@@ -65,7 +65,12 @@ Original sub-plan:
   interrupt handlers, DPMI / VGA / SB / MSCDEX calls), `port/symbols.csv`.
 - Same for `INTRO.EXE` (small; may be ported as its own module or folded into the main program).
 
-### 2. File formats (`FORMATS.md`, decoder per format in `tools/`, output to `work/`)
+### 2. File formats — done (2026-10-02, `FORMATS.md`, `port/formats/`)
+Every file in `Game/` is decoded (`tools/jsunpack.py`, `jsgfx.py`, `jsmap.py`, `jsdata.py`, `jssound.py`,
+`jsintro.py`); CD tracks ripped by `tools/cdrip.py` to `Game/MUSIC/`. The CD's data track holds the same
+files as `Game/`. No mission script: missions are 30 parameters driving fixed code. Open: some VAL
+attribute values, MP2 details, p20-p23/p29, ~30 plane-stat fields (phase 3).
+Original sub-plan:
 1. `PAX`/`PAL` pictures → PNG (likely compressed 256-colour screens + 768-byte VGA palette).
 2. `SPX` sprite sets and `JETSPRIT.PAL` → contact sheets.
 3. `MAP/` tile sets and maps (`TLX`, `P00/P01/P10`, `DX0/DX1`, `MP2/MXP`, `VAL`) → full level PNGs.

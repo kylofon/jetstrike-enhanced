@@ -1,5 +1,7 @@
 # JetStrike (CD-ROM, 1994): RE guide draft for the game code
 
+File formats: `FORMATS.md` and `port/formats/`. Sprites: pixel 0x40 is transparent (0x40 is added to every SPX pixel at load).
+
 Source: `work/JS.bin` (flat image, base 0x10000), Ghidra output in `port/decomp/js.c`. Names are listed in `port/symbols_game.csv`.
 Credits string: "conversion by Team Hoi Games in 1994. Martijn Pieterse / Peter Schaap" (Amiga port).
 
@@ -32,7 +34,7 @@ Page and scroll handling:
 - `Video_SetStartAndPan` (0x106b0) writes CRTC 0x0C/0x0D, waits for vsync, then sets attribute register 0x33 (pel pan, `(x&3)*2`).
 - `Video_FlipPage` (0x13a68) double-buffers between `g_BackPage` 0x18c0 and 0x78c0 (+0x600 when displayed). Each page is 384x256.
 - `Video_SetSplitLine` (0x105ef) programs the line compare (0x18, overflow bits in 0x07/0x09). In-game it is set to 0xAF (175 lines of playfield). The HUD panel (`display.pax`) sits at VRAM offset 0 and shows below the split line. At title/menu screens it is set to 400 (off).
-- Full-screen pictures are 320x200 pages at 0x5a00 bytes per 240-line page, drawn at row 20 (`Pic_LoadPax`).
+- Full-screen pictures are 320 wide, height = unpacked size / 320 (200, 220 or 256 rows), on pages at 0x5a00 bytes per 240-line page, drawn at row 20 (`Pic_LoadPax`).
 - Palette: 3C8/3C9 through `Pal_Upload`. Fades in `Pal_Fade` (0x13b01). Colour cycling runs in `Pal_CycleEffects` from the flip.
 
 Palette layout: 0-63 picture/panel (PAX .pal, 64 colours), 64-95 sprites (jetsprit.pal), 96-127 shifted sprite bank (+0x20, `Sprite_BlitShift`), 128-191 tileset (.pal), 0x240/3 = 192+ parallax (p00/p01), 0xFE/0xFF text.
@@ -105,7 +107,7 @@ Game_Run
 | File | Loader | Notes |
 |---|---|---|
 | JS.CFG | main 0x146f4 | fread 0x48 into 0x936b4. Words: +0 CD music, +2 sfx, +4..+0x22 16 key scancodes (E, Enter, A, U, L, D, P, Tab, B, Esc, Up, Down, Left, Right, LShift, RShift), +0x24 joy on, +0x26..+0x2c joy calibration, +0x2e detail/parallax, +0x30 fire (Space), +0x32 Alt, +0x34 Ctrl, +0x36 KP*, +0x38 Backspace, +0x3a SB IRQ |
-| GFX/*.PAX + .PAL | Pic_LoadPax(name,page,applyPal) 0x11a1a | LZW 320x200 linear, .pal = 64 RGB (8-bit, >>2, first 64 entries R/B swapped via SwapByte) |
+| GFX/*.PAX + .PAL | Pic_LoadPax(name,page,applyPal) 0x11a1a | LZW, linear 320 wide, height = size/320; .pal: only 64 colours read, R/B swapped, >>2 (see `port/formats/gfx.md`) |
 | GFX/DISPLAY.PAX | Pic_LoadHudPanel 0x130c8 | HUD panel into VRAM top |
 | DATA/JETSTRIK.SPX | Sprites_LoadSpx 0x11306 | LZW. The bank is a sequence of [x,y,w/4,h] 8-byte headers + 4 planes of w*h. Pixel += color offset (0x80008) |
 | DATA/JETSPRIT.PAL | Sprites_LoadSpx (second call) | 32 colours -> palette 64..95 |
@@ -128,7 +130,7 @@ Game_Run
 | DATA/MISC, MISC.Z | Game_Run | 0xdc-byte records / per-plane sprite offsets (300 B per plane) |
 | DATA/SARCASM | Sarcasm_Load | 28 x 80 |
 | DATA/BERTHA? | Map_StampBertha | map overlay (BE w,h + bytes) |
-| MISC/SMALLFNT.RAW, BIGFNT.RAW | Fonts_Load | glyph bitmaps 16x5 / 16x9 |
+| MISC/SMALLFNT.RAW, BIGFNT.RAW | Fonts_Load | 1 byte/pixel, 16 bytes/row, 5 / 9 rows per glyph, Q one row taller (see `port/formats/gfx.md`) |
 | MISC/JETSOUND.AAF | Sound_Init | raw signed 8-bit samples, 0x48a7a B (0x32dea for a 256K GUS) |
 | JS_SAVE.000-009 | SaveGame_Write/LoadMenu | |
 
