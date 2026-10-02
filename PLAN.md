@@ -122,6 +122,9 @@ remastered sprites).
 5. **Config**: `CONFIG.EXE` not ported; its options (sound on/off, keys, joystick) go into the
    launcher; `JS.CFG` is still read/written in the original format.
 
+6. **Sound Blaster rate**: 19920 Hz by default (the intended rate); a setting offers 3906 Hz, the rate the
+   original's bug actually programs (`port/spec/sound.md`).
+
 Confirmed by the user (2026-10-02). No floppy/AdLib version for now.
 
 ## Open questions
