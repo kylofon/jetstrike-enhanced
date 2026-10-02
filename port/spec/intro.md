@@ -314,3 +314,14 @@ drop the dead menu).
 2. Exact `Spr_Blit` handling of `skip/pad` when clipping (used only via Spr_BlitClip): verified for the
    argument values above; byte-exact planar behaviour belongs to the video spec of INTRO (not covered here).
 3. `Mixer_Update` timing (4 polls per frame) only matters for the SB buffer refill; the SDL port ignores it.
+
+## Corrections (phase 5 step E, from the port)
+1. §5 / Q7 wrong: the menu at 0x13475 (Intro_ExitWaitKey) and Intro_Cleanup 0x13f03 are unreachable. After the
+   loop, 0x1344c does sound shutdown, CD stop, `Pal_Fade(1)` and jumps to the epilogue 0x13fe6 (returns 1): no
+   second-Esc menu, no text mode, no INT 9 restore. Dead code, not ported.
+2. Ghidra locals swapped: `[ebp-0xc]` is the exit flag, `[ebp-8]` credOn.
+3. Video_PlotUnder tests the plane-0 pixel of the 4-pixel group (read map select never set), not the pixel
+   itself; the port does so (`tools/jsintro.py` tests the pixel itself).
+4. The play-once sample flags and cStep/cOvl are never initialised; the port assumes 0.
+5. Pal_Set always uploads from pal[0] (harmless: first is always 0).
+6. §1's "any key exits" recommendation is superseded by port/QUIRKS.md: Esc/D on release only.

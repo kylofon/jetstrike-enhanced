@@ -33,14 +33,15 @@ The build copies `SDL3.dll` and what it loads (`libiconv-2.dll`, ...) next to `j
 ## Run
 
 ```
-jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--lzw-dump OUTDIR]
+jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro] [--lzw-dump OUTDIR]
 ```
 
 | option | meaning |
 |---|---|
 | `--game-dir` | the original game folder (default `Game`); CD tracks in `DIR/MUSIC/TRACKnn.WAV` (`tools/cdrip.py`) |
 | `--scale` | window size 320x240 x N (default 3); Alt+Enter toggles full screen |
-| `--sb-rate` | Sound Blaster mixer rate: 19920 Hz as designed (default), 3906 = the rate the original actually programs (sound.md Q1) |
+| `--sb-rate` | Sound Blaster mixer rate: 19920 Hz as designed (default), 3906 = the rate the original actually programs (sound.md Q1); the intro's mixer: 40000 Hz / 3906 |
+| `--no-intro` | PORT: skip the intro (INTRO.EXE, which JS.BAT runs before the game; the port runs it first by default) |
 | `--lzw-dump` | developer check, see Verification |
 
 ## Source layout (`src/`)
@@ -48,7 +49,8 @@ jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 1
 | file | content |
 |---|---|
 | `main.c` | options, `--lzw-dump`, start-up |
-| `dseg.c/.h` | the data-segment image: LE object 5 of `JS_CDROM.EXE` loaded at start-up, `D8/D16/D32/DS32/DSTR(addr)` accessors |
+| `dseg.c/.h` | the data-segment images: LE object 5 of `JS_CDROM.EXE` loaded at start-up, `D8/D16/D32/DS32/DSTR(addr)` accessors; LE object 6 of `INTRO/INTRO.EXE` (`Iseg_Load`, `I8/I32/IS32/ISTR`) for the intro |
+| `intro.c/.h` | intro.md: INTRO.EXE (`Intro_Run` from `main` before the game, as JS.BAT): its mode-X / SB mixer / CD copies, scenes, FRAME overlay, credits; exits on Esc / D release only |
 | `game.h`, `game_flow.c` | game_flow.md: `Game_Run`, menus, zones, save/load, briefing, plane select, debrief, end game |
 | `level.c/.h` | level.md subset: map buffers, `Map_LoadMxp`, tile accessors, Bertha stamp; `Enemy_LoadSpx`, `Enemy_SetupSpriteIds` + `Truck_LoadSpx` (convoy set-up) |
 | `host.c/.h`, `host_int.h` | host layer API, init / shutdown, event pump, case-insensitive file lookup, fatal errors |

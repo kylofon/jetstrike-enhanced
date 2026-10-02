@@ -112,7 +112,13 @@ indexed framebuffer + palette, generated `symbols.h`, `PORTING.md`, headless tes
 C, the memory model is far simpler: plain C structs/pointers instead of `mem.h` seg:off.
 Placeholder `game_main` shows `JETLOGO.PAX`.
 
-### 5. Port, subsystem by subsystem
+### 5. Port, subsystem by subsystem — done (2026-10-02, `jsport/PORTING.md`)
+A: data-segment image (LE object 5 loaded from JS_CDROM.EXE at runtime), platform, video, front end.
+B: mission frame loop (93 steps), flight model, mission setup, HUD, terrain damage, engine sound.
+C: weapons, projectiles, explosions, particles, recon. D: enemies, airbase, support aircraft, tanker,
+bonuses; no stubs left. E: intro in-process (INTRO.EXE object 6 loaded at runtime), `--no-intro`.
+Not ported: GUS sound path (SB only). Next: play-testing against DOSBox, then phase 6.
+Original sub-plan:
 platform/video → title & menus (visible milestone) → intro → level scroller + sprites → player
 plane and weapons → enemies / mission scripts → HUD, scores, end game → sound effects → CD music.
 Each step checked against DOSBox captures of the original (`DOSBOX/`, ignored; mount the `.cue`

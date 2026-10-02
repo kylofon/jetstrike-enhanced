@@ -43,3 +43,28 @@ static inline u8 *DSEG_PTR(u32 flat)
 
 /* Loads the image from <game dir>/JS_CDROM.EXE; fatal error if the exe is missing or not the expected one. */
 void Dseg_Load(void);
+
+/* ---- The intro's data image (intro.c): LE object 6 of INTRO/INTRO.EXE (0x60000-0x683D0, the part past the
+ * one stored page is BSS = zeros), loaded by Iseg_Load the same way. Same accessor set with an I prefix. */
+#define ISEG_BASE 0x60000u
+#define ISEG_SIZE 0x83D0u
+#define ISEG_SLACK 0x100u                       /* PORT: zero bytes after the image */
+
+extern u8 g_iseg[ISEG_SIZE + ISEG_SLACK];
+extern u8 *g_isegp;
+
+#define ISEG(a)  (&g_isegp[(u32)(a) - ISEG_BASE])
+#define I8(a)    (*(u8 *)ISEG(a))
+#define I32(a)   (*(u32 *)ISEG(a))
+#define IS32(a)  (*(s32 *)ISEG(a))
+#define ISTR(a)  ((char *)ISEG(a))
+#define IS32A(a) ((s32 *)ISEG(a))               /* int32 array */
+
+/* A flat address stored in the intro image -> C pointer into it (NULL if outside). */
+static inline u8 *ISEG_PTR(u32 flat)
+{
+    return (flat >= ISEG_BASE && flat < ISEG_BASE + ISEG_SIZE) ? ISEG(flat) : NULL;
+}
+
+/* Loads the intro image from <game dir>/INTRO/INTRO.EXE; fatal error if missing or not the expected one. */
+void Iseg_Load(void);
