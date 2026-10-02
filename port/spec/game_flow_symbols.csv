@@ -1,0 +1,106 @@
+address,name,module,confidence,note
+0001ba0c,Game_Run,game_flow,verified,master loop: init tables/GENDAT3/GENDAT2/MISC; menu; attempt loop; frame loop; debrief; end game
+000212ac,Mission_Setup,game_flow,verified,briefing (if new mission) + PlaneSelect + map/tileset/parallax/HUD + flight tables
+00022223,Weapons_ReturnUnused,game_flow,verified,racks back to stock (rounds/per)
+000222f0,Mission_ResetState,game_flow,verified,rack loads by weight/hardpoints/stock; load weight; fuel; gun ammo
+0002299a,Mission_LoadBriefing,game_flow,verified,data/M<mode> 0x1c2 record; story; jetlogo.pax briefing; Rand(20) fog; F1..F10 save; resupply
+00023f6b,Story_ShowAsc,game_flow,verified,data/<asc>: picture+x y + text on page 1; WaitKey_Release
+000245a9,PlaneSelect_Screen,game_flow,verified,planech.pax 5x4 slots 20/page; limits L1L2; Aerolimits slots; copies MISC.Z stats 62..120
+000257c3,SelectScreen_LoadBg,game_flow,verified,(wep) planech.pax / wepch.pax; page=0
+00025869,Text_DrawCenteredAt,game_flow,verified,(page;x;y;s) centred at x+0x1d
+000258b6,SelectScreen_DrawInfoBox,game_flow,verified,(right) clears box and word-wraps g_InfoText
+00025a5d,SelectScreen_ShowPlaneName,game_flow,verified,name or STOLEN AIRCRAFT
+00025add,PlaneRecord_Load,game_flow,verified,renamed from PilotRecord_Load: reads the aircraft record (0xdc bytes of MISC) incl. code xor 'Mixamatosis is Fun !'
+00029d90,WeaponSelect_Screen,game_flow,verified,wepch.pax; called only from Airbase_Update in flight; DONE / NEW PLANE
+0002ba3c,WeaponSelect_DrawCounts,game_flow,verified,loads and weights of both racks (rack1 weight divides by rack0 per-rack: bug)
+0002bb33,WeaponSelect_DrawInfo,game_flow,verified,renamed from WeaponSelect_DrawLine: description + stock + AVAILABLE/NOT LOADED into info box
+0002c9cb,Mission_Debrief,game_flow,verified,sarcasm/result text over the last frame; bonus x bravery; sets g_EndGameIndex and g_AbortFlag
+0002d2b8,Sarcasm_Load,game_flow,verified,data/sarcasm 28 lines x 0x50
+000301b2,EndGame_Screen,game_flow,verified,gamedone.pax / AeroScores / final score+credits / endgameN.pax + CD track N+7
+000304e0,TrainingCredits_Screen,game_flow,verified,traincrt.pax / practcrt.pax
+0003c0fb,SaveGame_LoadMenu,game_flow,verified,js_save.00N (F10 -> ':' bug); byte/word fields
+0003c367,SaveGame_Write,game_flow,verified,(slot) no NULL check
+0003c56c,SaveGame_DrawLoadPrompt,game_flow,verified,
+00045352,AeroScores_Screen,game_flow,verified,aoscores.pax player N scored / wins
+000469e7,MainMenu,game_flow,verified,CD check once; srand; loads JETS.N WEAPONS.DAT HUDTEXT L1L2 GENDATAD GENDATA; miscon.pax cursor menu
+00047ec2,MainMenu_Draw,game_flow,verified,miscon.pax + 16 zones; cursor tables
+00048111,AeroOptions_Menu,game_flow,verified,aoset.pax Games/Players/Done
+00011d02,Zone_Add,game_flow,verified,(id;x1;y1;x2;y2) packed 5-int records; scan stride 1
+00011dbc,Zone_HitTest,game_flow,verified,first containing record; 0 if none
+00011e64,Zone_Clear,game_flow,verified,0x140 ints = -1
+0001adae,Stub_PlaneSelectOnce,game_flow,likely,empty; called once after the first plane selection
+000110a1,Stub_FrameA,game_flow,likely,empty stub in the frame loop
+000110bc,Stub_FrameB,game_flow,likely,returns 0; guards a dead Sfx+damage branch
+000110e1,Stub_FrameC,game_flow,likely,returns arg1; its Rand(9)/Rand(2) arguments are still evaluated every frame
+00011105,Stub_FrameD,game_flow,likely,returns 0; smoke emitter stub (Rand args evaluated)
+0001112a,Stub_FrameE,game_flow,likely,empty; dust emitter stub (Rand arg evaluated)
+00011012,Stub_FrameF,game_flow,likely,empty; burning wreck particle stub (Rand args evaluated)
+000112e1,Stub_FrameG,game_flow,likely,returns 0
+00011653,Stub_FrameH,game_flow,likely,returns 0; guards dead Rand(9) damage branch
+00011678,Stub_FrameI,game_flow,likely,returns 1 (ground probe multiplier)
+00026ae8,Stub_FrameJ,game_flow,likely,empty
+00026fb7,Stub_FrameK,game_flow,likely,empty
+00026fd2,Stub_FrameL,game_flow,likely,empty
+0001679b,Stub_FrameM,game_flow,likely,empty
+0001536c,Stub_AeroCountdown,game_flow,likely,empty; called when the Aerolimits countdown digit changes
+0001676a,Frame_DecCounter318,game_flow,likely,0x90318--
+00016e38,Windsock_Update,game_flow,likely,animated runway object (sprites 0x1e2..0x1e5) found at mission start
+00016dcd,Runway_SetEndTargets,game_flow,likely,sets 0x8ff04/0x903d8/0x901fc/0x9082c/0x905d4 to the far runway end
+00090154,g_MissionActive,global,verified,1 while a mission is set up; 0 = NEW PLANE / reselect
+00090184,g_MenuChoice,global,verified,0..9 training mission; 10 practice; 11 campaign; 12 Aerolimits
+0009030c,g_MenuDone,global,verified,menu loop exit; 2 = non-campaign game ended
+000903ec,g_MenuRepeat,global,verified,
+000903a4,g_StartMission,global,verified,
+0009021c,g_TrainingPicked,global,verified,MainMenu internal
+0009097c,g_TrainingMode,global,verified,
+0009007c,g_PracticeEjects,global,verified,3 in practice
+00090078,g_AutoEjectOn,global,verified,
+00090400,g_FinalMission,global,verified,param0/100
+000903f4,g_BriefedMission,global,verified,
+00090254,g_AeroPlayer,global,verified,
+000902c8,g_AeroPlayers,global,verified,
+0009033c,g_AeroRoundsSel,global,verified,
+000903cc,g_AeroRound,global,verified,
+00090390,g_AeroMissionMask,global,verified,0xffffe at menu
+0008c3b8,g_AeroUsedRacks,global,likely,8 ints per player; zeroed by MainMenu; read by PlaneSelect slot 4
+00090a20,g_AeroPlaneSlot,global,verified,also the Aerolimits bonus multiplier
+00090a58,g_PlaneSel,global,verified,1-based plane (0 none)
+00091140,g_PlaneFlown,global,verified,[plane-1]=1 once airborne
+00090a04,g_AlienPlaneIdx,global,verified,
+000909c0,g_AlienAbduct,global,likely,alien event state
+0009002c,g_PlaneCand,global,verified,select-screen candidate (also reused as temp)
+0008fed8,g_SelPage,global,verified,
+00090224,g_SelPageSize,global,verified,20 planes / 16 weapons
+000907d0,g_CursorX,global,verified,menu cursor col/x
+000907d4,g_CursorY,global,verified,menu cursor row/y
+0008fea4,g_ZoneHit,global,verified,
+00090058,g_InfoBoxW,global,verified,
+00084c48,g_InfoText,global,verified,info box / briefing scratch string
+0008fbc8,g_RackWeapon,global,verified,[2]
+0008fcb0,g_RackRounds,global,verified,[2]
+0008fbc0,g_RackMaxLoad,global,verified,[2] stat104/105
+0008fc10,g_RackPoints,global,verified,[2] stat101/102
+00090500,g_HardpointLoad,global,verified,stat103
+00090338,g_RackSel,global,verified,also a loop counter
+0008feb8,g_LoadWeight,global,verified,
+000904ec,g_MaxLoadWeight,global,verified,
+00090388,g_PlaneFuel,global,verified,stat106
+00090378,g_FuelBase,global,verified,
+000905b8,g_Fuel,global,verified,
+00092b1c,g_StoryShown,global,verified,enables the save prompt
+00092b18,g_FogPending,global,verified,never cleared (bug)
+00080070,g_FogActive,global,verified,
+000907f4,g_EndGameIndex,global,verified,0..6
+00084f48,g_DebriefText,global,verified,
+00090094,g_Speed,global,verified,float
+000904cc,g_IsHeli,global,verified,stat91
+00090440,g_OnGround,global,likely,0 airborne 1 landed 8 ditched
+0009099c,g_EjectState,global,likely,>0 ejected; 99 picked up; >99 pilot died
+000907fc,g_Crashed,global,verified,
+00090824,g_DeathTimer,global,likely,frame loop ends at 0x20
+000905a0,g_FrameParity,global,verified,toggles every frame
+00090090,g_StallSpeed,global,verified,float stat80/100
+00090674,g_Thrust,global,verified,float stat83/100 (0 = glider)
+000863c8,g_MaxSpeedTab,global,verified,10 floats per throttle
+00090200,g_Dir,global,likely,0..63
+000901f0,g_DirHalf,global,likely,g_Dir/2
