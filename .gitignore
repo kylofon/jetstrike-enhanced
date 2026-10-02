@@ -1,0 +1,21 @@
+# Original game and third-party tools (not redistributable / downloaded)
+/Game/
+/Jetstrik/
+/DOSBOX/
+/_tools/
+
+# Generated output
+/work/
+/port/decomp/
+/_ghidra/
+
+# Build output and copied binaries
+build*/
+/*.exe
+/*.dll
+/release/
+__pycache__/
+*.log
+
+# Game data dumped from the executables
+/port/spec/tables/
