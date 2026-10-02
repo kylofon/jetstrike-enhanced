@@ -4,15 +4,17 @@ C port of `JS_CDROM.EXE` (JetStrike CD, 1994; Watcom C, DOS/4GW, flat 32-bit) on
 data is read at runtime from the game folder (`Game/`, not in the repository). Specs: `../port/spec/`,
 formats: `../FORMATS.md` and `../port/formats/`, bug policy: `../port/QUIRKS.md` (every original bug is kept).
 
-Status: phase 5 step C. `main` (0x146f4) runs the real front end (step A) and the mission (step B: `Mission_Setup`, the
+Status: phase 5 step D. `main` (0x146f4) runs the real front end (step A) and the mission (step B: `Mission_Setup`, the
 frame loop of `Game_Run` in its original order (`Mission_Run`, frame.c), flight model, `Player_Update`, landing / ditching /
-crash / ejection, HUD, MP2 triggers, objectives, terrain damage, engine sound, `WeaponSelect_Screen`). Step C adds the
-weapons (weapons.c): `Weapon_Fire` and every fire kind (ballistic / retarded / cluster bombs, rockets, guided missiles,
-JP233 and Porcupine dispensers, drop tank, commando drop, camera pod, gun pods, flares), the gun (`Player_Weapons`:
-tracers, terrain ray, hit rolls, heat, ammo, flamer), `Projectiles_Update` with all flight routines, `Flamer_Update`,
-bullets, flares (release, movement, decoys), `Explosion_Damage` / `Explosion_Terrain` / debris emitters, the sprite
-particles, and `Mission_CompleteScreen` (recon photo pages). Enemies and the support aircraft are stubs at their call sites
-(stubs.c lists the Rand calls each will add).
+crash / ejection, HUD, MP2 triggers, objectives, terrain damage, engine sound, `WeaponSelect_Screen`). Step C added the
+weapons (weapons.c: every fire kind, the gun, projectiles, flares, explosions, particles, recon photo pages). Step D
+completes the mission: enemy aircraft (spawn, movement, AI, guns, missiles, bombing, kill scoring and bonus), enemy
+missiles (with the flare decoy), ground gunships, enemy shells, ejected pilots, convoys (Enemy_SetupSpriteIds,
+Truck_LoadSpx), the MP2 gun / flak / SAM emplacements, target-zone vehicles, commandos, the emplacement under
+construction, the airbase (fuel truck, jeep, fire engine, rearm truck -> WeaponSelect_Screen, crew, runway repair, base-hit
+losses), the bonus crate with its twelve handlers, the prize balloon, the alien abduction (enemies.c) and the support
+aircraft (support.c: tow plane, Fat Albert, B52, ship, big bomber, ground pickup; Tanker_Update with refuelling). No stub
+of the original is left: every function the frame loop calls is ported.
 
 ## Build
 
@@ -48,7 +50,7 @@ jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 1
 | `main.c` | options, `--lzw-dump`, start-up |
 | `dseg.c/.h` | the data-segment image: LE object 5 of `JS_CDROM.EXE` loaded at start-up, `D8/D16/D32/DS32/DSTR(addr)` accessors |
 | `game.h`, `game_flow.c` | game_flow.md: `Game_Run`, menus, zones, save/load, briefing, plane select, debrief, end game |
-| `level.c/.h` | level.md subset: map buffers, `Map_LoadMxp`, tile accessors, Bertha stamp; `Enemy_LoadSpx` |
+| `level.c/.h` | level.md subset: map buffers, `Map_LoadMxp`, tile accessors, Bertha stamp; `Enemy_LoadSpx`, `Enemy_SetupSpriteIds` + `Truck_LoadSpx` (convoy set-up) |
 | `host.c/.h`, `host_int.h` | host layer API, init / shutdown, event pump, case-insensitive file lookup, fatal errors |
 | `host_timer.c` | virtual VGA retrace clock, 59.94 Hz (25.175 MHz / 800 / 525) |
 | `host_video.c` | window, 320x240 presentation (4:3, square pixels), PNG snapshots |
@@ -65,7 +67,8 @@ jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 1
 | `engine.c` | sound.md §5: engine loop and pitch, warning sequence, mission sound triggers |
 | `weaponsel.c` | game_flow.md §7.2: `WeaponSelect_Screen` and helpers |
 | `weapons.c` | weapons.md: `Weapon_Fire` and the launch routines, `Player_Weapons`, `Projectiles_Update` + flight routines, bullets, flares, `Explosion_Damage` / `Explosion_Terrain` / debris; enemies.md §10.1 `Flamer_Update`, §14.1 particles, §15 `AgentSmoke_Update` |
-| `stubs.c` | TODO stubs of later steps (enemies, support aircraft), each with its Rand count |
+| `enemies.c` | enemies.md: EnemyBomber_Spawn, EnemyAir_Update (+ Heading_TurnToward, Map_ScanAround, Sfx_RandomAmbient, the lock reticle), Enemy_DropBomb, EnemyMissiles / EnemyGround / EnemyShells / EnemyPilots / Convoy / TargetVehicles / Commandos / Building updates, MP2 Gun / Flak / SAM draw + fire, Airbase_Update, AirbaseCrew_Update, BaseRepair_Update, BaseHit_Losses, Bonus_Spawn / Bonus_Update / Bonus_Award + 12 handlers, Pickup_Update, Alien_Update |
+| `support.c` | player.md §6 / §9.4: SupportAircraft_Update (tow plane, Fat Albert, B52, ship, big bomber, flares via weapons.c, ground pickup), Tanker_Update |
 | `video.c/.h` | mode X model: `vram[0x40000]`, `g_Palette` (image) + separate `dac`, CRTC (start, pel pan, line compare); every video.md routine: blitters, sprite bank / queue, tiles + `Level_DrawBackground`, palette and fades, fonts and text, lines / rects, `Video_FlipPage`, `Pic_LoadHudPanel` |
 | `pic.c/.h` | `Pic_LoadPax` 0x11a1a |
 | `sound.c/.h` | SB 4-channel mixer, Sfx_* API, `CD_PlayTrack` / `CD_Stop` |
@@ -135,9 +138,10 @@ fopen(DSTR(0x80EE6), DSTR(0x80C77));            /* strings of the exe: "js.cfg",
 | `JS_QUIT_AFTER=sec` | exit after that many seconds |
 | `JS_AUDIO_DUMP=file.wav` | record the mixer output (u8 mono at the SB rate) |
 | `JS_SEED=n` | replaces `time(NULL)` in MainMenu's `srand` (reproducible runs) |
+| `JS_VCLOCK=1` | JS_KEYS and JS_QUIT_AFTER count game time (retraces consumed x 1/59.94 s) instead of wall time, so scripted flights stay frame-exact when the host is slower than real time (PNG snapshots, traces) |
+| `JS_MISSION=n` | the campaign (COMBAT) starts at mission record n of DATA/M0 (0-based); a record without a map name gets the map of the nearest earlier record preset as the loaded map |
 | `JS_SFX_TRACE=1` | prints every `Sfx_Play(id, freq, vol)` call to stdout |
-| `JS_TRACE=n` | prints the base / plane stats once and the player state every n mission frames to stdout |
-| F12 (in a mission) | PORT debug until `Airbase_Update` is ported: parked on the ground at the airbase, opens `WeaponSelect_Screen` the way Airbase_Update does |
+| `JS_TRACE=n` | prints the base / plane stats once and, every n mission frames, the player state and a line with the enemy counts (aircraft 0 position / damage, ground units, missiles, shells, convoy, vehicles, flares, bonus, score, kills, armour, engine fire, lock target, convoy vehicle 0) to stdout |
 
 Headless example (from the repository root):
 
@@ -169,18 +173,24 @@ JS_KEYS="1.5:39,3:01" JS_AUDIO_DUMP=work/snap/mix.wav jsport/build/jsport.exe --
   plane), drop tank / commando / flamer pod without faults, flying into the hill (crash particles, debris, auto-eject);
   campaign mission 1 hop with a camera pod: photo in the air, landing to a stop on the runway -> "RECON PHOTO 1" overview
   page, Space returns to the mission.
+* Enemies / support aircraft (step D, JS_VCLOCK=1 + JS_SEED + JS_MISSION + JS_TRACE + snapshots + JS_SFX_TRACE):
+  campaign record 10 (Junglemap2: one bomber with 2 bombs, enemy airbase, SAM-launching target vehicles): the bomber flies
+  to raid the base, turns on the player, locks on, fires its gun (voice sfx 16/26) and missiles (armour hits); the player's
+  automatic flare is released; target vehicles fire shells and SAMs; shooting the bomber down with the gun: explosion,
+  `g_Kills` 1, +1000, "ENEMY AIRCRAFT SCRAMBLING" from the enemy base; record 2 (mission 3, the train convoy): strafing
+  one car destroys the train (+3 x 250, objective cleared), landing on the runway to a stop -> "MISSION COMPLETED",
+  jeep drives to the plane -> mission 4 briefing; record 0 (mission 1): Down held while parked -> the rearm truck drives to
+  the plane, sfx 24 and WeaponSelect_Screen open through Airbase_Update; the tanker and the airbase vehicles / crew are
+  drawn on the runway.
 * `JS_AUDIO_DUMP` with Space at 1.5 s: one 0.95 s burst = 18989 samples at 19920 Hz (slice 5, `Sfx_Play(6, 12000, 0x20)`, shift 5).
 
 ## Not ported / PORT decisions so far
 
-* Mission subsystems of later steps are no-op stubs at their original call sites (stubs.c): enemies (air, ground,
-  missiles, shells, convoys, target vehicles, SAM / gun / flak MP2 objects, bombers, pilots, commandos on the ground),
-  the support aircraft (tow plane, tanker, Fat Albert, B52, ship, big bomber, pickup; only the flare block of
-  `SupportAircraft_Update` is ported), bonus / prize balloon, `Airbase_Update` (F12 debug path instead),
-  `Enemy_SetupSpriteIds`. Until they are ported the RNG sequence of a mission diverges from the original as soon as one
-  of them would call Rand (`AirbaseCrew_Update` runs every frame near the base). Weapons damage the enemy arrays directly
-  (as the original's Explosion_Damage / gun hit rolls do); kills are scored by the enemy updaters (step D). MP2 objects of
-  class 0x83..0x85 are blanked from the map while in range (their sprites come with the enemies step).
+* Enemies (PORT): the enemy aircraft gun tracer divides by `abs(PY - y)` / `abs(PX - x)` (enemies.md Q4): kept, the port
+  stops with a FatalError where the original takes a DOS/4GW divide exception. The shell dots (Q13) go to absolute VRAM as
+  in the original, in colour 0xff (the original's colour byte is an unpushed stack byte). The target vehicles'
+  `Video_ReadPixel` page argument is not pushed in the original: the port passes the back page. BaseHit_Losses' uninitialised
+  `s` (Q21) keeps its previous value (static, starts 0).
 * Weapons (PORT): the secondary-explosion arrays are bounded to 32 entries in `Explosion_Damage` as in `Map_CraterAt`;
   a bullet left of column 0 reads height 0 (the original reads the heap before the table); `Mission_CompleteScreen`
   reads MP2 column < 0 as empty and pumps events in its input waits.

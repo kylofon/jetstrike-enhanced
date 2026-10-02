@@ -1184,3 +1184,22 @@ the next bonus-plane mission, game_flow GF 83). Score: +20000 (prize balloon, ty
    like; combined with Q24 the intended mapping is unclear.
 6. The GF 87 Nessie start uses `Rand(100)` (js.c shows `Rand()` with the 100 pushed earlier; verified as
    Rand(100) by the push at 0x20b2x — likely).
+
+## Corrections (phase 5 step D, checked against the disassembly while porting)
+
+1. §8.2 Gun_Fire 0x3e8b3: the height test reads the **flak** row 0x90614 (`0x90614*16 - 0x78 < PY`, 0x3e8c9), not the
+   gun's own row 0x9026c. With no flak site active (0x90614 stale or 0) the gun fires at any height.
+2. §2.7 the tracer arguments: both divisions are evaluated before the two `Rand(1)` calls (y first, then x), so the
+   #DE of Q4 happens before any Rand. The port keeps the fault (QUIRKS.md policy): it stops with a FatalError
+   ("Divide by zero in EnemyAir_Update (tracer, Q4)") where the original takes a DOS/4GW exception; this needs the
+   aircraft exactly level with (or exactly above) the player while it fires inside 0x140.
+3. §13.1 / player.md §6.5: the big bomber's "flares" are enemy missiles: `mx/my[n] = (bx, by), mdir 4, mlife 0x1e,
+   0x906fc++`, then `Flare_Release()` (the player's automatic flare), guarded by `0x90a00 in (199, 0x280)`,
+   `0x906fc < 4`, not killed, `0x90734 > 0`, `Rand(6) > 3`.
+4. §9 TargetVehicles_Update: the removal never touches g_TVCount 0x900b4 (only 0x900e0--, Q6): the dead entry
+   (x 0) is swapped to the end and stays counted.
+5. §12/§7.2 Truck_LoadSpx builds the name in 0x85b48 ("truck" + letter + digits + ".spx", dir "plane/") and copies
+   frames to `0x8dab8[0x9098c + f]`, f < 0x90434; the slot base is passed in 0x9098c (the search counter of
+   Enemy_SetupSpriteIds, which uses the same global as its loop index).
+6. §3.2 the tile probe is `Map_GetTileAttr(Clamp(Div16(x+16), 0, W-1), Clamp(Div16(y+16), 0, 63), 0)` with both
+   clamps as MIN/MAX macro pairs (no Rand), stored in 0x908b0.

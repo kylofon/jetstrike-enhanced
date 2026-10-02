@@ -149,7 +149,7 @@ void host_input_script(void)
     if (!checked) { spec = SDL_getenv("JS_KEYS"); checked = true; }
     if (npending) {
         /* The game polls g_KeyDown once per frame, so a tap is held for a few frames. */
-        if (host_seconds() < release_at) return;
+        if (host_script_seconds() < release_at) return;
         for (int i = npending - 1; i >= 0; i--) send_key(pending[i], false);
         npending = 0;
     }
@@ -157,7 +157,7 @@ void host_input_script(void)
     char *end;
     double at = SDL_strtod(spec, &end);
     if (end == spec || *end != ':') { fprintf(stderr, "JS_KEYS: bad entry at \"%s\"\n", spec); spec = NULL; return; }
-    if (host_seconds() < at) return;
+    if (host_script_seconds() < at) return;
     const char *p = end + 1;
     u16 keys[8];
     int n = 0;
@@ -176,7 +176,7 @@ void host_input_script(void)
     if (press && release) {
         for (int i = 0; i < n; i++) pending[i] = keys[i];
         npending = n;
-        release_at = host_seconds() + TAP_SECONDS;
+        release_at = host_script_seconds() + TAP_SECONDS;
     } else if (release) {
         for (int i = n - 1; i >= 0; i--) send_key(keys[i], false);
     }

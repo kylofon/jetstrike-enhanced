@@ -1348,3 +1348,21 @@ Bonus crates appear when `g_NextBonusScore <= score` (GF step 75); auto-eject ad
    B52 exists (js.c 14670); the next frame's view code then drops it (`0x90998 == 0` -> -1).
 6. §9.1 / GF step 45 smoke emitters: the 0x11105 stub (Stub_FrameD) returns 0, so each emitter call also stores
    `0x900fc = 0`.
+
+## Corrections (phase 5 step D)
+
+7. §6.2 Fat Albert propeller (0x27dee): `Sprite_Queue(0x90cd8[f] + (X - GetX(0x131+f)), (Y - cy) - GetX(0x131+f) +
+   0x90be4[f], f*2 + 0x19b + parity)` with f = 0x90518 and both offsets from **Sprite_GetX** (u16), and the x **without
+   the camera** (sic): the propeller is drawn at the world x as a screen x (normally off screen). The tanker (§9.4)
+   uses GetY for y and subtracts the camera, as intended.
+8. §9.4 Tanker_Update: the on-screen test is `IsOnScreen(cx, cy, X - GetX(0x131+type), Y)`; the door sprites are
+   `(X-cx - GetX(0x131) + 9 | + 0x20, Y-cy - GetY(0x131) + 0x1f + door, 0x199 | 0x19a)` (not the Fat Albert offsets);
+   the steering is `X += Clamp(Sign(e)*abs(e), -16, 4)`, `Y += Sign(e)*min(abs(e), 4)`; the vy floor is
+   `vy = max(vy - 1, -6*frame)`.
+9. §6.3 B52 contrail (open question 3): `if (Rand(1) && 0x90978 < 5) Particle_Spawn((X+0x20)<<8, (Y+0x10)<<8, 0,
+   -Rand(4)<<6, Rand(8)<<6, Rand(4)+12, 0x18)`; arguments evaluated right to left: Rand order life Rand(4), a5
+   Rand(8), vy Rand(4). Anim 0x18 is the empty row: the particle dies on its first on-screen update.
+10. §6.5 the bomber's "flares" are enemy missiles, see enemies.md Correction 3.
+11. §6.7 ground pickup (decompile-only before): the person sprite rides vehicle 0x90a40 with height
+    `Sprite_GetHeight(0x8de38[(vx < 0) + slot*2])`; the restored sprite is `0x90a30 % 500` (signed); the landing test
+    compares the speed bits `< 0x3f000000` (0.5) as a signed int.

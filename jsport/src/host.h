@@ -76,3 +76,5 @@ _Noreturn void host_fatal_code(int code, const char *fmt, ...);
  *   JS_QUIT_AFTER=sec     exit(0) after that many seconds (headless runs)
  *   JS_AUDIO_DUMP=file    write the mixer stream (u8 mono) to a WAV file */
 double host_seconds(void);
+double host_script_seconds(void);      /* JS_KEYS / JS_QUIT_AFTER clock (JS_VCLOCK=1: game time) */
+double host_vclock(void);               /* retraces consumed x 1/59.94 s */

@@ -351,32 +351,35 @@ void WeaponSelect_Screen(void);          /* 0x29d90 */
 void WeaponSelect_DrawCounts(void);      /* 0x2ba3c */
 void WeaponSelect_DrawInfo(void);        /* 0x2bb33 */
 
-/* ---- stubs.c: subsystems of later steps (weapons, projectiles, enemies, particles, support aircraft).
- * Each is called at its original place; the comments in stubs.c list the Rand calls they will make. */
-void TargetVehicle_Spawn(void);
-void TargetVehicles_Update(void);
+/* ---- enemies.c (enemies.md) */
+void TargetVehicle_Spawn(void);          /* 0x4424d */
+void TargetVehicles_Update(void);        /* 0x44478 */
+void EnemyMissiles_Update(void);         /* 0x19fda */
+void EnemyGround_Update(void);           /* 0x35e20 */
+void EnemyAir_Update(void);              /* 0x36ae3 */
+void Enemy_DropBomb(void);               /* 0x17944 */
+void Lock_Facing(int heliHalf);          /* lock reticle (enemies.md 2.8), inline in the original */
+void Lock_Draw(int dist, int ldx, int ldy, int lockid, int xmax, int ymin, int upgrade);
+void Building_Update(void);              /* 0x149ae */
+void Convoy_Update(void);                /* 0x3d105 */
+void AirbaseCrew_Update(void);           /* 0x2c55b */
+void Alien_Update(void);                 /* 0x164d2 (FUN_000164d2) */
+void Bonus_Update(void);                 /* 0x17072 */
+void Pickup_Update(void);                /* 0x45859 */
+void BaseRepair_Update(void);            /* 0x3dc4e */
+void Airbase_Update(void);               /* 0x2bc0b */
+void SAM_Draw(void);                     /* 0x3e0b2 */
+void SAM_Fire(void);                     /* 0x3ef72 */
+void Gun_Draw(void);                     /* 0x3dea2 */
+void Gun_Fire(void);                     /* 0x3e8b3 */
+void Flak_Draw(void);                    /* 0x3dfaa */
+void Flak_Fire(void);                    /* 0x3ec5b */
+void EnemyPilots_Update(void);           /* 0x35a33 */
+void Commandos_Update(void);             /* 0x14b4a */
+void EnemyShells_Update(void);           /* 0x19cc8 */
+void BaseHit_Losses(void);               /* 0x3dd5e */
+void Bonus_Spawn(void);                  /* 0x16f13 */
+
+/* ---- support.c (player.md §6, §9.4) */
 void Tanker_Update(void);                /* 0x27008 */
 void SupportAircraft_Update(void);       /* 0x2780b */
-void EnemyMissiles_Update(void);
-void EnemyGround_Update(void);
-void EnemyAir_Update(void);              /* 0x36ae3 */
-void Building_Update(void);              /* 0x149ae */
-void Convoy_Update(void);
-void AirbaseCrew_Update(void);
-void Alien_Update(void);                 /* 0x164d2 (FUN_000164d2) */
-void Bonus_Update(void);
-void Pickup_Update(void);
-void BaseRepair_Update(void);
-void Airbase_Update(void);               /* 0x2bc0b */
-void SAM_Draw(void);
-void SAM_Fire(void);
-void Gun_Draw(void);
-void Gun_Fire(void);
-void Flak_Draw(void);
-void Flak_Fire(void);
-void EnemyPilots_Update(void);
-void Commandos_Update(void);
-void EnemyShells_Update(void);
-void BaseHit_Losses(void);
-void Bonus_Spawn(void);
-

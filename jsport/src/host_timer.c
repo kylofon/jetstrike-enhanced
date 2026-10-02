@@ -18,17 +18,28 @@ bool host_in_vretrace(void)
 
 static Uint64 last_presented = ~0ull;
 
+/* PORT (developer aid, JS_VCLOCK=1): a clock that advances by one retrace period per retrace the game consumes,
+ * so scripted keys (JS_KEYS) and JS_QUIT_AFTER follow game time even when the host runs slower than real time. */
+static double vclock;
+#define RETRACE_S ((double)HOST_RETRACE_NUM / (double)HOST_RETRACE_DEN / 1e9)
+double host_vclock(void) { return vclock; }
+
 void host_idle(void)
 {
     host_pump();
     Uint64 k = host_retrace_count();
-    if (k != last_presented) { last_presented = k; host_present(); }
+    if (k != last_presented) {
+        vclock += (last_presented != ~0ull && k > last_presented) ? (double)(k - last_presented) * RETRACE_S : RETRACE_S;
+        last_presented = k;
+        host_present();
+    }
     SDL_DelayPrecise(SDL_NS_PER_MS / 2);
 }
 
 uint64_t host_wait_vretrace(void)
 {
     last_presented = host_retrace_count();
+    vclock += RETRACE_S;
     host_present();
     Uint64 next = host_retrace_count() + 1;             /* the first boundary after now */
     Uint64 due = retrace_at(next);

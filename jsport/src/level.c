@@ -17,6 +17,7 @@ u8 *g_MapMp2;
 
 #define MAPBUF_BYTES  150000
 #define MAPGRID_BYTES 0xfa04
+#define g_Scratch690  DS32(0x90690)
 
 /* 0x1aeaa Mem_AllocMapBuffers (no NULL checks in the original). */
 void Mem_AllocMapBuffers(void)
@@ -158,9 +159,79 @@ void Enemy_LoadSpx(void)
 /* 0x3fa76 Enemy_ReplaceSprite */
 void Enemy_ReplaceSprite(void) { Sprites_ReplaceFromBank(g_LoopJ, DS32(0x90830), g_MapBuf); }
 
-/* 0x38ba8 EnemyBomber_Spawn. TODO(enemies step): not ported yet; the briefing calls it for missions with
- * enemy aircraft (its Rand calls are therefore missing from the RNG sequence until then). */
-void EnemyBomber_Spawn(void) {}
+/* 0x3ff4d Truck_LoadSpx: "plane/truck" + ('a' + p13 hi byte) + digits + ".spx"; the two-digit name is built as
+ * '0'+(t/10)%10, '0'+t/10, i.e. always "11" for t >= 10 (enemies.md Q18, kept: TRUCKA11 does not exist -> fatal
+ * load error as in the original). Copies 0x90434 frames over the sprite slots 0x8dab8[g_LoopJ + f]. */
+static void Truck_LoadSpx(void)
+{
+    char *name = DSTR(0x85B48);
+    memcpy(name, DSTR(0x8145C), 6);              /* "truck" */
+    name[5] = (char)((D16(0x91662) >> 8) + 'a');
+    s32 t = DS32A(0x918E0)[g_LoopI];
+    if (t / 10 == 0) {
+        name[6] = (char)(t % 10 + '0');
+        name[7] = 0;
+    } else {
+        name[7] = (char)(t / 10 + '0');
+        name[6] = (char)((t / 10) % 10 + '0');
+        name[8] = 0;
+    }
+    strcat(name, DSTR(0x81462));                 /* ".spx" */
+    int packed = File_LoadWhole(DSTR(0x81467), name, (void **)&g_PackBuf, 0);   /* "plane/" */
+    if (LZW_PackedSize(g_PackBuf) > MAPBUF_BYTES)
+        FatalError(name, ": bank larger than g_MapBuf (the original would overwrite memory)", 6);
+    LZW_Unpack(g_PackBuf, (u32)packed, g_MapBuf);
+    for (DS32(0x90830) = 0; DS32(0x90830) < DS32(0x90434); DS32(0x90830)++) {
+        DS32(0x90248) = DS32A(0x8DAB8)[g_LoopJ + DS32(0x90830)];
+        Sprites_ReplaceFromBank(DS32(0x90248), DS32(0x90830) + 1, g_MapBuf);
+    }
+}
 
-/* 0x3faab Enemy_SetupSpriteIds. TODO(enemies step): not ported yet. */
-void Enemy_SetupSpriteIds(void) {}
+/* 0x3faab Enemy_SetupSpriteIds: convoy set-up (Mission_Setup when p09 != 0), enemies.md §7.2 (Q16, Q17) */
+void Enemy_SetupSpriteIds(void)
+{
+    static const s32 ids[24] = { 0x7a, 0x7b, 0x7c, 0x90, 0x91, 0x92, 0x93, 0xc0, 0xc1, 0xc2, 0xe3, 0xe4, 0xe5, 0xe6,
+                                 0xe7, 0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0x1ee, 0x1ef, 0x1f0 };
+    s32 *spr = DS32A(0x8DAB8), *loaded = DS32A(0x8DB18), *slot = DS32A(0x918E0), *base = DS32A(0x8DA88);
+    for (int k = 0; k < 24; k++) spr[k] = ids[k];
+    DS32(0x905AC) = D16(0x9165A);                /* g_ConvoyCount = p09 */
+    DS32(0x9057C) = D16(0x91662) & 0xff;
+    DS32(0x902B8) = 0;
+    DS32(0x8FF4C) = 0;
+    for (g_LoopI = 0; g_LoopI < 4; g_LoopI++) loaded[g_LoopI] = -999;
+    for (g_LoopI = 0; g_LoopI < DS32(0x905AC); g_LoopI++) {
+        int i = g_LoopI;
+        DS32A(0x91904)[i] = 0;
+        DS32A(0x91F74)[i] = (s32)((u32)D16(0x9166C) * (u32)i + (u32)D16(0x9165C) * 0x10 + 0x60);
+        DS32A(0x91F98)[i] = D16(0x9166A);
+        DS32A(0x91F2C)[i] = 0;
+        DS32A(0x91F50)[i] = 2;
+        if ((D16(0x91662) >> 8) == 2) { DS32A(0x91F50)[i] = 0; DS32(0x8FF4C) = 3; }
+        if (DS32A(0x91F98)[i] < 0x46) DS32A(0x91F98)[i] = DS32A(0x91F98)[i] * 0x10 - 1;
+        DS32(0x903E4) = D16A(0x91666)[i / 4];    /* p15, p16, then p17 / p18 (Q16) */
+        slot[i] = (DS32(0x903E4) >> ((i % 4) * 4)) & 0xf;
+        DS32A(0x91928)[i] = DS32(0x9057C) * DS32A(0x8E1D0)[slot[i]];
+        if (DS32(0x902B8) < 4) {
+            g_Scratch690 = DS32(0x902B8);
+            if (DS32(0x902B8) > 0)
+                for (g_LoopJ = 0; g_LoopJ < DS32(0x902B8); g_LoopJ++)
+                    if (loaded[g_LoopJ] == slot[g_LoopI]) { g_Scratch690 = g_LoopJ; g_LoopJ = 99; }
+            if (g_Scratch690 == DS32(0x902B8)) {
+                loaded[g_Scratch690] = slot[g_LoopI];
+                DS32(0x902B8)++;
+                if (slot[g_LoopI] == 0xf && DS32(0x8FF4C) == 3) {
+                    spr[base[g_Scratch690]] = D16(0x91678);              /* parked pickup sprite = p24 */
+                } else {
+                    g_LoopJ = base[g_Scratch690];
+                    DS32(0x90434) = (DS32(0x8FF4C) == 3) * -5 + 6;
+                    Truck_LoadSpx();
+                }
+            }
+        } else {
+            /* Q17: `for (j = 0; ntypes < j; j++)` never runs, g_Scratch690 keeps the previous slot */
+            for (g_LoopJ = 0; DS32(0x902B8) < g_LoopJ; g_LoopJ++)
+                if (loaded[g_LoopJ] == slot[g_LoopI]) { g_Scratch690 = g_LoopJ; g_LoopJ = 99; }
+        }
+        slot[g_LoopI] = base[g_Scratch690];
+    }
+}

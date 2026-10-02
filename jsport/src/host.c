@@ -39,6 +39,14 @@ void host_shutdown(void)
 
 double host_seconds(void) { return (double)(SDL_GetTicksNS() - host_start_ns) / 1e9; }
 
+/* the clock of JS_KEYS / JS_QUIT_AFTER: wall time, or game (retrace) time with JS_VCLOCK=1 */
+double host_script_seconds(void)
+{
+    static int v = -1;
+    if (v < 0) { const char *e = SDL_getenv("JS_VCLOCK"); v = (e && *e == '1'); }
+    return v ? host_vclock() : host_seconds();
+}
+
 void host_pump(void)
 {
     SDL_Event ev;
@@ -54,7 +62,7 @@ void host_pump(void)
         }
     }
     host_input_script();
-    if (quit_after >= 0 && host_seconds() >= quit_after) {
+    if (quit_after >= 0 && host_script_seconds() >= quit_after) {
         host_shutdown();
         exit(0);
     }

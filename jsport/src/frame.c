@@ -1,6 +1,6 @@
 /* The mission frame loop: port/spec/game_flow.md §8 (Game_Run 0x1cc2f..0x20db3), in the exact order of the
  * original's 93 steps (GF step numbers in the comments), with the flight model of player.md §3 inlined as in
- * the original. Subsystems of later steps are called through the stubs of stubs.c at their original places;
+ * the original; every subsystem is called at its original place;
  * the Rand calls the original makes *in Game_Run itself* (arguments of empty stubs, emitters, the wreck loop)
  * are all kept here. Float expressions follow the disassembly: each (float) is a rounding point. */
 #include "mission.h"
@@ -13,6 +13,7 @@
 #include "platform.h"
 #include "sound.h"
 #include "video.h"
+#include "host.h"
 
 #define g_CrashTimer g_AlienAbduct
 
@@ -44,27 +45,6 @@ void Fog_Refresh(void)
         g_NightLevel = Clamp((g_CamY + 0x96) / 0x43 + 1, 0, 0xf);
         Pal_NightAltitude();
     }
-}
-
-/* PORT (debug, until Airbase_Update is ported): F12 while parked at the airbase opens the weapon-select
- * screen the way Airbase_Update 0x2bc0b does (Sfx 0x18, WeaponSelect_Screen, then its after-steps). */
-static void debug_weapon_select(void)
-{
-    if (!g_KeyDown[0x58] || g_OnGround != 1 || g_SpeedBits != 0) return;
-    Sfx_Play(0x18, 4000, 0x3f, g_CamX + g_PlayerScrX);
-    WeaponSelect_Screen();
-    if (DS32(0x90240) == 0) DS32(0x907B4) = 1;
-    g_EngineSfxRequest = 1;
-    DS32(0x90854) = 0;
-    if (g_CatapultCount == 0) g_CatapultCount = -1;
-    g_StallLimit = 0x40;
-    g_StallTopY = g_CamY;
-    for (g_LoopI = 0; g_LoopI < 0x10; g_LoopI++) {}
-    if (g_MissionActive != 0) Hud_DrawPanel();
-    DS32(0x8FFCC) = -1;
-    if (g_MissionActive == 1) DS32(0x9046C) = 1;
-    if (g_FogActive != 0) Pal_SaveNight();
-    while (g_KeyDown[0x58]) Platform_Spin();
 }
 
 static void player_sprite(void)                  /* GF step 24, player.md §9.1 */
@@ -508,9 +488,16 @@ static void trace(void)
                    g_BaseYOff, g_MapWidth, (double)g_StallSpeed, (double)g_CruiseSpeed, g_TopSpeed, (double)g_Thrust, g_TurnRate);
     }
     if (every <= 0 || ++n % every != 0) return;
+    printf("t%.2f ", host_script_seconds());
     printf("f%d cam %d,%d scr %d,%d spd %.3f dir %d thr %d vx %d vy %d gnd %d gear %d stall %d crash %d eject %d fuel %d res %d\n",
            n, g_CamX, g_CamY, g_PlayerScrX, g_PlayerScrY, (double)g_Speed, g_Dir, g_Throttle, g_PlayerVX, g_PlayerVY,
            g_OnGround, g_GearDown, g_StallSink, g_Crashed, g_EjectState, g_Fuel, g_MissionResult);
+    printf("    air %d (%d,%d dm %d) gnd %d msl %d shell %d convoy %d tv %d flares %d bonus %d score %d kills %d armour %d "
+           "fire %d lock %d cv0 %d,%d st %d tanker %d,%d f%d hose %d\n",
+           g_EnemyAirCount, g_EnemyAirX[0], g_EnemyAirY[0], DS32A(0x92638)[0], g_EnemyGroundCount, DS32(0x906FC), DS32(0x8FFA0),
+           DS32(0x905AC), DS32(0x900B4), DS32(0x90310), DS32(0x90890), g_Score[g_AeroPlayer], g_Kills, g_Armour,
+           g_EngineFire, DS32(0x9042C), DS32A(0x91F74)[0], DS32A(0x91F98)[0], DS32A(0x91F2C)[0], DS32(0x8FF64), DS32(0x8FF6C),
+           DS32(0x8FFC8), DS32(0x8FFC0));
     fflush(stdout);
 }
 
@@ -597,40 +584,39 @@ void Mission_Run(void)
         if (g_NightMission != 0) Runway_Update();
         /* Stub_FrameB returns 0: its branch (Rand(0), Sfx, damage) is dead */
         /* 26 */ DS32(0x9042C) = g_LockTarget; g_LockTarget = -1;
-        /* 27 */ if (g_TankerType != 0) Tanker_Update();                         /* TODO stub */
+        /* 27 */ if (g_TankerType != 0) Tanker_Update();
         /* 28 */ if (g_TowX != 0 || DS32(0x90310) != 0 || g_MP_PickupCol != 0 || DS32(0x906DC) != 0 || DS32(0x90158) != 0
                      || DS32(0x90998) != 0 || DS32(0x90528) != 0)
-            SupportAircraft_Update();                                             /* TODO stub (flares ported) */
+            SupportAircraft_Update();
         /* 29 */ if (DS32(0x90608) != 0) Flamer_Update();
-        if (DS32(0x906FC) != 0) EnemyMissiles_Update();                        /* TODO stubs */
+        if (DS32(0x906FC) != 0) EnemyMissiles_Update();
         if (g_EnemyGroundCount != 0) EnemyGround_Update();
         /* 30 */ if (g_EnemyAirCount == 0) {
             DS32(0x906A4) += Rand(2);
             if (Div16(g_CamY + g_PlayerScrY) < (s32)g_MP_CeilingRow) DS32(0x906A4)++;
             if (DS32(0x906A4) > 300 && (g_GameMode & 1) == 0) {
                 DS32(0x90A5C) = Rand(2) + 1;
-                EnemyBomber_Spawn();                                              /* TODO stub */
+                EnemyBomber_Spawn();
                 DS32(0x906A4) = 0;
             }
         } else {
-            EnemyAir_Update();                                                    /* TODO stub */
+            EnemyAir_Update();
         }
-        /* 31 */ if (g_LauncherCol != 0) Building_Update();                     /* TODO stubs */
+        /* 31 */ if (g_LauncherCol != 0) Building_Update();
         if (DS32(0x905AC) != 0) Convoy_Update();
         if (DS32(0x900B4) > 0) TargetVehicles_Update();
         /* 32 */ if (g_BaseStartX - 0x140 < g_CamX && g_CamX < g_BaseEndX + 0x260 && 0x330 - g_BaseYOff < g_CamY)
-            AirbaseCrew_Update();                                                 /* TODO stub (Rand: 1) */
+            AirbaseCrew_Update();
         /* 33 */ if (g_FrameParity == 0) Weapons_FrameDispensers();
-        /* 34 */ if (g_AlienAbduct > 0) Alien_Update();                          /* TODO stub */
+        /* 34 */ if (g_AlienAbduct > 0) Alien_Update();
         /* 35 */ { Rand(9); Rand(2); }           /* arguments of the empty stub 0x110e1 (returns 0x900fc), Q20 */
         /* 36 */ Particles_Update(g_CamX, g_CamY);
-        /* 37 */ if (DS32(0x90890) != 0) Bonus_Update();                         /* TODO stubs */
+        /* 37 */ if (DS32(0x90890) != 0) Bonus_Update();
         if (DS32(0x90918) > 0) Pickup_Update();
         if (DS32(0x90498) != 0) BaseRepair_Update();
         /* 38 */ if (g_OnGround == 1 && DS32(0x8FF08) == 0 && DS32(0x90414) == 0) Runway_SetEndTargets();
         /* 39 */ if (g_BaseStartX - 0x140 < g_CamX && g_CamX < g_BaseEndX + 0x260 && (g_OnGround == 1 || DS32(0x8FF08) == 1)) {
-            Airbase_Update();                                                     /* TODO stub (-> WeaponSelect) */
-            debug_weapon_select();                                                /* PORT: debug path (F12) */
+            Airbase_Update();
         }
         /* 40 */ if (DS32(0x904AC) == 1 && DS32(0x90498) == 0) {
             DS32(0x90498) = 1;
@@ -644,7 +630,7 @@ void Mission_Run(void)
         if (DS32(0x9010C) == 0) {                /* MP2 object 0x84 */
             if (DS32(0x900E8) > 0) { Map_SetTile(DS32(0x900E8), DS32(0x900EC), (u8)DS32(0x900E4)); DS32(0x900E8) = 0; }
         } else {
-            SAM_Draw();                                                           /* TODO stubs */
+            SAM_Draw();
             SAM_Fire();
             g_TargetMarkX = DS32(0x9010C) << 4;
             g_TargetMarkY = DS32(0x90110) << 4;
@@ -653,7 +639,7 @@ void Mission_Run(void)
             if (DS32(0x90230) > 0) { Map_SetTile(DS32(0x90230), DS32(0x90234), (u8)DS32(0x9022C)); DS32(0x90230) = 0; }
         } else {
             DS32(0x90758) = 1;
-            Gun_Draw();                                                           /* TODO stubs */
+            Gun_Draw();
             g_TargetMarkX = DS32(0x90268) << 4;
             g_TargetMarkY = DS32(0x9026C) << 4;
             if (g_Crashed == 0 && DS32(0x8FFA0) < 10 && (g_GameMode & 1) == 0) Gun_Fire();
@@ -662,7 +648,7 @@ void Mission_Run(void)
             if (DS32(0x9063C) > 0) { Map_SetTile(DS32(0x9063C), DS32(0x90640), (u8)DS32(0x90630)); DS32(0x9063C) = 0; }
         } else {
             DS32(0x90758) = 0;
-            Flak_Draw();                                                          /* TODO stubs */
+            Flak_Draw();
             g_TargetMarkX = DS32(0x90668) << 4;
             g_TargetMarkY = DS32(0x90614) << 4;
             if (DS32(0x90660) == 0 && g_Crashed == 0) Flak_Fire();
@@ -670,9 +656,9 @@ void Mission_Run(void)
         /* 41 */ if (g_MarkerX != 0 && IsOnScreen(g_CamX, g_CamY, g_MarkerX + 0x29, g_MarkerY))
             Sprite_Queue(g_MarkerX + (0x29 - g_CamX), g_MarkerY + (0xf - g_CamY), 0x1e9);
         if (g_CrateX != 0) Crate_Update();
-        if (DS32(0x90754) != 0) EnemyPilots_Update();                            /* TODO stub */
+        if (DS32(0x90754) != 0) EnemyPilots_Update();
         if (g_AeroGateX[g_AeroGateIdx] != 0) Waypoint_Update();
-        if (DS32(0x902E0) != 0) Commandos_Update();                              /* TODO stub */
+        if (DS32(0x902E0) != 0) Commandos_Update();
         /* 42 */ Hud_DrawTargetArrow(g_CamX, g_CamY, g_TargetMarkX, g_TargetMarkY);
         /* 43 */ if (DS32(0x90660) != 0) DS32(0x90660)--;
         if (g_ProjCount != 0 && g_Crashed == 0 && g_EjectState == 0) Projectiles_Update();
@@ -758,7 +744,7 @@ void Mission_Run(void)
             Player_Weapons();
         /* 49b */ /* Stub_FrameL / Stub_FrameK / Stub_FrameG: empty */
         /* 50 */ Sprite_DrawQueue();
-        /* 51 */ if (DS32(0x8FFA0) != 0) EnemyShells_Update();                  /* TODO stub */
+        /* 51 */ if (DS32(0x8FFA0) != 0) EnemyShells_Update();
         Bullets_Update(g_CamX, g_CamY);
         /* Stub_FrameJ: empty */
         /* 52 */ if (g_HudMsgCount != 0) Hud_DrawMessages();
@@ -777,7 +763,7 @@ void Mission_Run(void)
             Sfx_Play(0xe, 0x2328, 0x3f, g_CamX + g_PlayerScrX);
         }
         if (DS32(0x8FFF8) == 4) Sfx_Play(4, 0x61a8, 0x3f, g_CamX + g_PlayerScrX);
-        if (DS32(0x901C8) != 0) BaseHit_Losses();                                /* TODO stub */
+        if (DS32(0x901C8) != 0) BaseHit_Losses();
         /* 58 */ g_Overloaded = (g_WingAuthority < 2 || g_LoadWeight <= g_MaxLoadWeight) ? 0 : 1;
         /* 59 */ /* if (0x90af4 && g_ProjCount < 8) Stub_FrameM(): empty */
         /* 60 */ if (g_ViewX > 0 || g_ViewY > 0) swap_views();
@@ -821,7 +807,7 @@ void Mission_Run(void)
         /* 75 */ if (g_NextBonusScore <= g_Score[g_AeroPlayer] && DS32(0x90890) == 0 && g_OnGround == 0) {
             DS32(0x909A8) = g_CamX + g_PlayerScrX;
             DS32(0x909AC) = g_CamY - 300;
-            Bonus_Spawn();                                                        /* TODO stub */
+            Bonus_Spawn();
         }
         /* 76 */ if (g_TowX == 0 || g_TowState == -0x11) Player_Update();
         /* 77 */ if (g_GunTrigger != 0 && g_TowState != 0 && g_OnGround == 0 && g_TowState != -0x11) g_TowState = -0x11;
@@ -881,7 +867,7 @@ void Mission_Run(void)
                 DS32(0x9072C) = 0x14; DS32(0x90734) = 8; DS32(0x90730) = 0;
                 if (g_EnemyAirCount == 0) {
                     DS32(0x90A5C) = 2;
-                    EnemyBomber_Spawn();                                          /* TODO stub */
+                    EnemyBomber_Spawn();
                 }
             }
         }

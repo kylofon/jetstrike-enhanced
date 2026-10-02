@@ -618,6 +618,34 @@ void MainMenu(void)
     if (g_TrainingPicked == 1) g_Mission = g_StartMission;
     g_TrainingPicked = 0;
     g_AeroPlayer = 0;
+    /* PORT (developer aid): JS_MISSION=n starts the campaign at mission record n (0-based). */
+    const char *jm = getenv("JS_MISSION");
+    if (jm != NULL && g_GameMode == 0 && g_MenuChoice == 11) {
+        g_Mission = atoi(jm);
+        /* a record without a map name uses the map of an earlier record: preset that one as the loaded map */
+        FILE *f = Platform_Fopen("data/m0", "rb");
+        for (int k = g_Mission; f != NULL && k >= 0; k--) {
+            char map[0x14] = { 0 }, ts[0x14] = { 0 };
+            fseek(f, k * 0x1c2 + 0x140, SEEK_SET);
+            if (fread(map, 0x14, 1, f) != 1 || fread(ts, 0x14, 1, f) != 1) break;
+            map[0x13] = 0; ts[0x13] = 0;
+            Str_TrimRight(map, 0x13);
+            Str_TrimRight(ts, 0x13);
+            if (map[0] != 0) {
+                if (k != g_Mission) {
+                    for (int r = 0; r < 2; r++) {        /* the variant digit, as Mission_LoadBriefing strips it */
+                        size_t n = strlen(map);
+                        if (n > 0 && map[n - 1] >= '0' && map[n - 1] <= '9') { g_MapVariant = map[n - 1] - '0'; map[n - 1] = 0; }
+                    }
+                    strcpy(g_MapLoaded, map);
+                    strcpy(g_TilesetPending, ts);
+                    replace_ext(g_TilesetPending, DSTR(0x81156));
+                }
+                break;
+            }
+        }
+        if (f != NULL) fclose(f);
+    }
 }
 
 /* 0x48111 AeroOptions_Menu: Games / Players / Done (only g_Fire confirms). */

@@ -22,5 +22,5 @@ void Map_ResetCounters(void);                            /* 0x24377 */
 void Map_StampBertha(void);                              /* 0x243d6 */
 void Enemy_LoadSpx(void);                                /* 0x3f991 */
 void Enemy_ReplaceSprite(void);                          /* 0x3fa76 */
-void EnemyBomber_Spawn(void);                            /* 0x38ba8 (TODO: enemies step) */
-void Enemy_SetupSpriteIds(void);                         /* 0x3faab (TODO: enemies step) */
+void EnemyBomber_Spawn(void);                            /* 0x38ba8 (enemies.c) */
+void Enemy_SetupSpriteIds(void);                         /* 0x3faab */
