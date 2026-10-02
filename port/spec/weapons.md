@@ -1346,3 +1346,22 @@ powers (e.g. collisions, enemy bombs, turret shells). They are specified with th
 5. Whether `Rand(n)` for n ≤ -2 (marker powers) behaves as described depends on the C library `%`;
    Watcom's `idiv` truncates, as assumed.
 6. Q9 (skip bomb y=99) should be confirmed in DOSBox before anyone "fixes" it.
+
+---------------------------------------------------------------------------------------------------
+
+## Corrections (phase 5 step C, checked against the disassembly while porting)
+
+1. §5.4 k3 = 10 (proximity fuse): the row is `Clamp(g_CurY/16 + 3, 0xc, 0x3f)` (lower bound **12**, not 0; 0x41a8b).
+2. §8.1 the damage-pass loops use the global `g_ExplI` 0x90868 as their index (not a local `j`); the night flash
+   global 0x9031c is `g_FlashCounter` (video.md).
+3. §8.3 Explosion_DebrisGround / Explosion_DebrisSolid keep their loop state in globals: count `n` → 0x907f8
+   (`g_DamageHits`), `j` → 0x90830, `k` → 0x901c0, `s` → 0x90248, the table value / `t` → 0x8fea4.
+4. §5.8 Projectile_Cruise: the TERRAIN loop counter `k` is the global 0x9098c (`g_ProjSprite`); Flamer_Update also
+   leaves its chain index there (enemies.md §10.1).
+5. §5.1 the projectile loop is a `do { } while (--g_LoopI >= 0)`: the body runs once before the test (the caller's
+   `g_ProjCount != 0` guard makes it equivalent).
+6. §7.2 the decoy loop over the enemy missiles uses the global 0x90724 as its index; the flare block is guarded by
+   `g_FlareCount > 0`.
+7. Names only (no behaviour change): in §3.1 `g_90440` is `g_OnGround` and `g_90ca0` is `g_Ctrl[2]` (game_flow.md §8,
+   frame.c step 85); `g_80070` (LGB daytime test) is `g_FogActive` / `g_NightPalActive`; `g_MP_TargetFlag` is p22
+   (0x91674).

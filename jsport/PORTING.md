@@ -4,12 +4,15 @@ C port of `JS_CDROM.EXE` (JetStrike CD, 1994; Watcom C, DOS/4GW, flat 32-bit) on
 data is read at runtime from the game folder (`Game/`, not in the repository). Specs: `../port/spec/`,
 formats: `../FORMATS.md` and `../port/formats/`, bug policy: `../port/QUIRKS.md` (every original bug is kept).
 
-Status: phase 5 step B. `main` (0x146f4) runs the real front end (step A) and now the mission itself: the rest of
-`Mission_Setup` (tileset, parallax, map / runway search, HUD panel, flight tables, start state), the frame loop of
-`Game_Run` in its original order (`Mission_Run`, frame.c) with the flight model, `Player_Update`, landing / ditching /
-crash / ejection, HUD (panel, messages, radar, target arrow), MP2 triggers, objectives, terrain damage, the engine
-sound, and `WeaponSelect_Screen`. Weapons, projectiles, enemies, particles and the support aircraft are stubs at
-their call sites (stubs.c lists the Rand calls each will add).
+Status: phase 5 step C. `main` (0x146f4) runs the real front end (step A) and the mission (step B: `Mission_Setup`, the
+frame loop of `Game_Run` in its original order (`Mission_Run`, frame.c), flight model, `Player_Update`, landing / ditching /
+crash / ejection, HUD, MP2 triggers, objectives, terrain damage, engine sound, `WeaponSelect_Screen`). Step C adds the
+weapons (weapons.c): `Weapon_Fire` and every fire kind (ballistic / retarded / cluster bombs, rockets, guided missiles,
+JP233 and Porcupine dispensers, drop tank, commando drop, camera pod, gun pods, flares), the gun (`Player_Weapons`:
+tracers, terrain ray, hit rolls, heat, ammo, flamer), `Projectiles_Update` with all flight routines, `Flamer_Update`,
+bullets, flares (release, movement, decoys), `Explosion_Damage` / `Explosion_Terrain` / debris emitters, the sprite
+particles, and `Mission_CompleteScreen` (recon photo pages). Enemies and the support aircraft are stubs at their call sites
+(stubs.c lists the Rand calls each will add).
 
 ## Build
 
@@ -58,10 +61,11 @@ jsport/build/jsport.exe [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 1
 | `frame.c` | game_flow.md §8: `Mission_Run` = the frame loop of `Game_Run` (93 steps in order, flight model of player.md §3 inlined), `Fog_Refresh` |
 | `player.c` | player.md: tables, controls, `Player_Update`, glider, takeoff assist, ditching, engine fire, damage, ejection, sprite helpers, crash debris |
 | `hud.c` | player.md §10: `Hud_DrawPanel`, messages, radar, target arrow, briefing overlay, lamps |
-| `level_mission.c` | level.md: `Tileset_Load(Tlx)`, `Parallax_Load`, MP2 trigger, `Map_CraterAt` / `Map_DamageColumn`, objectives, carrier, Bertha, agent drop / crate, Aerolimits gates, runway light, base radar |
+| `level_mission.c` | level.md: `Tileset_Load(Tlx)`, `Parallax_Load`, MP2 trigger (+ `Map_TriggerColumnAhead`), `Map_CraterAt` / `Map_DamageColumn`, objectives, carrier, Bertha, agent drop / crate, Aerolimits gates, runway light, base radar; the gun's `Ray_Trace` 0x4501e; `Level_DrawOverviewMap` and `Mission_CompleteScreen` |
 | `engine.c` | sound.md §5: engine loop and pitch, warning sequence, mission sound triggers |
 | `weaponsel.c` | game_flow.md §7.2: `WeaponSelect_Screen` and helpers |
-| `stubs.c` | TODO stubs of later steps (weapons, enemies, particles, support aircraft), each with its Rand count |
+| `weapons.c` | weapons.md: `Weapon_Fire` and the launch routines, `Player_Weapons`, `Projectiles_Update` + flight routines, bullets, flares, `Explosion_Damage` / `Explosion_Terrain` / debris; enemies.md §10.1 `Flamer_Update`, §14.1 particles, §15 `AgentSmoke_Update` |
+| `stubs.c` | TODO stubs of later steps (enemies, support aircraft), each with its Rand count |
 | `video.c/.h` | mode X model: `vram[0x40000]`, `g_Palette` (image) + separate `dac`, CRTC (start, pel pan, line compare); every video.md routine: blitters, sprite bank / queue, tiles + `Level_DrawBackground`, palette and fades, fonts and text, lines / rects, `Video_FlipPage`, `Pic_LoadHudPanel` |
 | `pic.c/.h` | `Pic_LoadPax` 0x11a1a |
 | `sound.c/.h` | SB 4-channel mixer, Sfx_* API, `CD_PlayTrack` / `CD_Stop` |
@@ -131,6 +135,7 @@ fopen(DSTR(0x80EE6), DSTR(0x80C77));            /* strings of the exe: "js.cfg",
 | `JS_QUIT_AFTER=sec` | exit after that many seconds |
 | `JS_AUDIO_DUMP=file.wav` | record the mixer output (u8 mono at the SB rate) |
 | `JS_SEED=n` | replaces `time(NULL)` in MainMenu's `srand` (reproducible runs) |
+| `JS_SFX_TRACE=1` | prints every `Sfx_Play(id, freq, vol)` call to stdout |
 | `JS_TRACE=n` | prints the base / plane stats once and the player state every n mission frames to stdout |
 | F12 (in a mission) | PORT debug until `Airbase_Update` is ported: parked on the ground at the airbase, opens `WeaponSelect_Screen` the way Airbase_Update does |
 
@@ -157,18 +162,28 @@ JS_KEYS="1.5:39,3:01" JS_AUDIO_DUMP=work/snap/mix.wav jsport/build/jsport.exe --
   end / diving into the sea (crash, damage messages, auto-eject, parachute, debrief), training LANDING (autothrottle)
   and NIGHT (night backdrop), F12 weapon select (pick a weapon, DONE, HUD redrawn). Engine loop audible in
   `JS_AUDIO_DUMP`, pitch rising with the throttle.
+* Weapons (step C, JS_KEYS + JS_SEED=1 + snapshots + JS_SFX_TRACE): training BOMBING (gun bursts: ammo count, tracers,
+  sfx 17 per frame; bombs: release sfx 5, pairs of bombs, explosions with fire / smoke particles and sfx 4/27 + 6,
+  craters and tile replacement on the hill, score), rockets (sfx 8, pairs), Hellfire (one per press), cluster bomb (6
+  bomblets, chain of explosions), JP233 / Porcupine dispensers (sfx 2 per even frame), flares (sprite 0xa0 behind the
+  plane), drop tank / commando / flamer pod without faults, flying into the hill (crash particles, debris, auto-eject);
+  campaign mission 1 hop with a camera pod: photo in the air, landing to a stop on the runway -> "RECON PHOTO 1" overview
+  page, Space returns to the mission.
 * `JS_AUDIO_DUMP` with Space at 1.5 s: one 0.95 s burst = 18989 samples at 19920 Hz (slice 5, `Sfx_Play(6, 12000, 0x20)`, shift 5).
 
 ## Not ported / PORT decisions so far
 
-* Mission subsystems of later steps are no-op stubs at their original call sites (stubs.c): weapons / projectiles /
-  bullets / explosions (`Explosion_Damage`, so `Map_CraterAt` is ported but not reached yet), enemies (air, ground,
-  convoys, SAM / gun / flak MP2 objects, bombers), particles and debris smoke, support aircraft (tow plane, tanker,
-  Fat Albert, B52, ship, pickup), bonus / prize balloon, `Airbase_Update` (F12 debug path instead),
-  `Mission_CompleteScreen` (recon photos), `Enemy_SetupSpriteIds`. Until they are ported the RNG sequence of a
-  mission diverges from the original as soon as one of them would call Rand (`AirbaseCrew_Update` runs every
-  frame near the base). MP2 objects of class 0x83..0x85 are blanked from the map while in range (their sprites
-  come with the enemies step).
+* Mission subsystems of later steps are no-op stubs at their original call sites (stubs.c): enemies (air, ground,
+  missiles, shells, convoys, target vehicles, SAM / gun / flak MP2 objects, bombers, pilots, commandos on the ground),
+  the support aircraft (tow plane, tanker, Fat Albert, B52, ship, big bomber, pickup; only the flare block of
+  `SupportAircraft_Update` is ported), bonus / prize balloon, `Airbase_Update` (F12 debug path instead),
+  `Enemy_SetupSpriteIds`. Until they are ported the RNG sequence of a mission diverges from the original as soon as one
+  of them would call Rand (`AirbaseCrew_Update` runs every frame near the base). Weapons damage the enemy arrays directly
+  (as the original's Explosion_Damage / gun hit rolls do); kills are scored by the enemy updaters (step D). MP2 objects of
+  class 0x83..0x85 are blanked from the map while in range (their sprites come with the enemies step).
+* Weapons (PORT): the secondary-explosion arrays are bounded to 32 entries in `Explosion_Damage` as in `Map_CraterAt`;
+  a bullet left of column 0 reads height 0 (the original reads the heap before the table); `Mission_CompleteScreen`
+  reads MP2 column < 0 as empty and pumps events in its input waits.
 * Pause and the weapon-select fire-release waits pump events (`Platform_Spin`).
 * Busy loops on key memory (menu fire release, `Input_AnyKey`, `Input_GetFKey`) call `Platform_Spin`
   (events, present, 0.5 ms sleep).

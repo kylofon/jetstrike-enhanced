@@ -299,6 +299,41 @@ void Runway_Update(void);                /* 0x15194 */
 void BaseRadar_Update(void);             /* 0x16e38 */
 void Runway_SetEndTargets(void);         /* 0x16dcd */
 void Recon_PhotoCheck(void);             /* 0x400da (FUN_000400da) */
+void Map_TriggerColumnAhead(void);       /* 0x3e66b */
+int  Ray_Trace(int x, int y, int vx, int vy);   /* 0x4501e */
+int  Ray_HitX(void);                     /* 0x450f8 */
+int  Ray_HitY(void);                     /* 0x4511e */
+void Level_DrawOverviewMap(int col, int row);   /* 0x14677 */
+void Mission_CompleteScreen(void);       /* 0x4011f */
+
+/* ---- weapons.c (weapons.md, enemies.md §10.1 / §14.1) */
+void Particles_Clear(void);              /* 0x2653b */
+void Particles_Nop(void);                /* 0x26520 */
+void Particle_Spawn(int x, int y, int vx, int vy, int a5, int a6, int a7);   /* 0x26560 */
+void Particles_Update(int camX, int camY);   /* 0x2661e */
+void Bullets_Clear(void);                /* 0x2688f */
+void Bullet_Add(int x8, int y8, int vx, int vy);   /* 0x268d9 */
+void Bullets_Update(int camX, int camY); /* 0x2694b */
+void Flare_Release(void);                /* 0x38a61 */
+void Flares_Add(void);                   /* 0x346d3 */
+void SupportAircraft_Flares(void);       /* flare block of 0x2780b */
+void Weapon_Fire(void);                  /* 0x341e9 */
+void Weapon_LaunchBallistic(void);       /* 0x3529c */
+void Weapon_FireRocket(void);            /* 0x35532 */
+void Weapon_FireGuided(void);            /* 0x356fe */
+void Weapon_TakePhoto(void);             /* 0x348db */
+void Weapon_DropTank(void);              /* 0x34f0d */
+void Weapon_DropCommando(void);          /* 0x351e9 */
+void Weapon_ArmJP233(void);              /* 0x34e13 */
+void Weapon_ArmPorcupine(void);          /* 0x34dd0 */
+void Weapon_FireGunPod(void);            /* 0x346f9 */
+void Weapon_DispenseJP233(void);         /* 0x3494e */
+void Weapon_DispensePorcupine(void);     /* 0x34b94 */
+void Weapons_FrameDispensers(void);      /* 0x15ce6 */
+void Player_Weapons(void);               /* 0x32846 */
+void Flamer_Update(void);                /* 0x17c56 */
+void Projectiles_Update(void);           /* 0x415e4 */
+void Explosion_Damage(int x, int y, int vx, int vy, int a5, int a6);   /* 0x39b69 */
 
 /* ---- sound.c (sound.md §5) */
 void Engine_Sfx(void);                   /* 0x391e3 */
@@ -318,24 +353,16 @@ void WeaponSelect_DrawInfo(void);        /* 0x2bb33 */
 
 /* ---- stubs.c: subsystems of later steps (weapons, projectiles, enemies, particles, support aircraft).
  * Each is called at its original place; the comments in stubs.c list the Rand calls they will make. */
-void Particles_Clear(void);              /* 0x2653b */
-void Particles_Nop(void);                /* 0x26520 */
-void Particle_Spawn(int x, int y, int vx, int vy, int a5, int a6, int a7);   /* 0x26560 */
-void Particles_Update(int camX, int camY);   /* 0x2661e */
-void Bullets_Clear(void);
-void Bullets_Update(int camX, int camY);
 void TargetVehicle_Spawn(void);
 void TargetVehicles_Update(void);
 void Tanker_Update(void);                /* 0x27008 */
 void SupportAircraft_Update(void);       /* 0x2780b */
-void Flamer_Update(void);
 void EnemyMissiles_Update(void);
 void EnemyGround_Update(void);
 void EnemyAir_Update(void);              /* 0x36ae3 */
 void Building_Update(void);              /* 0x149ae */
 void Convoy_Update(void);
 void AirbaseCrew_Update(void);
-void Weapons_FrameDispensers(void);
 void Alien_Update(void);                 /* 0x164d2 (FUN_000164d2) */
 void Bonus_Update(void);
 void Pickup_Update(void);
@@ -349,11 +376,7 @@ void Flak_Draw(void);
 void Flak_Fire(void);
 void EnemyPilots_Update(void);
 void Commandos_Update(void);
-void Projectiles_Update(void);
-void Player_Weapons(void);               /* 0x32846 */
 void EnemyShells_Update(void);
-void Explosion_Damage(int x, int y, int vx, int vy, int a5, int a6);   /* 0x39b69 */
 void BaseHit_Losses(void);
 void Bonus_Spawn(void);
-void Weapon_Fire(void);
-void Mission_CompleteScreen(void);       /* 0x4011f */
+

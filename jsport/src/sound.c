@@ -144,6 +144,9 @@ void Sound_StopAll(void)
 /* 0x315bc Sfx_Play: x is ignored (no panning). */
 void Sfx_Play(int id, int freq, int vol, int x)
 {
+    static int trace = -1;                       /* PORT (developer aid): JS_SFX_TRACE=1 logs every call */
+    if (trace < 0) trace = getenv("JS_SFX_TRACE") != NULL;
+    if (trace) { printf("sfx %d freq %d vol %d\n", id, freq, vol); fflush(stdout); }
     if (g_SfxOn) Sfx_PlayChannel(id - 1, freq / 2, vol, 0);
 }
 

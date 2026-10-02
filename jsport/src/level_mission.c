@@ -613,3 +613,103 @@ void Recon_PhotoCheck(void)
 {
     if (g_WeaponType[g_RackWeapon[0] * 6] == 4 || g_WeaponType[g_RackWeapon[1] * 6] == 4) DS32(0x901B8) = g_TrigCol;
 }
+
+/* 0x3e66b Map_TriggerColumnAhead (level.md §5.1): the MP2 trigger for the column ahead of the player; called by
+ * Projectile_HitGround after an impact. */
+void Map_TriggerColumnAhead(void)
+{
+    DS32(0x90668) = 0;
+    DS32(0x9010C) = 0;
+    DS32(0x90268) = 0;
+    g_TrigCol = imod_js(Div16(g_CamX + g_PlayerScrX + g_ScrollFineX + 0x10), g_MapWidth - 1, "Map_TriggerColumnAhead");
+    g_Scratch690 = (s32)(Byte_Get(g_MapMp2, g_TrigCol) & 0xff);
+    if (g_Scratch690 != 0) Map_TriggerColumn();
+}
+
+/* 0x4501e Ray_Trace(x, y, vx, vy): the gun's terrain ray (40 steps of 4.12 fixed point, +0x200 sag per step);
+ * returns the attribute of the solid tile hit (> 0x7e), else 0. The hit point goes to 0x80784/0x80788. */
+int Ray_Trace(int x, int y, int vx, int vy)
+{
+    x <<= 0xc;
+    y <<= 0xc;
+    vy >>= 1;
+    vx >>= 1;
+    int i, attr = 0;
+    for (i = 0; i < 0x28; i++) {
+        attr = Map_GetTileAttr(x >> 0x10, y >> 0x10, 0);
+        if (attr < 0x7f) {
+            x += vx;
+            y += vy + 0x200;
+            if (x < 0) x += g_MapWidth << 0x10;
+            if ((g_MapWidth << 0x10) < x) x -= g_MapWidth << 0x10;
+        } else {
+            DS32(0x80784) = x >> 0xc;
+            DS32(0x80788) = y >> 0xc;
+            i = 99;
+        }
+    }
+    return i < 99 ? 0 : attr;
+}
+int Ray_HitX(void) { return DS32(0x80784); }   /* 0x450f8 */
+int Ray_HitY(void) { return DS32(0x80788); }   /* 0x4511e */
+
+/* 0x145f9 Video_Fill4x4(x, y, tile): one overview cell (video.md) */
+static void Video_Fill4x4(int x, int y, int tile)
+{
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            Video_PutPixel((u32)(x + i), y + j, g_TilePtrs[tile & 0xff] ? g_TilePtrs[tile & 0xff][j * 4 + i] : 0);
+}
+
+/* 0x14677 Level_DrawOverviewMap(col, row): 80 x 44 tiles as 4x4 cells at absolute VRAM row 100 */
+void Level_DrawOverviewMap(int col, int row)
+{
+    for (int c = 0; c < 0x50; c++)
+        for (int r = 0; r < 0x2c; r++) Video_Fill4x4(c * 4, r * 4 + 100, Map_GetTile(col + c, row + r));
+}
+
+/* 0x4011f Mission_CompleteScreen: after landing with photos taken (camera pod) or the recon flag 0x901b8, one
+ * overview page per photo column, with the MP2 objects of the 73 columns around it marked. */
+void Mission_CompleteScreen(void)
+{
+    DS32(0x9028C) = 0;
+    g_LoopK = 1;
+    if (DS32(0x901B8) > 0) {
+        g_Score[g_AeroPlayer] += (g_PlaneClass + 1) * g_MissionBonus;
+    } else if (DS32(0x9028C) < g_PhotoCount) {
+        DS32(0x901B8) = DS32A(0x91304)[DS32(0x9028C)];
+        DS32(0x9028C)++;
+    }
+    while (DS32(0x901B8) > 0) {
+        while (g_AnyInput != 0) { Input_ReadControls(); Platform_Spin(); }   /* PORT: pump events */
+        Video_SetStartAndPan(0, 100, 0);
+        Level_DrawOverviewMap(DS32(0x901B8) - 0x1f, 0x14);
+        strcpy(DSTR(0x85048), DSTR(0x8B8C8));
+        strcat(DSTR(0x85048), DSTR(0x81470));
+        itoa_js(g_LoopK, DSTR(0x85048) + strlen(DSTR(0x85048)));
+        Text_DrawSmall(0xa0 - Text_WidthSmall(DSTR(0x85048)) / 2, 0x77, DSTR(0x85048), 0);
+        DS32(0x9002C) = 0;
+        for (g_LoopI = 0; g_LoopI < 0x49; g_LoopI++) {
+            int c = DS32(0x901B8) - 0x1c + g_LoopI;
+            /* PORT: columns left of 0 would read the heap before the MP2 buffer; 0 (no object) there */
+            g_DmgLoop = c < 0 ? 0 : (s32)(Byte_Get(g_MapMp2, c) & 0xff);
+            if (g_DmgLoop > 0 && g_DmgLoop < 0x80) {
+                Video_DrawLineColor((u32)(g_LoopI * 4 + 0x12), (u32)(DS32(0x9002C) * 8 + 0x84), (u32)(g_LoopI * 4 + 0x12),
+                                    (u32)((g_DmgLoop - 0x12) * 4 + 100));
+                Text_DrawSmall(g_LoopI * 4 + 8, DS32(0x9002C) * 8 + 0x7d, DSTR(0x8B918), 0);
+                DS32(0x9002C) = 1 - DS32(0x9002C);
+            }
+        }
+        g_LoopK++;
+        DS32(0x90478) = 0;
+        Input_ReadControls();
+        while (g_AnyInput == 0) { Input_ReadControls(); Platform_Spin(); }
+        while (g_AnyInput == 0) { Input_ReadControls(); Platform_Spin(); }
+        if (DS32(0x9028C) < g_PhotoCount && DS32(0x90478) == 0) {
+            DS32(0x901B8) = DS32A(0x91304)[DS32(0x9028C)];
+            DS32(0x9028C)++;
+        } else {
+            DS32(0x901B8) = 0;
+        }
+    }
+}

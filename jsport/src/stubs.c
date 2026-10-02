@@ -7,19 +7,6 @@
  * call sites in the function body (js.c), "via" lists callees that also call Rand. */
 #include "mission.h"
 
-/* 0x2653b Particles_Clear / 0x26520 Particles_Nop. Rand: 0. */
-void Particles_Clear(void) {}
-void Particles_Nop(void) {}
-/* 0x26560 Particle_Spawn. Rand: 0 (callers evaluate their Rand arguments before the call, as here). */
-void Particle_Spawn(int x, int y, int vx, int vy, int a5, int a6, int a7)
-{
-    (void)x; (void)y; (void)vx; (void)vy; (void)a5; (void)a6; (void)a7;
-}
-/* 0x2661e Particles_Update (GF step 36). Rand: 0. */
-void Particles_Update(int camX, int camY) { (void)camX; (void)camY; }
-/* Bullets_Clear (attempt start) / Bullets_Update (GF step 51). Rand: 0. */
-void Bullets_Clear(void) {}
-void Bullets_Update(int camX, int camY) { (void)camX; (void)camY; }
 /* TargetVehicle_Spawn (attempt start, campaign with a target column, up to 10 calls). Rand: 9 per call. */
 void TargetVehicle_Spawn(void) {}
 /* TargetVehicles_Update (GF step 31, g_TVCount > 0). Rand: 4; via TV_FireShell (2), TV_LaunchSAM (1). */
@@ -28,10 +15,16 @@ void TargetVehicles_Update(void) {}
  * enemy base, see frame.c step 45). Rand: 2 (Particle_Spawn arguments of the wreck). */
 void Tanker_Update(void) {}
 /* 0x2780b SupportAircraft_Update (GF step 28: tow plane, Fat Albert, B52, ship, campaign bomber, player
- * flares, ground pickup). Rand: 17; via Flare_Release (1), Explosion_Damage. */
-void SupportAircraft_Update(void) {}
-/* Flamer_Update (GF step 29, g_FlameActive). Rand: 1; via Explosion_Damage. */
-void Flamer_Update(void) {}
+ * flares, ground pickup). Rand: 17; via Flare_Release (1), Explosion_Damage. Only the flare block (0x28e6d,
+ * weapons.md §7.2, Rand(1) x 1..2 per flare) is ported (weapons.c); it sits after the big-bomber part and before
+ * the pickup part of the original, whose Rand calls are still missing. */
+void SupportAircraft_Update(void)
+{
+    /* TODO(support aircraft): tow plane, Fat Albert, B52, ship, big enemy bomber (incl. its missile launch, which
+     * calls Flare_Release), then: */
+    SupportAircraft_Flares();
+    /* TODO: ground pickup */
+}
 /* EnemyMissiles_Update (GF step 29, g_EnemyMslCount). Rand: 4; via Player_DamageSystems, Explosion_Damage. */
 void EnemyMissiles_Update(void) {}
 /* EnemyGround_Update (GF step 29, g_EnemyGroundCount). Rand: 7; via Explosion_Damage. */
@@ -46,9 +39,6 @@ void Convoy_Update(void) {}
 /* AirbaseCrew_Update (GF step 32: near the base and low). Rand: 1 - runs every frame at the airbase, so the
  * RNG sequence diverges from the start of every mission until it is ported. */
 void AirbaseCrew_Update(void) {}
-/* Weapons_FrameDispensers (GF step 33, even frames). Rand: 0; via AgentSmoke_Update (1),
- * Weapon_DispenseJP233 (3), Weapon_DispensePorcupine (3). */
-void Weapons_FrameDispensers(void) {}
 /* 0x164d2 FUN_000164d2 alien abduction (GF step 34, g_AlienAbduct > 0; never started, Q21). Rand: 0. */
 void Alien_Update(void) {}
 /* Bonus_Update (GF step 37, g_BonusType). Rand: 0. */
@@ -73,25 +63,9 @@ void Flak_Fire(void) {}
 void EnemyPilots_Update(void) {}
 /* Commandos_Update (GF step 41, 0x902e0). Rand: 0; via Explosion_Damage. */
 void Commandos_Update(void) {}
-/* Projectiles_Update (GF step 43, g_ProjCount). Rand: 4; via Projectile_LgbCluster (22), Projectile_SeaSkim
- * (3), Projectile_AimMarker (2), Projectile_AimMissionTarget (2), Projectile_Alarm (2), Projectile_HitGround
- * (2), Projectile_Climb (1), Explosion_Damage. */
-void Projectiles_Update(void) {}
-/* 0x32846 Player_Weapons (GF step 49a, fire held in the air). Rand: 9; via Explosion_Damage. */
-void Player_Weapons(void) {}
 /* EnemyShells_Update (GF step 51, g_ShellCount). Rand: 0; via Player_DamageSystems, Explosion_Damage. */
 void EnemyShells_Update(void) {}
-/* 0x39b69 Explosion_Damage. Rand: 8; via Explosion_Terrain (5), Map_CraterAt (6 + column collapse, ported in
- * level_mission.c). Callers here: the crash (GF step 69), Bertha, secondary explosions. */
-void Explosion_Damage(int x, int y, int vx, int vy, int a5, int a6)
-{
-    (void)x; (void)y; (void)vx; (void)vy; (void)a5; (void)a6;
-}
 /* BaseHit_Losses (GF step 57, 0x901c8: runway cratered). Rand: 4. */
 void BaseHit_Losses(void) {}
 /* Bonus_Spawn (GF step 75 and auto-eject bonus). Rand: 1. */
 void Bonus_Spawn(void) {}
-/* Weapon_Fire (GF step 85, rack fire keys). Rand: 0; via Weapon_LaunchBallistic (1). */
-void Weapon_Fire(void) {}
-/* 0x4011f Mission_CompleteScreen (recon photos after landing; needs Level_DrawOverviewMap). Rand: 0. */
-void Mission_CompleteScreen(void) {}

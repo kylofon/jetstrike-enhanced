@@ -600,9 +600,9 @@ void Mission_Run(void)
         /* 27 */ if (g_TankerType != 0) Tanker_Update();                         /* TODO stub */
         /* 28 */ if (g_TowX != 0 || DS32(0x90310) != 0 || g_MP_PickupCol != 0 || DS32(0x906DC) != 0 || DS32(0x90158) != 0
                      || DS32(0x90998) != 0 || DS32(0x90528) != 0)
-            SupportAircraft_Update();                                             /* TODO stub */
-        /* 29 */ if (DS32(0x90608) != 0) Flamer_Update();                        /* TODO stubs */
-        if (DS32(0x906FC) != 0) EnemyMissiles_Update();
+            SupportAircraft_Update();                                             /* TODO stub (flares ported) */
+        /* 29 */ if (DS32(0x90608) != 0) Flamer_Update();
+        if (DS32(0x906FC) != 0) EnemyMissiles_Update();                        /* TODO stubs */
         if (g_EnemyGroundCount != 0) EnemyGround_Update();
         /* 30 */ if (g_EnemyAirCount == 0) {
             DS32(0x906A4) += Rand(2);
@@ -620,10 +620,10 @@ void Mission_Run(void)
         if (DS32(0x900B4) > 0) TargetVehicles_Update();
         /* 32 */ if (g_BaseStartX - 0x140 < g_CamX && g_CamX < g_BaseEndX + 0x260 && 0x330 - g_BaseYOff < g_CamY)
             AirbaseCrew_Update();                                                 /* TODO stub (Rand: 1) */
-        /* 33 */ if (g_FrameParity == 0) Weapons_FrameDispensers();              /* TODO stub */
+        /* 33 */ if (g_FrameParity == 0) Weapons_FrameDispensers();
         /* 34 */ if (g_AlienAbduct > 0) Alien_Update();                          /* TODO stub */
         /* 35 */ { Rand(9); Rand(2); }           /* arguments of the empty stub 0x110e1 (returns 0x900fc), Q20 */
-        /* 36 */ Particles_Update(g_CamX, g_CamY);                                /* TODO stub */
+        /* 36 */ Particles_Update(g_CamX, g_CamY);
         /* 37 */ if (DS32(0x90890) != 0) Bonus_Update();                         /* TODO stubs */
         if (DS32(0x90918) > 0) Pickup_Update();
         if (DS32(0x90498) != 0) BaseRepair_Update();
@@ -675,7 +675,7 @@ void Mission_Run(void)
         if (DS32(0x902E0) != 0) Commandos_Update();                              /* TODO stub */
         /* 42 */ Hud_DrawTargetArrow(g_CamX, g_CamY, g_TargetMarkX, g_TargetMarkY);
         /* 43 */ if (DS32(0x90660) != 0) DS32(0x90660)--;
-        if (g_ProjCount != 0 && g_Crashed == 0 && g_EjectState == 0) Projectiles_Update();   /* TODO stub */
+        if (g_ProjCount != 0 && g_Crashed == 0 && g_EjectState == 0) Projectiles_Update();
         /* 44 */ g_FrameParity = 1 - g_FrameParity;
         if (DS32(0x901D8) != 0) DS32(0x901D8)--;
         g_FrameCounter50 = Wrap(g_FrameCounter50 + 1, 0, 0x31);
@@ -755,10 +755,10 @@ void Mission_Run(void)
         }
         /* 48 */ lightning();
         /* 49a */ if (g_GunTrigger != 0 && g_GearDown == g_FixedGear && g_Crashed == 0 && g_EjectState == 0 && g_OnGround == 0)
-            Player_Weapons();                                                     /* TODO stub */
+            Player_Weapons();
         /* 49b */ /* Stub_FrameL / Stub_FrameK / Stub_FrameG: empty */
         /* 50 */ Sprite_DrawQueue();
-        /* 51 */ if (DS32(0x8FFA0) != 0) EnemyShells_Update();                  /* TODO stubs */
+        /* 51 */ if (DS32(0x8FFA0) != 0) EnemyShells_Update();                  /* TODO stub */
         Bullets_Update(g_CamX, g_CamY);
         /* Stub_FrameJ: empty */
         /* 52 */ if (g_HudMsgCount != 0) Hud_DrawMessages();
@@ -851,12 +851,12 @@ void Mission_Run(void)
             if (g_FireOrConfirm != 0 && g_GearDown - g_FixedGear == 1 && g_IsHeli == 0) g_FireHeldGearDown = 1;
             if (g_FireLeftReq != 0 && g_GearDown == g_FixedGear && DS32(0x90624) == 0 && g_DamageFlags[3] == 0
                 && g_RackRounds[0] > 0 && g_OnGround == 0 && g_Ctrl[2] == 0) {
-                DS32(0x8FF00) = 1; g_RackSel = 0; Weapon_Fire();                  /* TODO stub */
+                DS32(0x8FF00) = 1; g_RackSel = 0; Weapon_Fire();
                 DS32(0x8FF00) = 0; g_RackSel = 0; Weapon_Fire();
             }
             if (g_FireRightReq != 0 && g_GearDown == g_FixedGear && DS32(0x90624) == 0 && g_DamageFlags[4] == 0
                 && g_RackRounds[1] > 0 && g_OnGround == 0 && g_Ctrl[2] == 0) {
-                DS32(0x8FF00) = 1; g_RackSel = 1; Weapon_Fire();                  /* TODO stub */
+                DS32(0x8FF00) = 1; g_RackSel = 1; Weapon_Fire();
                 DS32(0x8FF00) = 0; g_RackSel = 1; Weapon_Fire();
             }
             if (g_FireLeftReq == 0 && g_FireRightReq == 0) DS32(0x905E0) = 0;
