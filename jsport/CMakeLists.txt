@@ -20,6 +20,9 @@ else()
     target_compile_options(jsport PRIVATE -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing)
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         target_compile_options(jsport PRIVATE -Wno-format-truncation)
+        # The data-segment image (src/dseg.h) keeps the original's globals in one array: string copies
+        # between two of them look like overlapping copies to GCC, and strncpy is used as the original does.
+        target_compile_options(jsport PRIVATE -Wno-restrict -Wno-stringop-truncation)
     endif()
 endif()
 if(WIN32)

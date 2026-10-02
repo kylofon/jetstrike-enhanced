@@ -570,3 +570,11 @@ None of it needs emulating; all is replaced by SDL.
    in the weapons/player spec; the condition that both are 0 before a new request is accepted should be
    checked there.
 4. Whether any data file relies on the "second dot" truncation rule (none seen; `jetsoundext.aaf` is a stub).
+
+## Corrections (phase 5 step A)
+
+1. §11 open question 4 (second dot): no file name reaches DOS with two dots. The `.ABK` / `.Abk` names in the
+   story files and in DATA/MISC get their last 4 characters overwritten with `.pax` / `.spx` / `.hd` before the
+   open (game_flow.md Corrections 1), so the first-dot rule of §8.2 is enough.
+2. §4.1/§4.2 port note: the shipped JS.CFG has the joystick off (+0x24 = 0); the port still reads a connected
+   gamepad in Input_ReadControls (direction bits and button 1 directly), see jsport/PORTING.md.

@@ -585,3 +585,10 @@ void Video_Present(uint8_t out[240][320]) {          /* called from every WaitVS
 4. Confirm (game-loop spec) that 0x1cf91 .. 0x1e3fa are one loop iteration, i.e. the bolt is drawn after the
    background of the same back page and stays visible for one frame.
 5. Hud_DrawRadarLine argument meaning (wx1/wx2 world x vs map columns) — HUD spec.
+
+## Corrections (phase 5 step A)
+
+1. §1: `g_PicFullLoad` 0x8004B is **1** in the data-segment image (not 0): Pic_LoadPax clears the page and loads
+   the `.pal` from the start; PlaneSelect/WeaponSelect set it to 0 around their redraws.
+2. §8: Font_DrawSmallGlyph picks colour 0xFE when the dword at 0x80070 is non-zero; game_flow.md calls the same
+   global `g_FogActive` (fog/night palette active), video.md `g_NightPalActive`.

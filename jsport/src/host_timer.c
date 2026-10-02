@@ -16,8 +16,19 @@ bool host_in_vretrace(void)
     return now - retrace_at(host_retrace_count()) < VBLANK_NS;
 }
 
+static Uint64 last_presented = ~0ull;
+
+void host_idle(void)
+{
+    host_pump();
+    Uint64 k = host_retrace_count();
+    if (k != last_presented) { last_presented = k; host_present(); }
+    SDL_DelayPrecise(SDL_NS_PER_MS / 2);
+}
+
 uint64_t host_wait_vretrace(void)
 {
+    last_presented = host_retrace_count();
     host_present();
     Uint64 next = host_retrace_count() + 1;             /* the first boundary after now */
     Uint64 due = retrace_at(next);

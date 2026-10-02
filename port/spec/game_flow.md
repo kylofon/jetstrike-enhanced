@@ -1312,3 +1312,28 @@ Video_SetSplitLine(400); Video_SetStartAndPan(0,0,0); Pal_Fade(0,0x40,1,0x20)`.
 ```
 
 > **Correction (player spec):** §8.3 flight physics has errors (drift is 4*Sign re-centring on 0xa0; catapult limit 3.0 above speed 6.0; thrust from w83 0x90674). `port/spec/player.md` §3.2 is authoritative.
+
+## Corrections (phase 5 step A, checked against the disassembly while porting)
+
+1. **Extensions are written over the last 4 characters, not appended** (§5.1, §5.2, §6.1 / Plane_SetupSprites):
+   `*(u32 *)(name + strlen(name) - 4) = ".pax"` etc. The first token of a story file is `COMBATCOMBI.ABK` ->
+   `COMBATCOMBI.pax` (DOS opens `GFX/COMBATCO.PAX`); the MISC plane base name `Hawk.Abk` -> `plane/Hawk.hd` and
+   `Hawk.spx` (Plane_LoadSpx 0x264a2: `lea edi, [eax+0x85b44]; movsd; movsb`); the record's tileset name gets
+   `.tlx` over its own extension. With `strcat` every story picture would fail ("...ABK.pax not found").
+2. §3.1 step 4: `0x849c0` is 0 in the image, so `0x849e0` stays 0 and **Fonts_Load runs on every MainMenu
+   entry** (two `File_LoadWhole(.., -1)` allocations leaked each time), not only the first time.
+3. §3.1 step 9 (GENDATA.DAX): `0x92980` is a **u16** table (`[i + 3*j]`, word stores at 0x47359); the two
+   26-entry tables at `0x8f088` (g_ParamNotObjective) and `0x8f08a` are **u16 with a 4-byte stride**
+   (`shl edx,2; mov word [edx+0x8f088]`), not stride 8.
+4. §6 PlaneSelect inner loop: the vertical move uses `g_MenuDY` (0x9077c) itself as the temporary:
+   `g_MenuDY = cy + (mode != 3) * g_MenuDY * 0x20; cy = (mode & 1) ? 0x40 : 0x100; if (g_MenuDY < cy) cy = g_MenuDY;`
+   and the x clamp has minimum 0x26, so the start column 0x24 becomes 0x26 after the first poll. The arrow
+   highlight saves `Video_CopyRect(0, 0xe4,0xd4, 0xe4+W,0xd4+H, 0, 0,0xf0)` (W/H = Sprite_GetWidth/Height(0x1cb)).
+5. §6.2 SelectScreen_DrawInfoBox: a line is also taken whole when `Text_WidthSmall(g_InfoText) <= g_InfoBoxW - 6`;
+   in Aerolimits the lines are drawn at x **0x5a** (the colour variable), not 0x53; `Video_FillRect` gets colour 0
+   (0x53/0x5a is pushed as an extra, unused 6th argument).
+6. §10.1 EndGame_Screen (crash branch): the text starts at absolute VRAM row 12 but the display starts at row 20
+   (`Video_SetStartAndPan(0,0x14,0)`), so the first line - i.e. every shipped sarcasm text, all of which fit on one
+   line - is above the visible window: the end-game pictures show no text. Original behaviour, kept.
+7. §3.4 AeroOptions_Menu has no release wait: a direction held for more than one 15 Hz poll moves the cursor
+   again (a 0.2 s tap moves it two rows).

@@ -26,6 +26,9 @@ void host_pump(void);
 uint64_t host_wait_vretrace(void);
 uint64_t host_retrace_count(void);       /* retraces since start-up (no wait) */
 bool host_in_vretrace(void);             /* port 3DAh bit 3 (first ~1.4 ms of each period) */
+/* One step of a busy loop on ISR-updated memory: pumps events, presents the frame when a retrace boundary
+ * has passed since the last present, sleeps ~0.5 ms. */
+void host_idle(void);
 
 /* ---- Video: the frame source fills a 320x240 XRGB8888 image (the VGA model, video.c). */
 #define HOST_FRAME_W 320

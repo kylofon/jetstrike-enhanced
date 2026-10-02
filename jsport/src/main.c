@@ -15,9 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "game_main.h"
+#include "dseg.h"
 #include "host.h"
 #include "lzw.h"
+#include "platform.h"
 #include "sound.h"
 #include "video.h"
 
@@ -106,8 +107,9 @@ int main(int argc, char **argv)
     }
 
     if (!host_init(dir, scale, fullscreen, true)) return 1;
+    Dseg_Load();
     Video_Init();
-    int rc = game_main();
+    int rc = js_main();                         /* 0x146f4 main */
     host_shutdown();
     return rc;
 }
