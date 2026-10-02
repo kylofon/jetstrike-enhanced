@@ -1310,3 +1310,5 @@ Video_SetSplitLine(400); Video_SetStartAndPan(0,0,0); Pal_Fade(0,0x40,1,0x20)`.
    the burning-wreck particle count — same global, so likely a "cheap/expendable aircraft" flag; check MISC.Z.
 7. 0x90a10 (debrief success category "poor") is cleared in LoadBriefing; who sets it (objectives spec)?
 ```
+
+> **Correction (player spec):** §8.3 flight physics has errors (drift is 4*Sign re-centring on 0xa0; catapult limit 3.0 above speed 6.0; thrust from w83 0x90674). `port/spec/player.md` §3.2 is authoritative.
