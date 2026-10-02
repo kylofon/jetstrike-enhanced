@@ -1,0 +1,101 @@
+address,name,module,confidence,note
+00010010,Video_SetModeX,video,verified,INT10 13h; DAC black; unchain; CRTC 320x240 60Hz; offset 0x30 (384 px rows); attr mode 0x61; clears 256 KiB
+000100c2,Video_SetTextMode,video,verified,INT 10h with caller AX
+000100d0,Video_PutPixel,video,verified,(x;y;col) absolute VRAM; 96 B/row
+00010108,Video_WaitVSync,video,verified,waits for start of next retrace
+00010128,Sprite_Blit,video,verified,(x;y;spr;pageofs) skip if x<hotX||y<hotY (unsigned); 0x40 transparent
+000101c8,Sprite_BlitShift,video,verified,as Sprite_Blit; stores pixel+0x20
+0001026c,Sprite_BlitMirror,video,verified,horizontal flip; left=x-(4*w4-hotX); no guard
+0001032c,Video_GrabRect_Unused,video,likely,write-mode-1 VRAM->mem copy; no callers
+0001039c,Video_PutRect_Unused,video,likely,mem->VRAM write-mode-1 copy; no callers
+00010739,Video_PixelAddr_Unused,video,guess,code fragment; no callers
+0001040c,Tiles_DrawColumnsParallax,video,verified,22x13 tiles one plane; tile byte 0x80 -> backdrop byte (linear 320 stride)
+000104f8,Tiles_ParallaxRow,video,verified,inner helper: 4 bytes + backdrop stride 4
+00010540,Tiles_DrawColumns,video,verified,24x13 tiles one plane into 0x18c0+pagesel*0xc00
+000105d9,Video_SelectPlane,video,verified,map mask 1<<plane
+000105ef,Video_SetSplitLine,video,verified,line compare = rows*2-1 (0x18/0x07 bit4/0x09 bit6)
+0001063a,Video_BlitLinearToPlanar,video,verified,(src;x;y;w;h) linear 8bpp -> VRAM absolute rows
+000106b0,Video_SetStartAndPan,video,verified,(x;y;base) CRTC start=y*96+x/4+base; vsync; pel pan (x&3)*2
+000106fa,Video_ReadPixel,video,verified,(x;y;base) returns v-0x80 if 0x80<=v<=0xC0 else 0; used as collision probe
+00010e70,Sprite_ClearQueue,video,verified,
+00010e95,Video_NightStub,video,verified,empty function called each frame when !g_NightPalActive
+00010f11,Sprite_Queue,video,verified,(x;y;id) x+=fineX; y+=16+fineY; id>0x8000 mirrored; wrap flag if left<0
+0001102d,Sprite_DrawNow,video,verified,(x;y;id) Sprite_Blit page 0
+00011066,Sprite_DrawNowShift,video,verified,(x;y;id) Sprite_BlitShift page 0
+00011145,Pal_SetColor,video,verified,(idx;r;g;b) store + upload 1 entry
+0001119e,Pal_SetColorNoUpload,video,verified,
+000111e6,Pal_SetColor12,video,verified,(idx;0xRGB) nibble<<2 + upload
+0001125c,Pal_GetColor12,video,verified,packs 6-bit values as (r*16+g)*16+b (overlapping)
+0001155e,Sprite_DrawQueue,video,verified,draws entries count-1..0 (first queued on top); wrap -> x+384
+000117f8,Sprite_GetY,video,verified,hotY; 0 if id==0||id>0x212
+00011847,Sprite_GetX,video,verified,hotX; 0 if id==0||id>0x212
+00011895,Sprite_GetWidth,video,verified,w4*4
+000118e7,Sprite_GetHeight,video,verified,h
+0001195b,Pal_Black,video,verified,(first;last) DAC entries to 0; g_Palette unchanged
+000119b6,Pal_Upload,video,verified,(first;last) DAC <- g_Palette
+00011bee,Video_CopyRect,video,verified,(srcpage;x1;y1;x2;y2;dstpage;dx;dy) latch copy; rows=(u8)(y2-y1); bytes x1/4..x2/4
+0001206e,Sprite_Mirror,video,verified,id+0x8000
+000120ea,Pal_UploadAll,video,verified,
+00012343,Font_DrawSmallGlyph,video,verified,returns rightmost column; colour 255 or 254 at night
+000123fa,Font_DrawBigGlyph,video,verified,byte1->255 byte5->0
+000124e0,Text_DrawSmall,video,verified,(x;y;str;onPage) y+=onPage*g_BackPage/96; advance maxc+2; unknown +2
+000126e9,Text_DrawBig,video,verified,advance maxc; unknown +4; newline +12
+00012831,Text_DrawDigit,video,verified,3x5 digit from 0x80019; colour 255
+000128f1,Text_DrawNumber,video,verified,(x;y;val;n) right-aligned 4 px/digit; leading zeros
+00012970,Font_GlyphWidth,video,verified,
+000129ee,Text_FitWidth,video,verified,word-wrap break index or 0
+00012bed,Text_WidthSmall,video,verified,
+00012d8d,Text_WidthBig,video,verified,
+00012e92,Video_ShowPage,video,verified,CRTC start=page*0x5a00
+00012ef0,Video_GetPage,video,verified,
+00013041,Video_DrawLineColor,video,verified,Video_DrawLine with g_LineColor
+0001334f,Video_FillRect,video,verified,inclusive; PutPixel
+00013842,Level_DrawBackground,level,verified,(col;row) 24x16 window; backdrop px=(int)(camX/4.166666666)%320-fineX py=(int)((camY+2008)/9.25-fineY)
+00013a68,Video_FlipPage,video,verified,start=back+0x600+fine; 1+g_VSyncWaits vsyncs; Pal_CycleEffects if g_FlashCounter; swap pages
+00013b01,Pal_Fade,video,verified,(first;last;type;steps) 0 out 1 in 2 half-out 3 half-in; ignored if type==last type; restores g_Palette
+000143b0,Video_SetLineColor,video,verified,
+000143d3,Video_BenchmarkSpeed,video,verified,frame-crossing count -> g_VSyncWaits 2/1/0
+000145f9,Video_Fill4x4,video,verified,debug overview cell
+00014677,Level_DrawOverviewMap,level,verified,debug 80x44 tile overview at row 100
+00025869,Text_DrawCenteredAt,video,likely,(unused;x;y;str) x+29-w/2
+00026174,Hud_DrawRadarLine,video,likely,4 DrawLineColor segments; x scale 0x3e0/(mapW*16)+0xdd
+00031604,Video_DrawLine,video,verified,asm DDA; steep lines degenerate to vertical (16-bit step in 32-bit acc)
+0003184c,Tiles_ParallaxBench,video,verified,benchmark copy of the parallax loop
+00031934,Tiles_ParallaxBenchRow,video,verified,benchmark helper (copy of 0x104f8)
+0003197c,Tiles_ClearColumns,video,verified,benchmark: copies from linear address 0 into page B
+00031a19,Video_CountVSync,video,verified,polls until next retrace start; returns poll count
+00045c09,Pal_CycleEffects,video,verified,night: flash table on colour 64 (detail off) or sky ramp 192..207 (detail on)
+000460ba,Pal_NightAltitude,video,verified,night altitude lighting of 64..79 128..143 192..207 from g_PalSaved
+00046617,Pal_SaveNight,video,verified,saves palette; colour 254 dark red; dead grey table; forces altitude refresh
+0004699e,Pal_Restore,video,verified,g_Palette <- g_PalSaved (no upload)
+00080008,g_SpriteColorOfs,global,verified,0x40 added to SPX pixels
+00080009,g_SmallFont,global,verified,unaligned pointer
+0008000d,g_BigFont,global,verified,unaligned pointer
+00080011,g_SmallCharset,global,verified,-> 0x80bf0
+00080015,g_BigCharset,global,verified,-> 0x80c1c
+00080019,g_DigitFont,global,verified,50 bytes 3x5 digits
+0008004b,g_PicFullLoad,global,verified,Pic_LoadPax clears page + loads pal when 1
+0008004f,g_FadeTargetColor,global,verified,byte; Pal_Fade target entry (0 = black)
+00080050,g_ParallaxBuf,global,verified,320x512 backdrop
+00080054,g_VSyncWaits,global,verified,extra vsyncs per flip
+00080058,g_TileData,global,verified,256 tiles x 256 B
+0008005c,g_BackPage,global,verified,0x18c0 or 0x78c0
+0008006c,g_LastFadeType,global,verified,
+00080070,g_NightPalActive,global,likely,night lighting active (font colour 254; altitude palette)
+00080428,g_LineMaskL,global,verified,0f 0e 0c 08
+0008042c,g_LineMaskR,global,verified,01 03 07 0f
+000831d8,g_TileWindow,global,verified,24x16 tile ids
+00084504,g_LineColor,global,verified,
+0008452e,g_ShownPage,global,verified,int16
+0008ec88,g_NightGreyTab,global,verified,16x16 ints written by Pal_SaveNight; never read
+0008ffb0,g_LightningCooldown,global,likely,50 frames after a bolt
+0008ffd8,g_BoltX,global,likely,lightning segment x
+0008ffdc,g_BoltY,global,likely,lightning segment y (absolute VRAM row)
+0009031c,g_FlashCounter,global,verified,night flash state
+000905c4,g_ScrollFineX,global,verified,renamed from g_ShakeX: = g_CamX&15 (fine scroll; no shake)
+000905c8,g_ScrollFineY,global,verified,renamed from g_ShakeY: = g_CamY&15
+00090650,g_NightLevel,global,verified,Clamp((camY+150)/67+1;0;15)
+0009065c,g_NightLevelShown,global,verified,-2 forces refresh
+00090fe4,g_FlashTable,global,verified,indexed by g_FlashCounter; rows of 10 from 0x90fe8 (GENDATA.DAX)
+00092ad4,g_ParallaxPal,global,verified,48 B copy of colours 192..207
+000933b4,g_PalSaved,global,verified,768 B

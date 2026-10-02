@@ -23,6 +23,6 @@ opens case-insensitively.
 
 ## Original quirks the port keeps (decide per item in phase 3 specs)
 - Sound Blaster effect slices start 148 bytes before the real sample (table lengths include the AMOS
-  header, slicing starts at 0); mixer adds without clipping; pitch changes inaudible on SB.
+  header, slicing starts at 0); mixer adds without clipping; only two pitch steps on SB (the engine jumps an octave at frequency 10000); see `port/spec/sound.md` for the SB rate bug.
 - `WEAPONS.DAT` loads count+1 records; F10 save writes `js_save.00:`.
 - Intro exits only on Esc or D despite "PRESS ANY KEY".

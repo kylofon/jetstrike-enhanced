@@ -1,7 +1,7 @@
 """Merge the symbol tables of one executable into port/<exe>_symbols.csv and report conflicts.
 
 Inputs (header address,name,module,confidence,note; address = flat hex as loaded at 0x10000):
-  port/symbols_{rt,game,data}[_<exe>].csv, port/spec/*_symbols.csv (JS only)
+  port/symbols_{rt,game,data}[_<exe>].csv, port/spec/*_symbols.csv (intro_symbols.csv to INTRO, the rest to JS)
 Globals are rows with module "global" or a name starting with g_.
 Also writes work/<exe>_symbols_ghidra.txt for tools/ghidra/ApplySymbols.java.
 
@@ -14,8 +14,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 exe = sys.argv[1] if len(sys.argv) > 1 else 'js'
 sfx = '' if exe == 'js' else '_' + exe
 paths = [os.path.join(ROOT, 'port', f'symbols_{k}{sfx}.csv') for k in ('rt', 'game', 'data')]
+specs = sorted(glob.glob(os.path.join(ROOT, 'port', 'spec', '*_symbols.csv')))
 if exe == 'js':
-    paths += sorted(glob.glob(os.path.join(ROOT, 'port', 'spec', '*_symbols.csv')))
+    paths += [p for p in specs if os.path.basename(p) != 'intro_symbols.csv']
+elif exe == 'intro':
+    paths += [p for p in specs if os.path.basename(p) == 'intro_symbols.csv']
 
 rows = defaultdict(list)
 for path in paths:

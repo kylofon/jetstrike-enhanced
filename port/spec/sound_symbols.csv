@@ -1,0 +1,110 @@
+address,name,module,confidence,note
+0002f7e6,CD_MSCDEX_Install,sound,high,INT 2Fh 1500h; returns CX (first CD drive letter)
+0002f892,CD_MSCDEX_Version,sound,high,150Ch; BX > 0x209
+0002f951,CD_PlayTrackRaw,sound,high,(drive;track) cmd 0x84 Red Book start; length start[t+1]-start[t]; plays once
+0002fb5a,CD_StopRaw,sound,high,cmd 0x85
+0002fc91,CD_GetDiscInfo,sound,high,IOCTL 0Ah; returns last-first+1; start[0]=lead-out
+0002fe82,CD_ReadTrackTable,sound,high,IOCTL 0Bh per track; frames = F+S*75+M*4500
+000300b9,CD_Check,sound,high,0 ok 1 no MSCDEX 2 old 3 not 15 tracks
+00030136,CD_PlayTrack,sound,high,if g_CDMusicOn
+00030176,CD_Stop,sound,high,if g_CDMusicOn
+0003057c,SB_SpeakerOn,sound,high,D1; mixer 0x0e=0x31/0x33; 0x22/0x04=0xff; DSP 0x40 + g_SBTimeConst (still 0 -> 3906 Hz)
+000305da,SB_ResetDSP,sound,high,CF=1 on failure
+0003060f,SB_WriteDSP,sound,high,
+00030624,SB_ReadDSP,sound,high,
+00030639,SB_MixerWrite,sound,high,AL=reg AH=value
+0003065a,SB_MixerRead,sound,high,unused
+00030670,SB_Detect,sound,high,ports 0x210-0x280; stores DSP minor version (bug)
+00030712,SB_SetRate,sound,high,TC computed with wrong 64-bit divide; never sent
+000307ab,SB_Stop,sound,high,D3 if ver<=1; reset
+000307c5,SB_SetupDmaBuffer,sound,high,avoids 64K page crossing
+00030875,SB_AckIRQ,sound,high,re-arms 0x14 when ver<=1; EOI
+000308c3,SB_SetStopFlag,sound,high,
+000308d1,SB_IsStopped,sound,high,unused in JS
+000308de,SB_UnmaskIRQ,sound,high,
+000308fa,SB_RestoreIRQMask,sound,high,
+00030906,SB_StartDMA,sound,high,DMA ch1 mode 0x59 page 0x83; DSP 0x14 or 0x48+0x90
+000309ab,Mixer_SetChannel,sound,high,(ch;data;len;loop;shift;rateParam) step=40000/rateParam&15
+00030ac7,DMA_WaitPos,sound,high,returns play position in DX
+00030b06,Mixer_UpdatePolled,sound,high,unused near-copy of the timer ISR mixer (polled variant)
+00030ffa,Mixer_SetRate,sound,high,(ch;rateParam) step only
+0003103b,Mixer_IsActive,sound,high,unused; channel mapping reversed
+00031092,SB_GetBase,sound,high,unused
+0003109c,SB_GetIrq,sound,high,unused
+000310a6,SB_GetDma,sound,high,unused
+000310b0,SB_GetDspVer,sound,high,unused
+000310ba,Timer_ISR_SBMixer,sound,high,INT 8 50 Hz; mixes 120 bytes when write pos < play+120; see spec 2.13
+000315bc,Sfx_Play,sound,high,(id;freq;vol;x) -> Sfx_PlayChannel(id-1;freq/2;vol;0) if g_SfxOn; x ignored
+00031a31,SB_IRQ_ISR,sound,high,
+00031a53,Sfx_PlayChannel,sound,high,(slice;f;vol;loop) SB ch round robin 2;3;1; GUS voices 2..13 window +0x50
+00031c51,Sfx_PlayVoice,sound,high,(ch;slice;f;vol;loop) fixed channel; GUS window +0x186 loop +2
+00031e24,Sound_Init,sound,high,GUS (>=0x200 port) else SB 19920 requested
+00032119,Sound_Shutdown,sound,high,does not restore INT 8
+000321e5,Sound_StopAll,sound,high,
+000322c4,Sound_SetFreq,sound,high,SB step 1/2 (div0 if f>20000); GUS fc=f/19
+0003235d,Sound_SetVolume,sound,high,GUS only
+000391e3,Engine_Sfx,sound,high,engine loop on ch0 by plane class; crash loop slice 1 on ch1
+00039388,Engine_SoundUpdate,sound,high,per frame: rev smoothing; pitch every 2nd frame; warning queue; Engine_Sfx on change
+0003978d,Sfx_LaunchThump,sound,medium,Sfx_Play(8;15000;0x2b) (was FUN_0003978d)
+000397c5,Engine_DeathWobble,sound,medium,0x8fef4 = clamp(0x8fef4+Rand(1);4;12) (was FUN_000397c5)
+00039817,Engine_SetPitch,sound,high,classes 0/3: f=e*90+4000+max(0;e-80)*25
+00039976,Engine_Nop,sound,high,empty (was FUN_00039976)
+00039991,Engine_Pitch1,sound,high,class 1: f=(max(0;e-80)*100+e*80+8000)/2 (was FUN_00039991)
+00039a94,Engine_Pitch2,sound,high,class 2: f=e*40+6000 (was FUN_00039a94)
+0003f945,Sfx_WarningTone,sound,high,Sfx_Play(10;8000;0x3f); delay 24 (was FUN_0003f945)
+00014923,Sfx_MissionEvent,sound,high,Sfx_Play(33;4100;0x3a) with Rand(40)/Rand(10) gate (was FUN_00014923)
+000389b0,Sfx_RandomAmbient,sound,medium,ids 16 (Rand(20)==1) and 26 (Rand(10)==1) once each (was FUN_000389b0)
+00070000,GUS_Detect,sound,high,returns (ram<<16)|port
+0007004c,GUS_Upload,sound,high,(len;src;dram) copies len+1 bytes
+000700a6,GUS_SelectVoice,sound,high,
+000700d1,GUS_Start,sound,high,out base=1 (was gus_read_port)
+000700df,GUS_Shutdown,sound,high,
+000700f2,GUS_SetFreq,sound,high,reg 1
+0007012b,GUS_SetVolume,sound,high,reg 9
+000702d6,GUS_Reset,sound,high,15 active voices
+0007034d,GUS_PlayVoice,sound,high,struct {voice;mode;pan;pad;fc;vol;start;loopStart;end}
+00080394,g_SBBase,global,high,
+00080398,g_SBIrqNum,global,high,
+0008039c,g_SBDmaChan,global,high,always 1
+000803a0,g_SBDspVer,global,high,holds DSP minor version (bug)
+000803a4,g_SBRate,global,high,
+000803ae,g_MixChunk,global,high,constant 120
+000803b0,g_SBTimeConst,global,high,
+000803bb,g_DmaBufSeg,global,high,
+000803c5,g_MixWritePos,global,high,
+000803c7,g_MixNextPos,global,high,
+000803c9,g_DmaBufLen,global,high,0x4000
+000803cd,g_MixWrapFlag,global,high,
+000803cf,g_SBStopFlag,global,high,
+000803d1,g_SBStopped,global,high,
+000803d4,g_MixChan,global,high,4 x 21-byte channels {data;len;pos;loop;shift(u8);step}
+00080430,g_SoundDevice,global,high,0 none 1 SB 2 GUS
+00080434,g_SfxLens,global,high,35 x u32
+000804c0,g_GusVolTable,global,high,64 x u16
+00080542,g_GusVoiceRR,global,high,init 2
+00080546,g_SfxChanRR,global,high,init 1
+0008078c,g_SoundInitDone,global,high,
+0008078e,g_CDCheckDone,global,high,
+000900a4,g_EngineSfxRequest,global,high,
+000900f0,g_SfxBusyTimer,global,high,
+00090404,g_WarnSfxDelay,global,high,
+000903fc,g_PendingWarnSfx,global,high,0xb/0xc/0xd
+0009066c,g_EngineRevTarget,global,high,
+00090698,g_EngineRev,global,high,
+000907c8,g_EngineSfxLastState,global,high,
+000909c0,g_CrashTimer,global,medium,crash/fall counter 0..100; drives ch1 loop
+00092b04,g_CDMissionTrack,global,high,
+0009322c,g_CDTrackStart,global,high,u32 frames; [0]=lead-out
+00093344,g_CDDrive,global,high,
+00093348,g_DpmiRmRegs,global,high,DPMI real-mode call struct
+0009337a,g_CDLastTrack,global,high,
+0009337b,g_CDFirstTrack,global,high,
+0009337c,g_DosBufSeg,global,high,
+00093380,g_SBVector,global,high,
+00093384,g_GusSliceLimit,global,high,0x21 or 0x23
+00093388,g_SampleData,global,high,
+0009338c,g_OldSBVecOff,global,high,
+000936ee,g_SBIrq,global,high,JS.CFG +0x3a
+000936f4,g_CDEndgameLatch,global,high,never cleared
+000936f8,g_CDMusicOn,global,high,JS.CFG +0
+000936fc,g_SfxOn,global,high,JS.CFG +2 (u16)

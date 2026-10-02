@@ -80,8 +80,8 @@ The 46-byte slices (ids 16, 21, 23, 24) are 32-byte AMOS dummies: effectively a 
 | 26 | enemy_air_event | FUN_389b0 random 1/11 |
 | 27 | explosion_b | second explosion variant |
 | 29, 31, 32 | engine_1/2/3 | Engine_Sfx `Sfx_PlayVoice(0, 0x1c/0x1e/0x1f, 2500, 0x10, loop)` by plane class (1 / 2,12 / 3) |
-| 34 | mission_event | FUN_14923 at mission events (4100,0x3a) |
-| 28, 30, 33, 35 | unused | |
+| 33 | mission_event | FUN_14923 at mission events (4100,0x3a); earlier listed as 34, corrected in port/spec/sound.md |
+| 28, 30, 34, 35 | unused | |
 
 Names are from call context only (not listened to); ids 7, 11-14, 18, 25, 26, 34 especially are guesses.
 
