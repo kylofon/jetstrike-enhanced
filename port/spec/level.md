@@ -849,3 +849,15 @@ if (IsOnScreen(g_CamX, g_CamY, 0x9017c, 0x3DF - g_BaseYOff))
   p03 (c): attr0 **classes**, not tile ids. p07 Aero: **column** of the 0x3E strip (rows p03±3); p08 Aero: column
   of the 0x3F strip. p09: zeroed in Mission_Setup for modes 0-2. p20: radar ceiling row (+ objective-clear
   quirk). p25: fog warning sticky. p29 % 1000 → 0x8deb0/4, no reader.
+
+## Corrections (phase 5 step B)
+
+1. §6.1 horizontal drift: `g_PlayerScrX -= 4*Sign(g_PlayerScrX - 0xA0)` and `Clamp(scrX - 4*Sign(vx), 0x20,
+   0x120)` (player.md §3.2 is right; "Sign(scrX - 0x28)" here is the decompile's pointer-typed reading).
+2. §6.1 / Mission_Setup: the start is `g_StallTopY (0x900a8) = 0x340 - 0x90064; g_CamY = g_StallTopY`,
+   `g_Throttle = 0` (9 for helicopters), `g_GearDown = 1`, `g_ProjCount = 0`, `g_TrigCamCol (0x904dc) = -1`; the
+   level-object state cleared there also includes 0x9049c, g_HookDown, 0x904f8, g_ChuteFail, 0x90664 and 0x8fed0.
+3. Level_DrawBackground at the bottom of the map reads grid rows 64..68 (past the 0xFA04-byte buffer); only row 64
+   is drawn and it lies under the HUD split. The port reads tile 0 there (PORT note in video.c).
+4. js_symbols.csv has two globals named `g_MarkerX`: 0x9089c (class-5 marker, §5.2) and 0x9037c (weapons: the
+   B52 target column; GF step 45 starts the B52 when it is set). The port names 0x9037c by address.

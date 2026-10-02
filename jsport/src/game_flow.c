@@ -1,7 +1,7 @@
 /* Game flow: port/spec/game_flow.md (§2 Game_Run, §3 menus, §4 Mission_Setup, §5 briefing, §6 plane
- * select, §7.3/7.4 rack loads, §8.5/9 end of mission, §10 end game). The in-mission frame loop (§8) is not
- * ported yet: Mission_Run below is a placeholder. */
+ * select, §7 weapons, §8.5/9 end of mission, §10 end game). The in-mission frame loop (§8) is in frame.c. */
 #include "game.h"
+#include "mission.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -86,46 +86,6 @@ int Zone_HitTest(int x, int y)
 }
 
 /* ================================================================ Game_Run (§2) */
-
-/* TODO(next steps): functions of the mission set-up / frame loop that are not ported yet. They are called
- * at the original's places so the order of everything around them stays right. */
-static void Particles_Clear(void) {}            /* 0x? play spec */
-static void Particles_Nop(void) {}
-static void Bullets_Clear(void) {}
-static void TargetVehicle_Spawn(void) {}
-
-/* TODO(phase 5, next steps): placeholder for the mission frame loop (game_flow.md §8.1/8.2, Game_Run
- * 0x1cc2f..0x20db3). Shows a notice for about 3 s (60 game frames at 19.98 Hz) and ends the attempt as a
- * crash ("mission failed"); F11 held/pressed during it ends the attempt as a successful landing instead. */
-static void Mission_Run(void)
-{
-    static const char *const lines[3] = { "MISSION NOT PORTED YET", "F11  SUCCESS", "OTHERWISE  CRASH" };
-    Video_SetSplitLine(400);
-    g_ScrollFineX = 0;
-    g_ScrollFineY = 0;
-    s32 back = g_BackPage;
-    for (int pg = 0; pg < 2; pg++) {
-        g_BackPage = pg ? 0x78C0 : 0x18C0;
-        for (s32 i = g_BackPage * 4; i < g_BackPage * 4 + 256 * VRAM_ROW; i++) vput(i, 0);
-        for (int k = 0; k < 3; k++) Text_DrawBig(160 - Text_WidthBig(lines[k]) / 2, 0x50 + k * 0x18, lines[k], 1);
-    }
-    g_BackPage = back;
-    Pal_SetColorNoUpload(0, 0, 0, 0);
-    Pal_SetColorNoUpload(0xff, 0x3f, 0x3f, 0x3f);
-    Pal_Fade(0, 0x100, 1, 0x20);                /* as Hud_DrawPanel ends (keeps the fade-type sequence) */
-    int success = 0;
-    for (int f = 0; f < 60; f++) {
-        Video_FlipPage();
-        if (g_KeyDown[0x57]) success = 1;      /* F11 */
-    }
-    g_EjectState = 0;
-    g_DeathTimer = 0x20;
-    g_CrashAttr = 0;
-    g_CrashTileAttr = 0;
-    g_CrashDir = 0;
-    if (success) { g_MissionResult = 2; g_OnGround = 1; g_Crashed = 0; }
-    else { g_MissionResult = 0; g_OnGround = 0; g_Crashed = 1; }
-}
 
 /* 0x1ba0c Game_Run */
 void Game_Run(void)
@@ -286,7 +246,7 @@ void Game_Run(void)
             while (DS32(0x92B04) < 2 || (6 < DS32(0x92B04) && DS32(0x92B04) < 0xe)) DS32(0x92B04) = Rand(13) + 2;
             CD_PlayTrack(DS32(0x92B04));
 
-            Mission_Run();                        /* TODO: the frame loop (§8) */
+            Mission_Run();                        /* the frame loop (§8), frame.c */
 
             /* §8.5 */
             if (g_MissionActive == 1) g_AbortFlag = 1;
@@ -308,7 +268,7 @@ void Game_Run(void)
         /* §9.1 */
         if (g_CDMusicOn) CD_Stop();
         g_HudMsgCount = 0;
-        /* TODO(level step): Level_DrawBackground(0x904f0 + 1, 0x904f4 + 1) needs the tileset (not loaded yet). */
+        Level_DrawBackground(DS32(0x904F0) + 1, DS32(0x904F4) + 1);
         Sprite_DrawQueue();
         Video_FlipPage();
         Sound_StopAll();
@@ -831,8 +791,7 @@ void Mission_ResetState(void)
     DS32(0x909C4) = g_GameMode < 3 ? DS32(0x903C0) + DS32(0x909E4) * 100 : 0;   /* g_GunAmmo */
 }
 
-/* 0x212ac Mission_Setup. Ported up to the rack set-up after PlaneSelect_Screen; the level part (tileset,
- * parallax, map/runway search, HUD panel, flight tables) is TODO for the level step. */
+/* 0x212ac Mission_Setup (game_flow.md §4, level.md §2) */
 void Mission_Setup(void)
 {
     Sound_StopAll();
@@ -887,13 +846,149 @@ void Mission_Setup(void)
         Enemy_SetupSpriteIds();
         g_MP_ConvoyCount = 0;
     }
-    /* TODO(level step): Tileset_Load / Parallax_Load, the map load and runway search, Pal_Fade out, the .val
-     * reload, Map_ResetCounters, Hud_DrawPanel, the flight tables and the player start state
-     * (game_flow.md §4 from "if (strcmp(g_TilesetPending, g_TilesetName) ..." on). */
+    if (strcmp(g_TilesetPending, g_TilesetName) != 0 && g_TilesetPending[0] != 0) {
+        Tileset_Load(g_TilesetPending);
+        strcpy(g_TilesetName, g_TilesetPending);
+        DS32(0x906DC) = 0; DS32(0x90728) = 0; DS32(0x90750) = 0; DS32(0x90114) = 0; DS32(0x90158) = 0;
+        DS32(0x90760) = 0; DS32(0x9071C) = 0;
+    }
+    Parallax_Load(g_TilesetName);
+    if (strcmp(g_MapName, g_MapLoaded) == 0 || g_MapName[0] == 0) {
+        strcpy(g_MapName, g_MapLoaded);
+    } else {
+        memset(g_MapGrid, 0, 4);
+        strcpy(g_MapLoaded, g_MapName);
+        DS32(0x90410) = 0;
+    }
+    if (g_MapGrid == NULL || (g_MapGrid[0] | g_MapGrid[1] | g_MapGrid[2] | g_MapGrid[3]) == 0) {
+        DS32(0x904AC) = 0;
+        if (g_MapVal == NULL) g_MapVal = calloc(1, 0x13b8);          /* PORT: zeroed (level.md Q18) */
+        if (g_MapMp2 == NULL) g_MapMp2 = calloc(1, 1000);
+        File_SetBufferCapacity((uintptr_t)g_MapVal, 0x13b8);
+        strcpy(s_Tmp85048, g_MapName);
+        strcat(s_Tmp85048, DSTR(0x8112C));                           /* "1.val" */
+        File_LoadWhole(DSTR(0x81132), s_Tmp85048, (void **)&g_MapVal, 0);
+        for (int ext = 0; ext < 2; ext++) {
+            strcpy(s_Tmp85048, g_MapName);
+            g_LoopI = (s32)strlen(s_Tmp85048);
+            if (6 < g_LoopI) g_LoopI = 6;
+            s_Tmp85048[g_LoopI] = (char)(g_MapVariant / 10 + '0');
+            s_Tmp85048[g_LoopI + 1] = (char)(g_MapVariant % 10 + '0');
+            s_Tmp85048[g_LoopI + 2] = 0;
+            if (ext == 0) {
+                strcat(s_Tmp85048, DSTR(0x81137));                   /* ".mp2" */
+                File_LoadWhole(DSTR(0x81132), s_Tmp85048, (void **)&g_MapMp2, 0);
+            } else {
+                strcat(s_Tmp85048, DSTR(0x8113C));                   /* ".mxp" */
+                Map_LoadMxp();
+            }
+        }
+        /* runway / carrier search (level.md §2.4) */
+        DS32(0x8FEA0) = 0x3f;
+        g_SkyTile = (s32)(Byte_Get(g_MapGrid, 5) & 0xff);
+        g_BaseStartX = 0;
+        g_BaseEndX = 0;
+        g_BaseIsCarrier = 0;
+        while (g_BaseStartX == 0) {
+            if (DS32(0x8FEA0) < -0x40)
+                FatalError(g_MapName, ": no runway (attribute 0x81) in the map (the original loops forever)", 6);   /* PORT */
+            for (g_LoopI = g_MapWidth - 1; g_LoopI > -1; g_LoopI--)
+                if (Map_GetTileAttr(g_LoopI, DS32(0x8FEA0), 0) == 0x81) {
+                    g_RunwayFill = Map_GetTile(g_LoopI - 1, DS32(0x8FEA0));
+                    g_BaseEndX = g_LoopI * 0x10;
+                    g_CamX = g_BaseEndX - 0xa0;
+                    g_BaseStartX = g_LoopI;
+                    g_LoopI = -1;
+                    g_BaseYOff = (0x3f - DS32(0x8FEA0)) * 0x10;
+                }
+            DS32(0x8FEA0)--;
+        }
+        if (Map_GetTileAttr(Div16(g_BaseEndX), 0x3f, 0) == 0x82) g_BaseIsCarrier = 1;
+        for (g_LoopI = g_BaseStartX; g_LoopI > -1; g_LoopI--)
+            if (Map_GetTileAttr(g_LoopI, 0x3f - Div16(g_BaseYOff), 0) != 0x81) {
+                g_BaseStartX = g_LoopI << 4;
+                g_LoopI = -1;
+            }
+    }
     Pal_Fade(0, 0x100, 0, 0x20);
+    strcpy(s_Tmp85048, g_MapName);
+    strcat(s_Tmp85048, DSTR(0x8112C));                               /* "1.val": the attribute tables only */
+    File_LoadWhole(DSTR(0x81132), s_Tmp85048, (void **)&g_MapVal, 0);
+    Map_ResetCounters();
+    Hud_DrawPanel();
+    Player_BuildSpeedCaps();
+    g_StallTopY = 0x340 - DS32(0x90064);
+    g_StallLimit = 0x40;
+    g_Throttle = 0;
+    g_CamX = g_BaseEndX - 0x140;
+    if (g_IsHeli != 0) g_Throttle = 9;
+    g_CamY = g_StallTopY;
+    for (g_LoopI = Div16(g_BaseStartX) + 1; g_LoopI <= Div16(g_BaseEndX) - 1; g_LoopI++)   /* re-pave the runway */
+        if (Map_GetTileAttr(g_LoopI, 0x3f - Div16(g_BaseYOff), 0) != 0x81)
+            Map_SetTile(g_LoopI, 0x3f - Div16(g_BaseYOff), (u8)g_RunwayFill);
+    DS32(0x906A4) = 0;
+    g_PlayerScrX = 0xa0;
+    g_PlayerVY = 0;
+    g_PlayerVX = 0;
+    g_TargetVY = 0;
+    g_LiftVY = 0;
+    g_Speed = 0;
+    g_Dir = 0;
+    g_DirHalf = 0;
+    g_GearDown = 1;
+    g_PlayerScrY = (0x9f - g_GearHeight) - g_BaseYOff;
+    g_StallSink = 0;
+    g_DeathTimer = 0;
+    g_Crashed = 0;
+    g_EjectState = 0;
+    g_ProjCount = 0;
+    DS32(0x90344) = 0;
+    g_OnGround = 1;
+    g_EngineFire = 0;
+    g_TrigCamCol = -1;
+    DS32(0x90974) = 0;
+    g_CrashAttr = 0;
+    g_CrashDir = 0;
+    if (g_IsHeli == 0) {
+        Player_BuildPlaneTables(0);
+        g_Dir = 0;
+        g_DirHalf = 0;
+    } else {
+        Player_BuildHeliTables();
+        g_Dir = 6;
+        g_DirHalf = 3;
+        g_HeliLift = 5;
+        g_HeliVX = 0;
+    }
+    /* FUN_00015128: empty */
+    for (g_LoopI = 0; g_LoopI < 0x10; g_LoopI++)
+        for (g_LoopJ = 0; g_LoopJ < 0x20; g_LoopJ++) {}
+    DS32(0x905D4) = g_BaseEndX;
+    DS32(0x901FC) = g_BaseEndX;
+    DS32(0x9082C) = g_BaseEndX;
+    DS32(0x90668) = -1;
+    DS32(0x90268) = 0;
+    g_LockTarget = -1;
+    DS32(0x90764) = 0;
+    DS32(0x8FFCC) = -1;
+    if (g_ReverseThrust != 0) g_ReverseThrust = 1;
+    g_DamageLampsDirty = 1;
+    for (g_LoopI = 0; g_LoopI < 0xe; g_LoopI++) g_DamageFlags[g_LoopI] = 0;
+    g_FuelLeaks = 0;
+    g_PrevCamX = g_CamX;
+    DS32(0x90628) = 0;
     g_MissionActive = 1;
     if ((g_FogPending || g_MP_Weather == 2 || g_SpecialHit == 1) && g_NightMission == 0 && g_GameMode < 3)
         g_FogActive = 1;
+    DS32(0x9049C) = 0;
+    g_HookDown = 0;
+    g_MapWidthPx = g_MapWidth << 4;
+    DS32(0x904F8) = 0;
+    g_ChuteFail = 0;
+    DS32(0x90664) = 0;
+    g_PickupX = (s32)g_MP_PickupCol << 4;
+    DS32(0x8FED0) = 0;
+    DS32(0x9046C) = 1;
 }
 
 /* ================================================================ briefing (§5) */
@@ -1812,8 +1907,8 @@ void EndGame_Screen(void)
             AeroScores_Screen();
         } else {
             s32 x = g_BaseStartX + (g_BaseEndX - g_BaseStartX) / 2;
-            /* TODO(level step): with the tileset loaded this draws the airbase; the tile pointers are
-             * still empty here (the credits picture replaces it immediately anyway, Q18). */
+            /* the airbase (the credits picture replaces it immediately, Q18). PORT: guard for a run that
+             * never loaded a map (the original divides by zero there). */
             if (g_MapWidth != 0) Level_DrawBackground(x / 16 - 9, 0x35);
             strcpy(s_Tmp85048, HUDTEXT(65));                      /* "FINAL SCORE" */
             itoa_js(g_Score[0], s_Tmp85048 + strlen(s_Tmp85048));

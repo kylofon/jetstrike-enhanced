@@ -1337,3 +1337,26 @@ Video_SetSplitLine(400); Video_SetStartAndPan(0,0,0); Pal_Fade(0,0x40,1,0x20)`.
    line - is above the visible window: the end-game pictures show no text. Original behaviour, kept.
 7. §3.4 AeroOptions_Menu has no release wait: a direction held for more than one 15 Hz poll moves the cursor
    again (a 0.2 s tap moves it two rows).
+8. §8.2 step names (phase 5 step B): step 29 is `Flamer_Update` (0x90608), `EnemyMissiles_Update` (0x906fc),
+   `EnemyGround_Update` (0x90348); step 32 is `AirbaseCrew_Update` (not balloons); step 33 `Weapons_FrameDispensers`;
+   step 34 `FUN_000164d2` (alien); step 37 `Bonus_Update`, `Pickup_Update`, `BaseRepair_Update`; step 38
+   `Runway_SetEndTargets`; step 40 objects 0x84 = SAM_Draw/SAM_Fire, 0x85 = Gun_Draw/Gun_Fire (also needs
+   `g_ShellCount < 10 && (mode & 1) == 0`), 0x83 = Flak_Draw/Flak_Fire; step 41 `EnemyPilots_Update` (0x90754),
+   `Commandos_Update` (0x902e0); step 43 `Projectiles_Update` (g_ProjCount != 0); step 51 `EnemyShells_Update`
+   (g_ShellCount 0x8ffa0) before Bullets_Update.
+9. §8.2 step 45 also **starts the support aircraft** (0x1db4c..): if 0x9037c (B52 target) != 0 and no B52 yet:
+   `0x90998 = 1, 0x90970 = 0x9095c = 0, 0x90978 = 8, 0x90984 = 0x3d34, 0x90988 = -0x800`, then Rand(9), Rand(5);
+   if 0x90398 (drop zone) != 0 and no Fat Albert: `0x90528 = 1` + its start state, Rand(9), Rand(5); and
+   **every frame with no tanker, no enemy aircraft and p26 == 0 it starts the tanker** (`0x8ffb8 = 1`, x =
+   g_BaseEndX, y = 0x3cb - g_BaseYOff, door 4). Then: 0x905b0 (gun smoke) -> Rand(3); wing vapour (0x8ff2c, no
+   fire, not crashed) -> Rand(3) and clears it; rocket boost particle; 0x907b0 contrail -> Rand(3); landed on
+   water (0x90034 == 0x82): 4 x {Rand(3), Rand(3), Rand(8)}; first landed frame (0x90414 == 0): Sfx 7 if attr
+   0x81 and not a heli, then 6 x {Rand(3), Rand(8), Rand(8)}; catapult: 6 x {Rand(3), Rand(8), Rand(8)};
+   `0x90414 = g_OnGround`.
+10. §7.2 WeaponSelect_Screen: the hovered zone is stored in **0x8fea8** (g_ZoneHit 0x8fea4 is the confirmed one);
+   when Zone_HitTest returns 0 the cursor steps right (`Wrap(x+1,0,3)`) and reads a 4x8 table at 0x8dca0
+   (`[x*8 + y]`); in the confirm branch the Wrap result is discarded (endless loop if the cell had no zone - every
+   cell has one). The cell highlight is saved/restored with `Video_CopyRect(0, x, y, x+W, y+H, 0, 0, 0x104)` /
+   `(0, 0, 0x104, W, 0x104+H, 0, x, y)` where its y uses **`0x90830 != 0`** while the drawn cursor uses
+   `g_CursorY != 0` (kept). The weapon-confirm keys are `g_Fire || g_KeyDown[0x39] || g_KeyDown[0x1c]`; the outer
+   test adds `g_FireOrConfirm || g_Ctrl[0] || g_Ctrl[1]`.

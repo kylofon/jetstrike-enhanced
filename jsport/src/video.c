@@ -401,8 +401,13 @@ void Level_DrawBackground(s32 col, s32 row)
     const u8 *grid = g_MapGrid + 4;
     if (row < 2) row = 2;
     for (int j = 0; j < 16; j++)
-        for (int i = 0; i < 24; i++)
-            g_TileWindow[j * 24 + i] = grid[g_MapWidth * (row + j - 1) + imod_js(col + i, g_MapWidth, "Level_DrawBackground")];
+        for (int i = 0; i < 24; i++) {
+            s32 k = g_MapWidth * (row + j - 1) + imod_js(col + i, g_MapWidth, "Level_DrawBackground");
+            /* PORT: at the bottom of the map (row 54) the window reaches rows 64..68, past the 0xfa04-byte grid
+             * (heap bytes in the original); those rows lie under the HUD split (row 64 is the 13th tile row,
+             * rows 65+ are never drawn), so they read as tile 0 here. */
+            g_TileWindow[j * 24 + i] = (k >= 0 && k < 0xfa00) ? grid[k] : 0;
+        }
     s32 px = (s32)((double)g_CamX / dbits(0x4010AAAAAA9F36A3ull)) % 320 - g_ScrollFineX;
     s32 py = (s32)((double)(g_CamY + 0x7D8) / 9.25 - (double)g_ScrollFineY);
     int pagesel = (g_BackPage == 0x18C0) ? 0 : 8;

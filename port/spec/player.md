@@ -1332,3 +1332,19 @@ Bonus crates appear when `g_NextBonusScore <= score` (GF step 75); auto-eject ad
    coordinates (g_ShakeX/Y offsets) against video.md's back-page layout.
 5. Exact semantics of 0x903fc (debrief cause ids 0xb/0xc/0xd) — game_flow §9 owns the sarcasm table.
 6. Sprite id 0 handling in Sprite_Queue (Player_DrawHeli with no rotor) — video.md.
+
+## Corrections (phase 5 step B, checked against the disassembly while porting)
+
+1. §3.3 `g_OverRunway`: the height test is `PY <= 0x3e1 - g_BaseYOff` (0x1f0f6 `jle`), not `>`: the plane counts as
+   over the runway while it is *above* (or level with) the runway surface.
+2. §5.5 gear key: the speed test applies **on the ground**, not in the air (0x2da9d: `g_OnGround == 0` skips it):
+   `g_KeyGear && (g_OnGround == 0 || g_Speed > g_StallSpeed * 6.0f) && g_LastAction != 4 && !g_DamageFlags[10] &&
+   w89 == 0`. So the gear always works in the air, and on the ground it can only be raised/lowered above 6x stall
+   speed (`__FSC` + `jle` skips at speed <= 6x stall).
+3. §5.2 rocket boost: the third test is `g_Ctrl[1]` (0x90c9c, RShift), not `g_Ctrl[0]` (dead code either way).
+4. §5.1/§5.3 not listed: `Player_Update` also counts `0x90854++` while Down is held parked (`g_KeyDn && g_OnGround
+   == 1 && speed bits == 0 && g_GameMode != 3`), else clears 0x90854 and 0x90140 (read by Airbase_Update).
+5. §5.3 Backspace cycling: the 0..49 (projectile) case sets the B52 view and its message without testing that the
+   B52 exists (js.c 14670); the next frame's view code then drops it (`0x90998 == 0` -> -1).
+6. §9.1 / GF step 45 smoke emitters: the 0x11105 stub (Stub_FrameD) returns 0, so each emitter call also stores
+   `0x900fc = 0`.
