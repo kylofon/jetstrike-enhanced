@@ -24,3 +24,6 @@ address,name,module,confidence,note
 00050090,LZW_ReadCode,asm,high,
 000501e0,LZW_Decode,asm,high,
 0009097c,g_AutoThrottle,global,high,player.md: Tab toggles autothrottle (game_flow called it g_TrainingMode)
+000389b0,Sfx_RandomAmbient,sound,high,random sfx 0x10/0x1a (Rand(20)/Rand(10)) not tied to an enemy (enemies called it EnemyFire_Sfx)
+0003b6e6,Eject_SetPilotX,player,medium,uses player position and Sign(0x90328) (enemies called it Debrief_SignX)
+000900d8,g_EngineFire,global,medium,player.md: 1..2 smoke / 3 out of control / >3 dead (enemies: g_DamageLevel)

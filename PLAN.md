@@ -83,7 +83,12 @@ Original sub-plan:
    from the `.cue`) → WAV, then OGG/FLAC into `Game/MUSIC/` for the port. Port reads them at
    runtime; not redistributed.
 
-### 3. Specs (`port/spec/`)
+### 3. Specs (`port/spec/`) — done (2026-10-02)
+Nine specs with symbol tables: `platform`, `video`, `sound`, `game_flow`, `intro`, `level`, `player`,
+`weapons`, `enemies`; names merged (`tools/merge_symbols.py`, hand-resolved conflicts in
+`port/symbols_overrides.csv`): JS 1297 names, INTRO 209. Logic runs at 19.98 Hz (3 retraces of 59.94 Hz).
+Bugs and quirks: `port/QUIRKS.md` (policy: keep, fix only crashes / host dependence).
+Original sub-plan:
 Split by call tree once the map is known; expected:
 - `platform` — startup, config file, timer/IRQ, keyboard (remap), joystick, file I/O, memory
 - `video` — mode setup, palette (fades), blitters, sprite drawing, scrolling, fonts

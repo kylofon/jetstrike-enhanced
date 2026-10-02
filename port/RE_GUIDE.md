@@ -161,7 +161,7 @@ Game_Run
 4. The sprite colour offset 0x80008 and the shift bank (+0x20): check whether the shifted bank is the hit-flash or the night palette.
 5. The SPX header field order (x, y, w/4, h) is inferred from the blitters: w is in 4-pixel units and the planes are stored sequentially.
 6. The layout of the JS.CFG trailing words and the meaning of keys E/A/U/L/D/B: compare against CONFIG.EXE (work/CONFIG.bin).
-7. Frame rate: probably 70 Hz/(1+g_VSyncWaits). Verify against a DOSBox capture.
+7. Frame rate: probably 60 Hz (59.94)/(1+g_VSyncWaits). Verify against a DOSBox capture.
 
 ## Regenerating
 

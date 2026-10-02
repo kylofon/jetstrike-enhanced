@@ -1,17 +1,22 @@
 address,name,module,confidence,note,source
-00010010,Kbd_ISR,input,high,INT 9 handler (code label): key[scancode&0x7f]=1 on RELEASE (break code) else 0; table 0x66e18,symbols_game_intro.csv
-000100ce,Spr_BlitClip,video,high,stub+body 0x100db: (src;x;y;w;h;skip;pad;page) clips x to 0..0x160 then Spr_Blit,symbols_game_intro.csv
+00010010,Kbd_ISR,intro,verified,INTRO.EXE; g_KeyReleased[sc&0x7f] = break ? 1 : 0,intro_symbols.csv
+000100ce,Spr_BlitClip,intro,verified,INTRO.EXE; stub; body 0x100db clips x to 0..0x160,intro_symbols.csv
 000101a5,SB_IRQ_ISR,sound,high,SB IRQ handler (code label) -> 0x502f9,symbols_game_intro.csv
 000101c7,Intro_PlaySample,sound,high,stub+body 0x101d4: (n) INTRO.SAM slice n; SB: n 0-4 ch 1/2 alternating vol 6 rate 12000 one-shot; n 6 ch0 loop vol 4; n 5/7 not handled. GUS: freq 0x12e/0x13b/0x107; n 6 loop from +0x251c,symbols_game_intro.csv
 00010464,Intro_SoundInit,sound,high,stub+body 0x10471: GUS (0x40000) or SB (0x50000; 40000 Hz); loads intro.sam 0x3f404 bytes; SB converts to unsigned; starts loop sample 6,symbols_game_intro.csv
 000106cb,Intro_SoundShutdown,sound,high,stub+body 0x106d8: stops DMA; restores IRQ; frees sample buffer (DAT_67210=0),symbols_game_intro.csv
-000107bb,main,intro,high,stub+body 0x107c8: loads data; mode X; scene state machine DAT_67018 (1..7) until ESC/D; text credits; FRAME overlays; see sound_intro.md,symbols_game_intro.csv
-00013475,Intro_ExitWaitKey,intro,medium,ghidra fragment of main after the loop: if credits text was visible -> Intro_Cleanup; else waits for another ESC (contains dead menu code: PLAYERS/GAMES/ABORT),symbols_game_intro.csv
-00013f03,Intro_Cleanup,intro,high,fade out; text mode; sound shutdown; CD stop; restore INT 9; free buffers; return 0,symbols_game_intro.csv
-00013ff1,Intro_DrawCredits,text,high,stub+body 0x13ffe: (scroll;page) draws credit string DAT_60368 (0..10) centred with widths table 0x6075d; '\' = newline (+12 px); y 100 or 150 when logo/frames shown,symbols_game_intro.csv
+000107bb,main,intro,verified,INTRO.EXE; stub -> Intro_Main body 0x107c8,intro_symbols.csv
+000107c8,Intro_Main,intro,verified,INTRO.EXE; load; mode X; scene machine 1..7; overlay; credits; exit on Esc/D release,intro_symbols.csv
+00013475,Intro_ExitWaitKey,intro,verified,INTRO.EXE; post-loop fragment: credits visible -> Intro_Cleanup else dead menu loop,intro_symbols.csv
+000134d3,DeadMenu_Case0,intro,likely,INTRO.EXE; dead menu switch fragment (Ghidra caseD_0),intro_symbols.csv
+0001363d,DeadMenu_Case8,intro,likely,INTRO.EXE; dead menu switch fragment (Ghidra caseD_8),intro_symbols.csv
+00013f03,Intro_Cleanup,intro,verified,INTRO.EXE; fade; text mode; sound/CD stop; restore INT 9; free,intro_symbols.csv
+00013ff1,Intro_DrawCredits,intro,verified,INTRO.EXE; stub (scroll;page),intro_symbols.csv
+00013ffe,Intro_DrawCredits_body,intro,verified,INTRO.EXE; big font 16x9 glyphs; backslash newline +12; advance 11 (I 7; W 12),intro_symbols.csv
 000141b2,Mouse_ClampPos,input,medium,stub+body 0x141bf: dead menu code,symbols_game_intro.csv
 00014247,Mouse_ButtonEvent,input,medium,stub+body 0x14254: dead menu code,symbols_game_intro.csv
-000142c1,Intro_ReadKey,input,high,stub+body 0x142ce: -1 ESC or scancode 0x20 released; 1 Up 2 Down 3 Left 4 Right 5 Enter; mouse polling when DAT_671f4 (never set),symbols_game_intro.csv
+000142c1,Intro_ReadKey,intro,verified,INTRO.EXE; stub,intro_symbols.csv
+000142ce,Intro_ReadKey_body,intro,verified,INTRO.EXE; -1 Esc/D released; 1..5 arrows/Enter,intro_symbols.csv
 0001444c,Mouse_DrawCursor,input,medium,stub+body 0x14459: dead menu code,symbols_game_intro.csv
 000144ca,Mouse_HideCursor,input,medium,stub+body 0x144d7: dead menu code,symbols_game_intro.csv
 00014518,Mouse_WaitRelease,input,medium,stub+body 0x14525: dead menu code,symbols_game_intro.csv
@@ -19,7 +24,8 @@ address,name,module,confidence,note,source
 000146cd,Menu_Unhighlight,menu,medium,stub+body 0x146da: dead menu code,symbols_game_intro.csv
 0001474b,Menu_HitTest,menu,medium,stub+body 0x14758: dead menu code,symbols_game_intro.csv
 00014847,Menu_LoadScreen,menu,medium,stub+body 0x14854: dead; loads MAINMENU/BETWEEN/AOSET/OPTIONS/PLANESEL .RAW+.PAL (table 0x607b9),symbols_game_intro.csv
-000149a6,Pal_Fade,video,high,stub+body 0x149b3: (dir) 0 = fade in 25 steps; 1 = fade out 26 steps; each step waits vsync; master palette 0x65c18,symbols_game_intro.csv
+000149a6,Pal_Fade,intro,verified,INTRO.EXE; dir 0 in 25 steps; 1 out 26 steps; 1 vsync each,intro_symbols.csv
+000149b3,Pal_Fade_body,intro,verified,INTRO.EXE,intro_symbols.csv
 00014a8f,Text_DrawBig,text,medium,stub+body 0x14a9c: (x;y;str;mode) big-font string; used by dead menu,symbols_game_intro.csv
 00014b98,CD_MSCDEX_Install,cd,high,stub+body 0x14ba5: INT 2Fh 1500h -> drive count,symbols_game_intro.csv
 00014c44,CD_MSCDEX_Version,cd,high,stub+body 0x14c51: 150Ch > 2.09,symbols_game_intro.csv
@@ -30,7 +36,7 @@ address,name,module,confidence,note,source
 00015468,CD_Check,cd,medium,stub+body 0x15475: 0 ok 1 no MSCDEX 2 old 3 not 15 tracks (unused),symbols_game_intro.csv
 000154e5,CD_PlayTrack,cd,medium,stub+body 0x154f2 (unused),symbols_game_intro.csv
 00015511,CD_Stop,cd,high,stub+body 0x1551e,symbols_game_intro.csv
-0001553a,CD_InitAndPlayTrack2,cd,high,stub+body 0x15547: MSCDEX checks (printf on failure); reads TOC; plays track 2,symbols_game_intro.csv
+0001553a,CD_InitAndPlayTrack2,intro,verified,INTRO.EXE; MSCDEX checks (printf) then track 2,intro_symbols.csv
 000155cf,DPMI_GetDosMem,platform,low,stub+body 0x155dc: unused helper,symbols_game_intro.csv
 0001571c,_cstart_,rt,high,matches JS 000485d0 (identical bytes); program entry (DOS4GW startup),symbols_rt_intro.csv
 00015796,__cstart_body,rt,medium,matches JS 0004864a (identical bytes except relocated addresses/call displacements); startup continuation: INT21 30h DOS version; 4Ah resize; DGROUP/env setup; calls __InitRtns and __CMain,symbols_rt_intro.csv
@@ -144,16 +150,16 @@ address,name,module,confidence,note,source
 00018917,__ultoa_body,rt,medium,matches JS 0004e609 (identical bytes except relocated addresses/call displacements),symbols_rt_intro.csv
 00020008,Video_SetModeX,video,high,mode 13h then unchained 320x240 60 Hz; line pitch 0x60 bytes (384 px virtual); clears 256K; palette black,symbols_game_intro.csv
 000200ab,Video_SetTextMode,video,high,INT 10h,symbols_game_intro.csv
-000200b8,Video_PlotUnder,video,high,(x;y;colour;page) plot only if current pixel is 0 or 0x20..0x24 (city lights behind scenery),symbols_game_intro.csv
+000200b8,Video_PlotUnder,intro,verified,INTRO.EXE; plot if pixel is 0 or 0x20..0x24,intro_symbols.csv
 00020114,Video_FillRect,video,high,(x1;y1;x2;y2;colour) planar fill,symbols_game_intro.csv
 00020220,Video_Clear,video,high,(colour) fills 0x2d00 words of all planes,symbols_game_intro.csv
-00020254,Pal_Set,video,high,(pal;first;last;waitVsync),symbols_game_intro.csv
-000202c0,Spr_Blit,video,high,(src;x;y;w;h;skip;pad;page) chunky source to mode X; 0 transparent,symbols_game_intro.csv
-000205c4,Video_FlipScroll,video,high,(scrollX;page) CRTC start = page(0/0x5a00)+x/4; pel pan (x&3)*2; waits vsync,symbols_game_intro.csv
-00020614,Tile_DrawBand,video,high,(map;tilePtrs;band;plane;page) 2 tile rows (24 x 16x16) per band; band 7 = 1 row; tiles planar 4x0x40,symbols_game_intro.csv
+00020254,Pal_Set,intro,verified,INTRO.EXE; (pal;first;last;waitVsync),intro_symbols.csv
+000202c0,Spr_Blit,intro,verified,INTRO.EXE; chunky->planar 0 transparent,intro_symbols.csv
+000205c4,Video_FlipScroll,intro,verified,INTRO.EXE; (x;showPage1) start+pan; waits retrace end then start,intro_symbols.csv
+00020614,Tile_DrawBand,intro,verified,INTRO.EXE; (map;ptrs;band;plane;page) band = 32 rows; band 7 = 16 rows,intro_symbols.csv
 00020760,Video_CopyRect,video,medium,latched copy between pages (dead menu),symbols_game_intro.csv
 00020904,Video_Line,video,medium,(x1;y1;x2;y2;colour) (dead menu),symbols_game_intro.csv
-00020ba3,Tile_ScrollMapLeft,video,high,rotates each of 16 map rows left by one tile (24 entries),symbols_game_intro.csv
+00020ba3,Tile_ScrollMapLeft,intro,verified,INTRO.EXE; 16 rows x 24 rotate left,intro_symbols.csv
 0003001c,Mouse_Poll,input,medium,INT 33h (dead menu),symbols_game_intro.csv
 00040000,GUS_Detect,sound,medium,obj GUS driver (same as JS obj4),symbols_game_intro.csv
 0004004c,GUS_Upload,sound,medium,,symbols_game_intro.csv
@@ -175,23 +181,30 @@ address,name,module,confidence,note,source
 0005042f,Mixer_SetChannel,sound,high,(ch;ptr;len;loop;volshift;rate) step = 40000/rate & 15,symbols_game_intro.csv
 0005058a,Mixer_Update,sound,high,same 4-channel mixer as JS Timer_ISR_SBMixer but polled from main loop (4x per frame),symbols_game_intro.csv
 00050b1b,SB_GetIrq,sound,low,,symbols_game_intro.csv
-00060368,g_CreditIndex,global,high,0..10,symbols_game_intro.csv
-00060701,g_LogoShown,global,high,logo sprite 66 drawn every frame,symbols_game_intro.csv
-00060705,g_FrameOverlayActive,global,high,FRAME1..8 sequence running,symbols_game_intro.csv
+00060368,g_CreditIndex,global,verified,INTRO.EXE; 0..10,intro_symbols.csv
+0006036c,g_PalSource,global,verified,INTRO.EXE; 0x240 bytes: 0..0x5f <<2; rest >>2,intro_symbols.csv
+00060701,g_LogoShown,global,verified,INTRO.EXE,intro_symbols.csv
+00060705,g_FrameOverlayActive,global,verified,INTRO.EXE,intro_symbols.csv
 00060709,g_SoundDevice,global,high,0 none 1 SB 2 GUS,symbols_game_intro.csv
 0006070d,g_SampleLens,global,high,8 x u32 INTRO.SAM slice lengths,symbols_game_intro.csv
-0006072d,g_CreditStrings,global,high,11 string pointers,symbols_game_intro.csv
-0006075d,g_CreditWidths,global,high,pixel widths line1/line2 per credit,symbols_game_intro.csv
-00060b50,g_SpriteSize,global,high,97 x (w;h) of INTRO.RAW sprites,symbols_game_intro.csv
-00060e98,g_CityPoints,global,high,CITY.PTT 405 x (x;y;colour) int32,symbols_game_intro.csv
-00065c18,g_Palette,global,high,master palette (0x240 bytes from 0x6036c),symbols_game_intro.csv
-00065f18,g_PaletteWork,global,high,faded palette,symbols_game_intro.csv
-00066218,g_TilePtrs,global,high,384 tile pointers into INTRO.TIL,symbols_game_intro.csv
-00066818,g_TileMap,global,high,24x16 map (initially identity),symbols_game_intro.csv
-00066e18,g_KeyReleased,global,high,128 dwords,symbols_game_intro.csv
-00067018,g_Scene,global,high,1..7,symbols_game_intro.csv
-00067044,g_SpriteOffs,global,high,97 offsets into INTRO.RAW (+4),symbols_game_intro.csv
-000671e8,g_TilBuf,global,high,,symbols_game_intro.csv
-000671ec,g_RawBuf,global,high,INTRO.RAW,symbols_game_intro.csv
-000671fc,g_BigFont,global,high,BIGFNT2 + BIGFNT1,symbols_game_intro.csv
+0006072d,g_CreditStrings,global,verified,INTRO.EXE; 11 ptrs,intro_symbols.csv
+0006075d,g_CreditWidths,global,verified,INTRO.EXE; 11 x {w1;w2},intro_symbols.csv
+000607b5,g_GlyphSetPtr,global,verified,INTRO.EXE; -> 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?',intro_symbols.csv
+00060b50,g_SpriteSize,global,verified,INTRO.EXE; 97 x {w;h},intro_symbols.csv
+00060e98,g_CityPoints,global,verified,INTRO.EXE; 405 x {x;y;col},intro_symbols.csv
+00065c18,g_Palette,global,verified,INTRO.EXE,intro_symbols.csv
+00065f18,g_PaletteWork,global,verified,INTRO.EXE,intro_symbols.csv
+00066218,g_TilePtrs,global,verified,INTRO.EXE; 384,intro_symbols.csv
+00066818,g_TileMap,global,verified,INTRO.EXE; 16x24 int32,intro_symbols.csv
+00066e18,g_KeyReleased,global,verified,INTRO.EXE; 128 int32,intro_symbols.csv
+00067018,g_Scene,global,verified,INTRO.EXE; 1..7,intro_symbols.csv
+00067020,g_FrameBuf,global,verified,INTRO.EXE; 8 ptrs FRAME1..8 (0x67020..0x6703c),intro_symbols.csv
+00067040,g_Char1Buf,global,verified,INTRO.EXE; CHAR1.RAW buffer (= offs[-1] slot),intro_symbols.csv
+00067044,g_SpriteOffs,global,verified,INTRO.EXE; offs[0]=0; sprite n uses offs[n-1],intro_symbols.csv
+000671e8,g_TilBuf,global,verified,INTRO.EXE,intro_symbols.csv
+000671ec,g_RawBuf,global,verified,INTRO.EXE,intro_symbols.csv
+000671f0,g_AosetBuf,global,likely,INTRO.EXE; malloc 0x12c00 for the dead menu,intro_symbols.csv
+000671f4,g_MouseEnabled,global,verified,INTRO.EXE; never set,intro_symbols.csv
+000671f8,g_SmallFontBuf,global,verified,INTRO.EXE; never drawn,intro_symbols.csv
+000671fc,g_BigFont,global,verified,INTRO.EXE,intro_symbols.csv
 00067210,g_SamBuf,global,high,INTRO.SAM (SB),symbols_game_intro.csv

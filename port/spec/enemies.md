@@ -71,6 +71,13 @@ AgentDrop_Update 0x15387, AgentDrop_Release 0x17be5, Bertha_Update 0x1af0f (leve
 0x182cb and Projectile_Alarm 0x184cf (weapons.md; live); B52 0x90984 / Hercules ("Fat Albert") 0x90520
 friendly support aircraft and the flare update (Player_DeathAndLanding, player spec).
 
+**Range 0x40f5a-0x43d05** (the ~13 "AI/target helpers"): apart from the dead 0x40f5a/0x40f67 (§15) they are
+the live guided-projectile helpers owned by weapons.md (0x413a0 Projectile_HitGround, 0x42509 Projectile_AimMissionTarget,
+0x425c2 Projectile_LgbCluster, 0x42b70/0x42b7d Projectile_AlarmOld wrapper/body, 0x42d0e Projectile_AimMarker,
+0x42dc6 Projectile_Climb, 0x42ec9 Projectile_Steer, 0x43207 Projectile_Commando, 0x433c1 Projectile_Parachute,
+0x4341a Projectile_HomeAir, 0x438f2 Projectile_SeaSkim, 0x43d05 Projectile_Cruise); not repeated here.
+Turrets_Update 0x17c56 is resolved as Flamer_Update (player flamer chain, §10.1), consistent with weapons.md.
+
 **Dead code** (no caller anywhere; verified by a full scan of call/jmp rel32 targets in 0x10000-0x485d0):
 the old projectile updater 0x332fb/0x33308 (weapons.md §1) and its flight helpers in 0x18237-0x19c6f, plus
 0x19ab5/0x19ac2, 0x40f5a/0x40f67, 0x3e705/0x3e712. They are named in §15 for orientation; **do not port**.
