@@ -1,0 +1,600 @@
+address,name,module,confidence,note,source
+00010010,Video_SetModeX,video,high,INT10 13h then unchain: 320x240 mode X (480-line CRTC; offset 0x30 = 384 px virtual width); clears VRAM,symbols_game.csv
+000100c2,Video_SetTextMode,video,high,INT 10h,symbols_game.csv
+000100d0,Video_PutPixel,video,high,(x;y;col) planar; 96 bytes/row,symbols_game.csv
+00010108,Video_WaitVSync,video,high,0x3DA bit 3,symbols_game.csv
+00010128,Sprite_Blit,video,high,(x;y;spr;pageofs) planar sprite; colour 0x40 transparent,symbols_game.csv
+000101c8,Sprite_BlitShift,video,high,same; adds 0x20 to colour,symbols_game.csv
+0001026c,Sprite_BlitMirror,video,high,horizontally flipped (ids > 0x8000),symbols_game.csv
+0001040c,Tiles_DrawColumnsParallax,video,medium,tile plane over parallax buffer (tile 0x80 transparent),symbols_game.csv
+000104f8,Tiles_ParallaxRow,video,medium,helper,symbols_game.csv
+00010540,Tiles_DrawColumns,video,high,24x16 window of 16x16 tiles; one plane per call,symbols_game.csv
+000105d9,Video_SelectPlane,video,high,sequencer map mask,symbols_game.csv
+000105ef,Video_SetSplitLine,video,high,CRTC line compare (18h/07h/09h) = HUD split screen,symbols_game.csv
+0001063a,Video_BlitLinearToPlanar,video,high,(src;x;y;w;h),symbols_game.csv
+000106b0,Video_SetStartAndPan,video,high,(x;y;pageofs) CRTC 0Ch/0Dh + attr 33h pel pan; waits vsync,symbols_game.csv
+000106fa,Video_ReadPixel,video,medium,GC read map,symbols_game.csv
+00010760,Kbd_ISR,platform,high,INT 9 handler (code label): in 0x60; toggle 0x61; EOI; g_KeyDown[scan]; copies JS.CFG-mapped keys to slots 0x8453a-0x84564,symbols_game.csv
+00010a16,Kbd_Install,platform,high,clears g_KeyDown; hooks INT 9,symbols_game.csv
+00010a88,Kbd_Restore,platform,high,,symbols_game.csv
+00010abb,Timer_Install,platform,high,DPMI 0x205 INT 8 -> 0x310ba; PIT ch0 divisor 0x5d37 (~50 Hz),symbols_game.csv
+00010ba0,Timer_Restore,platform,high,restores INT 8; PIT 18.2 Hz,symbols_game.csv
+00010bad,Timer_Restore2,platform,high,duplicate,symbols_game.csv
+00010c1d,FatalError,platform,high,CD stop; sound shutdown; text mode; printf %s%s; exit,symbols_game.csv
+00010c6b,Str_TrimRight,platform,high,,symbols_game.csv
+00010cb6,Map_GetTileAttr,level,high,(x;y;layer) attribute via .val table,symbols_game.csv
+00010d22,Map_SetTile,level,high,,symbols_game.csv
+00010d65,Rand,platform,high,rand() % (n+1),symbols_game.csv
+00010da7,SwapInt,platform,high,,symbols_game.csv
+00010ddc,SwapByte,platform,high,,symbols_game.csv
+00010e11,Clamp,platform,high,,symbols_game.csv
+00010e70,Sprite_ClearQueue,video,high,,symbols_game.csv
+00010eb0,IsOnScreen,play,high,(camx;camy;x;y),symbols_game.csv
+00010f11,Sprite_Queue,video,high,(x;y;id) add to draw list; ids > 0x8000 mirrored; wrap at 384,symbols_game.csv
+0001102d,Sprite_DrawNow,video,high,immediate blit,symbols_game.csv
+00011066,Sprite_DrawNowShift,video,high,,symbols_game.csv
+00011145,Pal_SetColor,video,high,(idx;r;g;b) store + upload,symbols_game.csv
+0001119e,Pal_SetColorNoUpload,video,high,,symbols_game.csv
+000111e6,Pal_SetColor12,video,high,(idx; 0xRGB 4 bits each),symbols_game.csv
+0001125c,Pal_GetColor12,video,high,,symbols_game.csv
+00011306,Sprites_LoadSpx,files,high,data/jetstrike.spx -> g_SpriteTab (8-byte hdr x;y;w/4;h); on reload only data/jetsprit.pal colours 64-95,symbols_game.csv
+000114da,Fonts_Load,files,high,misc/smallfnt.raw; misc/bigfnt.raw,symbols_game.csv
+0001155e,Sprite_DrawQueue,video,high,draw list back-to-front,symbols_game.csv
+000116dd,Map_GetTile,level,high,,symbols_game.csv
+0001172a,BoxOverlap,play,high,(x1;y1;x2;y2;dx;dy) collision,symbols_game.csv
+0001178a,Wrap,platform,high,,symbols_game.csv
+000117f8,Sprite_GetY,video,medium,,symbols_game.csv
+00011847,Sprite_GetX,video,medium,header word 0,symbols_game.csv
+00011895,Sprite_GetWidth,video,medium,w*4,symbols_game.csv
+000118e7,Sprite_GetHeight,video,medium,,symbols_game.csv
+0001195b,Pal_Black,video,high,(first;last),symbols_game.csv
+000119b6,Pal_Upload,video,high,(first;last) 3C8/3C9 from g_Palette,symbols_game.csv
+00011a1a,Pic_LoadPax,files,high,(name;page;applyPal): gfx/<name> LZW -> page (320x200 at row 20); gfx/<name>.pal 64 colours,symbols_game.csv
+00011bee,Video_CopyRect,video,high,VRAM->VRAM latch copy (page;x1;y1;x2;y2;dstpage;dx;dy),symbols_game.csv
+00011d02,Zone_Add,game_flow,high,menu hit zones (zonemap),symbols_game.csv
+00011dbc,Zone_HitTest,game_flow,high,,symbols_game.csv
+00011e64,Zone_Clear,game_flow,high,,symbols_game.csv
+00011eab,Input_GetBits,platform,low,,symbols_game.csv
+00011f20,Input_AnyKey,platform,medium,,symbols_game.csv
+0001206e,Sprite_Mirror,video,high,id + 0x8000,symbols_game.csv
+000120ea,Pal_UploadAll,video,high,,symbols_game.csv
+00012114,File_LoadWhole,files,high,(dir;name;&buf;size) size 0=filesize; -1=alloc; fatal if missing,symbols_game.csv
+000122a3,Key_Up,platform,high,key slot 0x84560,symbols_game.csv
+000122cb,Key_Left,platform,medium,key slot 0x84552,symbols_game.csv
+000122f3,Key_Right,platform,medium,key slot 0x84564,symbols_game.csv
+0001231b,Key_Down,platform,medium,key slot 0x8454e,symbols_game.csv
+00012343,Font_DrawSmallGlyph,video,high,,symbols_game.csv
+000123fa,Font_DrawBigGlyph,video,high,,symbols_game.csv
+000124e0,Text_DrawSmall,video,high,(x;y;str;page),symbols_game.csv
+000126e9,Text_DrawBig,video,high,,symbols_game.csv
+00012831,Text_DrawDigit,video,high,,symbols_game.csv
+000128f1,Text_DrawNumber,video,high,(x;y;val;digits) 3x5 digits,symbols_game.csv
+00012970,Font_GlyphWidth,video,high,,symbols_game.csv
+000129ee,Text_FitWidth,video,high,word wrap,symbols_game.csv
+00012bed,Text_WidthSmall,video,high,,symbols_game.csv
+00012d8d,Text_WidthBig,video,high,,symbols_game.csv
+00012e92,Video_ShowPage,video,high,CRTC start = page*0x5a00,symbols_game.csv
+00012ef0,Video_GetPage,video,high,,symbols_game.csv
+00012f18,Byte_Set,level,low,,symbols_game.csv
+00012f3e,Byte_Get,level,low,,symbols_game.csv
+00012f67,Sprites_ReplaceFromBank,files,high,(slot;n;bank) copy n-th sprite of a bank into slot,symbols_game.csv
+00013041,Video_DrawLineColor,video,medium,,symbols_game.csv
+000130c8,Pic_LoadHudPanel,files,high,gfx/display.pax to VRAM top + .pal; split 0xaf; start 0x1ec0,symbols_game.csv
+0001334f,Video_FillRect,video,high,(x1;y1;x2;y2;col),symbols_game.csv
+000133b3,Tileset_LoadTlx,files,high,map/<name>.tlx (LZW 256 tiles x 0x40) + map/<name>.pal (64 colours at index 128),symbols_game.csv
+0001351e,Parallax_Load,files,high,map/<name>.dx0|dx1 (LZW 0x28000 backdrop) + .p00/.p01/.p10 palette; detail off -> plain sky colours,symbols_game.csv
+00013773,Sprites_CountInBank,files,medium,,symbols_game.csv
+000137de,Div16,platform,high,,symbols_game.csv
+00013842,Level_DrawBackground,level,high,24x16 tile window at camera into back page; parallax/no-parallax per plane,symbols_game.csv
+00013a25,Sign,platform,high,,symbols_game.csv
+00013a68,Video_FlipPage,video,high,show back page (scroll + 0x600); g_VSyncWaits vsyncs; colour cycling; swap 0x18c0/0x78c0,symbols_game.csv
+00013b01,Pal_Fade,video,high,(first;last;type;steps) 0/2 out; 1/3 in,symbols_game.csv
+00014331,Bit_Test,platform,high,,symbols_game.csv
+00014382,Bit_Clear,platform,high,,symbols_game.csv
+000143b0,Video_SetLineColor,video,medium,,symbols_game.csv
+000143d3,Video_BenchmarkSpeed,video,medium,tile draw speed vs vsync -> g_VSyncWaits 0/1/2,symbols_game.csv
+0001456d,Joystick_ReadDirs,platform,high,reads axes vs calibration -> dir bits; buttons,symbols_game.csv
+000145f9,Video_Fill4x4,video,low,,symbols_game.csv
+00014677,Level_DrawOverviewMap,level,medium,4x4 px per tile,symbols_game.csv
+000146f4,main,game_flow,high,Watcom main(): 2.5MB check; alloc pack buffers; kbd ISR; load jetstrike.spx; read js.cfg; joystick init; set mode X; CPU bench; Game_Run; shutdown; credits,symbols_game.csv
+000149ae,Building_Update,play,low,,symbols_game.csv
+00014b4a,Flak_Update,play,low,,symbols_game.csv
+00015194,Runway_Update,play,low,,symbols_game.csv
+00015d2b,PlayerState_ResetA,play,low,,symbols_game.csv
+00015d38,PlayerState_ResetA_b,play,low,dup,symbols_game.csv
+000160f4,PlayerState_ResetB,play,low,,symbols_game.csv
+00016101,PlayerState_ResetB_b,play,low,dup,symbols_game.csv
+000167b6,CheatKeys,play,low,,symbols_game.csv
+000167c3,CheatKeys_b,play,low,dup,symbols_game.csv
+00016f13,Bonus_Spawn,play,medium,next bonus at,symbols_game.csv
+00017072,Bonus_Update,play,medium,,symbols_game.csv
+00017214,Bonus_Award,play,high,switch on bonus type: Extra Aircraft; Auto Eject ...,symbols_game.csv
+00017c56,Turrets_Update,play,low,,symbols_game.csv
+00019cc8,Targets_Update,play,low,,symbols_game.csv
+00019fda,Helis_Update,play,low,B52 Hit / Hercules Hit,symbols_game.csv
+0001acf5,Input_PollMenu,platform,high,ReadControls + menu cursor deltas + vsync,symbols_game.csv
+0001aeaa,Mem_AllocMapBuffers,level,high,0x849f0 150000; map grid 0xfa04,symbols_game.csv
+0001b043,NameEntry_Init,game_flow,low,alphabet table for name entry,symbols_game.csv
+0001b3c5,UnusedMenu_Loop,game_flow,low,dead code (no callers),symbols_game.csv
+0001b752,NameEntry_Screen,game_flow,low,dead code (no callers),symbols_game.csv
+0001b919,NameEntry_ReadString,game_flow,low,text entry loop (key reader is a stub),symbols_game.csv
+0001ba0c,Game_Run,game_flow,high,master loop: loads gendat3/gendat2/misc/misc.z; outer loop = MainMenu -> mission loop -> per-frame loop with object updaters -> debrief/end,symbols_game.csv
+000212ac,Mission_Setup,game_flow,high,per-mission: stop CD; briefing; plane/weapon select; load map .val/.mp2/.mxp; tileset; parallax; HUD panel; init player state,symbols_game.csv
+00022223,Weapons_ReturnUnused,game_flow,low,,symbols_game.csv
+000222f0,Mission_ResetState,game_flow,medium,stops CD; resets per-mission globals,symbols_game.csv
+0002299a,Mission_LoadBriefing,game_flow,high,reads data/M<mode> record (0x1c2 bytes) for g_Mission: briefing text; map name; tileset name; 30 BE params; story .asc; data/enemies; jetlogo.pax briefing; 'Press f1 to f10 to save',symbols_game.csv
+00023f6b,Story_ShowAsc,game_flow,medium,opens data/<name>.asc (picture name + text lines) and displays story screen,symbols_game.csv
+0002422d,Map_LoadMxp,files,high,map/<name><NN>.mxp LZW -> g_MapGrid (BE width + width x 64); column height table,symbols_game.csv
+00024377,Map_ResetCounters,level,low,,symbols_game.csv
+000243d6,Map_StampBertha,files,medium,data/berthaX overlay stamped into map,symbols_game.csv
+000245a9,PlaneSelect_Screen,game_flow,high,planech.pax plane choice (2 slots); Glider special case; calls WeaponSelect,symbols_game.csv
+000257c3,SelectScreen_LoadBg,game_flow,high,arg 0 -> planech.pax; 1 -> wepch.pax,symbols_game.csv
+00025869,Text_DrawCenteredAt,video,medium,center small text in a box,symbols_game.csv
+000258b6,SelectScreen_DrawInfoBox,game_flow,low,clears box; prints name (player 1 etc.),symbols_game.csv
+00025a5d,SelectScreen_ShowPlaneName,game_flow,low,prints jets.n name for plane index,symbols_game.csv
+00025add,PilotRecord_Load,game_flow,low,copies 0xdc-byte record from data/misc (descriptions),symbols_game.csv
+00025c13,Tileset_Load,files,medium,wrapper,symbols_game.csv
+00025c8b,Hud_DrawPanel,play,high,display.pax HUD; weapon icons; lives,symbols_game.csv
+00026174,Hud_DrawRadarLine,play,medium,,symbols_game.csv
+00026256,Plane_SetupSprites,files,medium,per-plane offsets from misc.z,symbols_game.csv
+00026473,Plane_LoadSpx,files,high,plane/<name>.spx into 0x849f0,symbols_game.csv
+000264eb,Plane_ReplaceSprite,files,medium,,symbols_game.csv
+00026520,Particles_Nop,play,low,,symbols_game.csv
+0002653b,Particles_Clear,play,high,,symbols_game.csv
+00026560,Particle_Spawn,play,high,(x<<8;y<<8;vx;vy;...) max 40,symbols_game.csv
+0002661e,Particles_Update,play,high,,symbols_game.csv
+000267da,Hud_DrawTargetArrow,play,low,,symbols_game.csv
+0002688f,Bullets_Clear,play,medium,,symbols_game.csv
+000268d9,Bullet_Add,play,medium,max 32,symbols_game.csv
+0002694b,Bullets_Update,play,medium,,symbols_game.csv
+00026cc6,Hud_Nop,play,low,stub,symbols_game.csv
+00026ce1,Hud_PlaneMessage,play,low,,symbols_game.csv
+00026d24,Hud_WeaponMessage,play,low,,symbols_game.csv
+00026e03,Hud_PushMessage,play,high,queue HUD message (max 10; 40 frames),symbols_game.csv
+00026e5a,Hud_DrawMessages,play,high,,symbols_game.csv
+00027008,Player_Ejection,play,low,,symbols_game.csv
+0002780b,Player_DeathAndLanding,play,medium,crash/eject/landing state machine,symbols_game.csv
+00029b29,Player_Collide,play,low,,symbols_game.csv
+00029d90,WeaponSelect_Screen,game_flow,high,wepch.pax weapon loadout selection,symbols_game.csv
+0002ba3c,WeaponSelect_DrawCounts,game_flow,medium,weapon counts/weights via Text_DrawNumber,symbols_game.csv
+0002bb33,WeaponSelect_DrawLine,game_flow,low,builds weapon description line,symbols_game.csv
+0002bc0b,Airbase_Update,play,low,,symbols_game.csv
+0002c55b,Balloons_Update,play,low,,symbols_game.csv
+0002c9cb,Mission_Debrief,game_flow,medium,post-mission screen; loads sarcasm messages on first use,symbols_game.csv
+0002d2b8,Sarcasm_Load,files,high,data/sarcasm: 0x1c lines x 0x50 -> 0x863f0,symbols_game.csv
+0002d34e,Player_Update,play,high,player plane control; flight; camera follow modes (weapon cam; B52; Fat Albert; camera pod),symbols_game.csv
+0002ec74,Hud_UpdateRadar,play,medium,radar / Jammed,symbols_game.csv
+0002f7e6,CD_MSCDEX_Install,sound,high,INT 2Fh AX=1500 via DPMI 0x300,symbols_game.csv
+0002f892,CD_MSCDEX_Version,sound,high,AX=150C > 2.09,symbols_game.csv
+0002f951,CD_PlayTrackRaw,sound,high,device cmd 0x84,symbols_game.csv
+0002fb5a,CD_StopRaw,sound,high,cmd 0x85,symbols_game.csv
+0002fc91,CD_GetDiscInfo,sound,high,IOCTL 0Ah first/last track,symbols_game.csv
+0002fe82,CD_ReadTrackTable,sound,high,IOCTL 0Bh per track,symbols_game.csv
+000300b9,CD_Check,sound,high,0 ok; 1 no MSCDEX; 2 old; 3 wrong CD (needs 15 tracks),symbols_game.csv
+00030136,CD_PlayTrack,sound,high,if music enabled,symbols_game.csv
+00030176,CD_Stop,sound,high,,symbols_game.csv
+000301b2,EndGame_Screen,game_flow,high,game over: gamedone.pax / AeroScores / endgameN.pax with text; plays CD track N+7,symbols_game.csv
+000304e0,TrainingCredits_Screen,game_flow,medium,traincrt.pax / practcrt.pax,symbols_game.csv
+0003057c,SB_SpeakerOn,sound,medium,,symbols_game.csv
+000305da,SB_ResetDSP,sound,high,,symbols_game.csv
+0003060f,SB_WriteDSP,sound,high,,symbols_game.csv
+00030624,SB_ReadDSP,sound,high,,symbols_game.csv
+00030639,SB_MixerWrite,sound,medium,,symbols_game.csv
+00030670,SB_Detect,sound,high,ports 0x210-0x280,symbols_game.csv
+00030712,SB_SetRate,sound,medium,,symbols_game.csv
+000307ab,SB_Stop,sound,medium,,symbols_game.csv
+000307c5,SB_SetupDmaBuffer,sound,medium,,symbols_game.csv
+00030875,SB_AckIRQ,sound,high,EOI,symbols_game.csv
+000308c3,SB_SetStopFlag,sound,low,,symbols_game.csv
+000308de,SB_UnmaskIRQ,sound,high,,symbols_game.csv
+000308fa,SB_RestoreIRQMask,sound,high,,symbols_game.csv
+00030906,SB_StartDMA,sound,high,DMA ch1 auto-init mode 0x59; page 0x83,symbols_game.csv
+000309ab,Mixer_SetChannel,sound,high,(ch;ptr;?;len;vol;rate),symbols_game.csv
+00030ac7,DMA_WaitPos,sound,medium,,symbols_game.csv
+00030ffa,Mixer_SetRate,sound,medium,,symbols_game.csv
+000310ba,Timer_ISR_SBMixer,sound,high,INT 8 handler (code label): mixes 4 SFX channels into SB DMA ring buffer (0x80 = silence),symbols_game.csv
+000315bc,Sfx_Play,sound,high,(id;freq;vol;x) if sfx enabled,symbols_game.csv
+00031604,Video_DrawLine,video,medium,planar line (radar),symbols_game.csv
+0003184c,Tiles_ParallaxBench,video,low,benchmark helper,symbols_game.csv
+0003197c,Tiles_ClearColumns,video,low,benchmark helper,symbols_game.csv
+00031a19,Video_CountVSync,video,medium,,symbols_game.csv
+00031a31,SB_IRQ_ISR,sound,high,SB IRQ handler (code label) -> SB_AckIRQ,symbols_game.csv
+00031a53,Sfx_PlayChannel,sound,high,,symbols_game.csv
+00031c51,Sfx_PlayVoice,sound,medium,,symbols_game.csv
+00031e24,Sound_Init,sound,high,GUS (obj4) else SB; loads misc/jetsound.aaf; DOS buffer; IRQ; DMA; timer,symbols_game.csv
+00032119,Sound_Shutdown,sound,high,,symbols_game.csv
+000321e5,Sound_StopAll,sound,high,,symbols_game.csv
+000322c4,Sound_SetFreq,sound,high,,symbols_game.csv
+0003235d,Sound_SetVolume,sound,medium,,symbols_game.csv
+000323b9,Player_RotateA,play,low,,symbols_game.csv
+00032476,Player_RotateB,play,low,,symbols_game.csv
+000324ed,Player_PitchUp,play,low,,symbols_game.csv
+00032585,Player_ThrottleUp,play,medium,,symbols_game.csv
+00032635,Player_PitchDown,play,low,,symbols_game.csv
+000326d3,Player_ThrottleDown,play,medium,,symbols_game.csv
+000327c0,Joystick_Poll,platform,high,port 0x201 timing loop -> 0x8054c/0x80550,symbols_game.csv
+000327fb,Joystick_GetX,platform,high,,symbols_game.csv
+00032805,Joystick_GetY,platform,high,,symbols_game.csv
+0003280f,Joystick_GetButtons,platform,high,in 0x201,symbols_game.csv
+00032846,Player_Weapons,play,medium,fire handling,symbols_game.csv
+000332fb,Projectiles_Update,play,medium,player projectiles (0x92720 arrays),symbols_game.csv
+00033308,Projectiles_Update_b,play,medium,duplicate entry of 332fb,symbols_game.csv
+000341e9,Weapon_Fire,play,high,spawns projectile per weapon type (0x8f168),symbols_game.csv
+000346d3,Flares_Add,play,low,,symbols_game.csv
+000346f9,Weapon_FireFromStock,play,medium,,symbols_game.csv
+000348db,Weapon_DropMarker,play,low,,symbols_game.csv
+0003494e,Weapon_FireSpecialA,play,low,,symbols_game.csv
+00034b94,Weapon_FireSpecialB,play,low,,symbols_game.csv
+00034dd0,Weapon_ArmA,play,low,,symbols_game.csv
+00034e13,Weapon_ArmB,play,low,,symbols_game.csv
+00034e56,Projectile_Init,play,medium,,symbols_game.csv
+00034f0d,Weapon_FireRepeat,play,low,,symbols_game.csv
+000351e9,Weapon_FireBomb,play,low,,symbols_game.csv
+0003529c,Weapon_FireMissile,play,low,Nuclear Psychopath warning,symbols_game.csv
+00035532,Weapon_FireCamera,play,low,camera pod,symbols_game.csv
+000356fe,Weapon_FireGuided,play,low,,symbols_game.csv
+00035a33,Mines_Update,play,low,,symbols_game.csv
+00035e20,EnemyGround_Update,play,medium,,symbols_game.csv
+00036ae3,EnemyAir_Update,play,medium,enemy aircraft AI (0x9264c arrays),symbols_game.csv
+00038a61,Flares_Update,play,low,,symbols_game.csv
+00038ba8,EnemyBomber_Spawn,play,medium,Enemy Bomber Raiding!,symbols_game.csv
+000391e3,Engine_Sfx,sound,low,,symbols_game.csv
+00039388,Engine_SoundUpdate,sound,medium,,symbols_game.csv
+00039817,Engine_SetPitch,sound,medium,,symbols_game.csv
+00039b69,Explosion_Damage,play,high,(x;y;vx;vy;type;dmg) explosion + damage + terrain,symbols_game.csv
+0003a99f,Explosion_Terrain,play,medium,,symbols_game.csv
+0003adf9,Explosion_Particles,play,low,,symbols_game.csv
+0003b27c,Debris_Update,play,low,,symbols_game.csv
+0003b5c0,Debris_Spawn,play,low,,symbols_game.csv
+0003b777,Map_CraterAt,level,low,,symbols_game.csv
+0003c0fb,SaveGame_LoadMenu,game_flow,high,'Press F1 to F10 to load game': reads js_save.00N,symbols_game.csv
+0003c367,SaveGame_Write,game_flow,high,writes js_save.00N (slot from F-key),symbols_game.csv
+0003c56c,SaveGame_DrawLoadPrompt,game_flow,high,,symbols_game.csv
+0003c5b0,Input_GetFKey,platform,high,returns 1..10 for F1..F10 (scancodes 0x3b-0x44),symbols_game.csv
+0003cdec,Map_ScanAround,level,low,,symbols_game.csv
+0003ceae,Input_ReadControls,platform,high,merges remapped keys + joystick into g_Ctrl[11] at 0x90c98; fire -> 0x8455c,symbols_game.csv
+0003d105,Convoy_Update,play,medium,Friendly vehicle / Mission Failed,symbols_game.csv
+0003f02e,Mission_CheckComplete,play,medium,,symbols_game.csv
+0003f195,Map_DamageColumn,level,low,,symbols_game.csv
+0003f2fe,Player_DamageSystems,play,high,random system failure; gendatad.dax messages (switch 0..15),symbols_game.csv
+0003f991,Enemy_LoadSpx,files,high,plane/enemyX.spx,symbols_game.csv
+0003fa76,Enemy_ReplaceSprite,files,medium,,symbols_game.csv
+0003faab,Enemy_SetupSpriteIds,play,low,,symbols_game.csv
+0003ff4d,Truck_LoadSpx,files,high,plane/truck<c>.spx,symbols_game.csv
+0004011f,Mission_CompleteScreen,play,low,,symbols_game.csv
+000403c1,Camera_Update,play,low,,symbols_game.csv
+00040e8b,Map_FindTile,level,medium,,symbols_game.csv
+000415e4,Projectiles_UpdateGuided,play,medium,,symbols_game.csv
+0004424d,Enemy_InitPositions,play,low,,symbols_game.csv
+00044478,Ships_Update,play,low,,symbols_game.csv
+00044a5d,Mission_CheckObjectives,play,medium,,symbols_game.csv
+00045144,WaitKey_Release,game_flow,medium,waits for fire/space/enter,symbols_game.csv
+00045233,WaitKey_Press,game_flow,medium,waits for fire/space/enter on briefing,symbols_game.csv
+00045352,AeroScores_Screen,game_flow,high,aoscores.pax 'player N scored ... wins !!',symbols_game.csv
+00045584,Waypoint_Update,play,low,,symbols_game.csv
+00045859,Pickup_Update,play,low,,symbols_game.csv
+0004596f,Crate_Update,play,low,,symbols_game.csv
+00045c09,Pal_CycleEffects,video,medium,colour cycling from flip,symbols_game.csv
+00046617,Pal_SaveNight,video,medium,night palette,symbols_game.csv
+0004699e,Pal_Restore,video,medium,,symbols_game.csv
+000469e7,MainMenu,game_flow,high,first call: CD check (Wrong CD) + Sound_Init; loads jets.n weapons.dat hudtext.dat l1l2 gendatad.dax gendata.dax; menu on miscon.pax (zone map) sets g_GameMode,symbols_game.csv
+00047ec2,MainMenu_Draw,game_flow,medium,loads miscon.pax and registers menu hit zones,symbols_game.csv
+00048111,AeroOptions_Menu,game_flow,medium,aoset.pax: 2-player Aerolimits options (Players 2 / Games 10),symbols_game.csv
+000485d0,_cstart_,rt,high,program entry (DOS4GW startup),symbols_rt.csv
+0004864a,__cstart_body,rt,medium,startup continuation: INT21 30h DOS version; 4Ah resize; DGROUP/env setup; calls __InitRtns and __CMain,symbols_rt.csv
+00048842,__fatal_runtime_error,rt,high,writes message to CON (INT21 3Dh/40h) and terminates (INT21 4Ch),symbols_rt.csv
+00048874,__GETDS,rt,high,loads DS from saved selector at cs:[0x48644],symbols_rt.csv
+0004887c,inp,rt,high,in al;dx (port=arg1),symbols_rt.csv
+00048887,outp,rt,high,out dx;al - game uses for VGA DAC 0x3c8 and PIT 0x40/0x43,symbols_rt.csv
+00048894,__save_SS,rt,low,stores SS to 0x8079c,symbols_rt.csv
+0004889b,__CHK,rt,high,stack check,symbols_rt.csv
+000488ae,__STK,rt,high,stack overflow test; calls __fatal_runtime_error,symbols_rt.csv
+000488cb,__STKOVERFLOW,rt,high,stack overflow -> fatal error,symbols_rt.csv
+000488da,_dos_getvect,rt,high,INT21 35h (2502h under Phar Lap); game: vector 9 (keyboard) and timer vector,symbols_rt.csv
+00048914,_dos_setvect,rt,high,INT21 25h (2504h Phar Lap); game installs keyboard ISR 0x10760 on INT 9 and ISR 0x31a31 on timer vector (DAT_93380),symbols_rt.csv
+0004894b,int386,rt,high,int386(intno;in;out) -> segread + int386x; game uses INT 31h (DPMI),symbols_rt.csv
+00048974,printf,rt,high,vfprintf(stdout=0x8085e); game prints memory/exit messages,symbols_rt.csv
+00048996,__null_rtn,rt,low,empty ret,symbols_rt.csv
+00048997,exit,rt,high,runs fini routines (ptrs 0x807b0..0x807b8) then __exit (INT21 4Ch),symbols_rt.csv
+000489c0,__get_rand_seed_ptr,rt,medium,returns &seed (0x807bc),symbols_rt.csv
+000489c6,rand,rt,high,LCG seed*0x41c64e6d+0x3039; >>16 & 0x7fff,symbols_rt.csv
+000489e8,srand,rt,high,sets seed,symbols_rt.csv
+000489fb,malloc,rt,high,wrapper to _nmalloc,symbols_rt.csv
+00048a0b,_nmalloc,rt,high,near heap allocator (grows via __ExpandDGROUP),symbols_rt.csv
+00048a7d,__open_flags,rt,high,parses fopen mode string r/w/a/+/b/t,symbols_rt.csv
+00048b2c,__doopen,rt,high,opens fd for FILE (via sopen 0x4ae05),symbols_rt.csv
+00048c11,_fsopen,rt,high,allocates FILE (__allocfp) then __doopen,symbols_rt.csv
+00048c3c,fopen,rt,high,fopen(name;mode); game: data\jetsprit.pal and js.cfg,symbols_rt.csv
+00048c51,__chk_freopen_fp,rt,medium,validates FILE for freopen,symbols_rt.csv
+00048cb6,freopen,rt,medium,freopen(name;mode;fp),symbols_rt.csv
+00048ce2,fread,rt,high,fread(buf;size;n;fp),symbols_rt.csv
+00048e3d,fclose,rt,high,fclose(fp) (checks stream list),symbols_rt.csv
+00048e69,__doclose,rt,high,close stream; free buffer; remove tmpfile,symbols_rt.csv
+00048e8d,__hexdigit,rt,medium,0-15 -> '0'..'f' (tmpfile name helper),symbols_rt.csv
+00048ea0,__MkTmpFile,rt,medium,builds tmp file name tXXXX_xx.tmp,symbols_rt.csv
+00048f1f,__shutdown_stream,rt,high,flush; reposition; close handle; free buffer,symbols_rt.csv
+00048fbd,outpw,rt,high,out dx;ax - game: VGA seq/GC/CRTC regs 0x3c4/0x3ce/0x3d4,symbols_rt.csv
+00048fca,strcpy,rt,high,,symbols_rt.csv
+00048ff3,strlen,rt,high,,symbols_rt.csv
+0004900f,strcat,rt,high,,symbols_rt.csv
+0004904a,fseek,rt,high,fseek(fp;off;whence),symbols_rt.csv
+0004921b,ftell,rt,high,,symbols_rt.csv
+0004924f,free,rt,high,wrapper to _nfree,symbols_rt.csv
+0004925f,_nfree,rt,high,,symbols_rt.csv
+00049284,__I4D,rt,high,soft-float int32 -> double (EAX -> EDX:EAX),symbols_rt.csv
+00049291,__U4D,rt,high,soft-float uint32 -> double,symbols_rt.csv
+000492c4,__FDD,rt,high,soft-float double divide (div-by-zero -> 0x4b4c1),symbols_rt.csv
+000494c8,__FDI4,rt,high,double -> int32,symbols_rt.csv
+000494cc,__FDU4,rt,high,double -> uint32,symbols_rt.csv
+00049544,__FDS,rt,high,double subtract (negates and falls into __FDA),symbols_rt.csv
+0004954a,__FDA,rt,high,double add,symbols_rt.csv
+00049714,__FDM,rt,high,double multiply,symbols_rt.csv
+000498c0,__FSFD,rt,high,float -> double,symbols_rt.csv
+00049918,__FDC,rt,high,double compare,symbols_rt.csv
+00049950,__FSS,rt,high,float subtract,symbols_rt.csv
+0004995a,__FSA,rt,high,float add (dispatch via [0x807f8]: x87 or emulated),symbols_rt.csv
+00049a2b,__FSM,rt,high,float multiply (dispatch via [0x807fc]),symbols_rt.csv
+00049ab2,__FSD_thunk,rt,medium,thunk to __FSD,symbols_rt.csv
+00049b5e,__FSD,rt,high,float divide (dispatch via [0x80800]),symbols_rt.csv
+00049b69,__init_float_dispatch,rt,medium,selects x87 or emulated float add/mul/div based on 8087 flag 0x80a59,symbols_rt.csv
+00049bb4,__FSC,rt,high,float compare,symbols_rt.csv
+00049bf3,__utoa_body,rt,medium,unsigned to ascii with radix,symbols_rt.csv
+00049c3b,itoa,rt,high,itoa(val;buf;radix) - game uses radix 10,symbols_rt.csv
+00049c6c,__FDFS,rt,high,double -> float,symbols_rt.csv
+00049cc4,__sin_cos_emu,rt,medium,emulated sin/cos/tan core (selector 0/2/1),symbols_rt.csv
+00049f10,sin,rt,medium,sin(double) - x87 (0x4b993) or emulated,symbols_rt.csv
+00049f2a,__sin_reg,rt,medium,register-arg sin,symbols_rt.csv
+00049f56,cos,rt,medium,cos(double),symbols_rt.csv
+00049f6b,__cos_reg,rt,medium,register-arg cos,symbols_rt.csv
+00049f9f,tan,rt,medium,tan(double),symbols_rt.csv
+00049fb2,__tan_reg,rt,medium,register-arg tan,symbols_rt.csv
+00049fd4,__FDN,rt,medium,double negate (flip sign bit),symbols_rt.csv
+00049fdf,abs,rt,high,,symbols_rt.csv
+00049fed,strncpy,rt,high,,symbols_rt.csv
+0004a020,strcmp,rt,high,,symbols_rt.csv
+0004a0cd,__scanf_getc_file,rt,medium,fscanf char-input callback,symbols_rt.csv
+0004a114,__scanf_ungetc_file,rt,medium,fscanf unget callback (ungetc),symbols_rt.csv
+0004a12a,vfscanf,rt,high,sets up callbacks; calls __scnf,symbols_rt.csv
+0004a158,fscanf,rt,high,game reads text data,symbols_rt.csv
+0004a178,fgets,rt,high,fgets(buf;n;fp),symbols_rt.csv
+0004a1e4,__U4FS,rt,high,uint32 -> float,symbols_rt.csv
+0004a20f,__I4FS,rt,high,int32 -> float,symbols_rt.csv
+0004a220,__FSI4,rt,high,float -> int32 (table of float->int entry points follows),symbols_rt.csv
+0004a25c,__FSI_signed,rt,medium,float -> int core (signed),symbols_rt.csv
+0004a268,__FSU_core,rt,medium,float -> int core,symbols_rt.csv
+0004a2b0,memset,rt,high,memset(dst;val;n) -> __memset_body,symbols_rt.csv
+0004a2d2,int386x,rt,high,int386x(intno;in;out;sregs) - game uses INT 31h DPMI,symbols_rt.csv
+0004a2f3,_fmemset,rt,high,far memset (offset;selector;val;n),symbols_rt.csv
+0004a31a,fwrite,rt,high,fwrite(ptr;size;n;fp) - game saves config/scores,symbols_rt.csv
+0004a481,time,rt,high,time(NULL): DOS date/time -> mktime,symbols_rt.csv
+0004a4ba,__null_rtn2,rt,low,empty ret,symbols_rt.csv
+0004a4bb,__CMain,rt,high,sets up stack; calls main (0x000146f4) then exit,symbols_rt.csv
+0004a50a,__InitRtns,rt,high,runs XI init table by priority,symbols_rt.csv
+0004a54d,__FiniRtns,rt,high,runs YI fini table by priority,symbols_rt.csv
+0004a590,segread,rt,high,,symbols_rt.csv
+0004a5be,__fprtf_putc,rt,medium,printf output callback (fputc),symbols_rt.csv
+0004a5d7,vfprintf,rt,high,vfprintf(fp;fmt;args) -> __prtf,symbols_rt.csv
+0004a658,__MemAllocator,rt,high,heap block allocator (free list search),symbols_rt.csv
+0004a708,__MemFree,rt,high,heap block free/coalesce,symbols_rt.csv
+0004a813,__LinkUpNewMHeap,rt,medium,inserts new heap segment into heap list,symbols_rt.csv
+0004a88d,__unlink_free,rt,medium,doubly linked list unlink,symbols_rt.csv
+0004a8a9,__UnlinkMHeap,rt,medium,removes heap segment,symbols_rt.csv
+0004a943,__FreeDPMIBlocks,rt,medium,DPMI 0502h free memory block / INT21 49h,symbols_rt.csv
+0004a9ba,__ReAllocDPMIBlock,rt,medium,DPMI 0503h resize memory block,symbols_rt.csv
+0004aaec,__LastFree,rt,medium,size of free block at end of DGROUP,symbols_rt.csv
+0004ab39,__CreateNewNHeap,rt,medium,DPMI 0501h alloc / INT21 48h; DPMI 0006h get segment base,symbols_rt.csv
+0004ac21,__ExpandDGROUP,rt,medium,grows near heap (sbrk / new DPMI block),symbols_rt.csv
+0004adbe,__ret0,rt,low,returns 0,symbols_rt.csv
+0004adc5,tolower,rt,high,,symbols_rt.csv
+0004adda,__get_errno_ptr,rt,high,returns &errno,symbols_rt.csv
+0004ade0,__get_doserrno_ptr,rt,high,returns &_doserrno,symbols_rt.csv
+0004ade6,open,rt,high,open(path;mode;...) -> sopen with share 0,symbols_rt.csv
+0004ae05,sopen,rt,high,INT21 3Ch/3Dh/3Eh/40h create/open file handle,symbols_rt.csv
+0004afc7,setmode,rt,medium,INT21 4400h/4401h IOCTL get/set device info,symbols_rt.csv
+0004b031,__allocfp,rt,high,allocates FILE struct,symbols_rt.csv
+0004b0cc,__freefp,rt,high,returns FILE to free list,symbols_rt.csv
+0004b0ff,__purgefp,rt,high,frees FILE free list at exit,symbols_rt.csv
+0004b121,__chktty,rt,high,marks stream as tty (isatty),symbols_rt.csv
+0004b14e,__ioalloc,rt,high,allocates stream buffer (0x1000 default),symbols_rt.csv
+0004b1c5,memcpy,rt,high,dword+byte copy (used internally),symbols_rt.csv
+0004b1ef,__qread,rt,high,INT21 3Fh read,symbols_rt.csv
+0004b220,fgetc,rt,high,text-mode CR / ^Z handling,symbols_rt.csv
+0004b299,__filbuf,rt,high,refill and return char,symbols_rt.csv
+0004b2c4,__fill_buffer,rt,high,reads into stream buffer,symbols_rt.csv
+0004b36f,__get_tmp_id,rt,low,returns DAT_80814 (used for tmp file naming),symbols_rt.csv
+0004b375,__flush,rt,high,flush stream buffer (write or seek back),symbols_rt.csv
+0004b412,lseek,rt,high,INT21 42h,symbols_rt.csv
+0004b45d,close,rt,high,INT21 3Eh,symbols_rt.csv
+0004b497,remove,rt,high,-> unlink (INT21 41h),symbols_rt.csv
+0004b4a7,tell,rt,high,lseek(fd;0;SEEK_CUR),symbols_rt.csv
+0004b4bc,__FPE_underflow_zero,rt,medium,returns 0.0,symbols_rt.csv
+0004b4c1,__FPE_divzero,rt,medium,FP error 0x83 -> +/-inf,symbols_rt.csv
+0004b4cd,__FPE_overflow,rt,medium,FP error 0x84; ERANGE -> +/-inf,symbols_rt.csv
+0004b515,__Init_Argv_alt,rt,low,builds argv (alternate entry 3 bytes earlier),symbols_rt.csv
+0004b518,__Init_Argv,rt,medium,builds argc/argv from command line,symbols_rt.csv
+0004b5c8,__parse_args,rt,medium,splits command line (quotes; backslashes),symbols_rt.csv
+0004b6a3,frexp,rt,low,FP helper used by trig and printf,symbols_rt.csv
+0004b6e9,modf,rt,low,,symbols_rt.csv
+0004b6fe,__modf_body,rt,low,,symbols_rt.csv
+0004b7ec,__mul64_helper,rt,low,64-bit arithmetic helper for trig range reduction,symbols_rt.csv
+0004b8ed,__EvalPoly,rt,low,polynomial evaluation (FDA/FDM loop),symbols_rt.csv
+0004b923,__OddPoly,rt,low,odd polynomial evaluation,symbols_rt.csv
+0004b95a,__set_EDOM,rt,medium,errno=EDOM,symbols_rt.csv
+0004b961,__set_ERANGE,rt,medium,errno=ERANGE,symbols_rt.csv
+0004b972,__FPE_handler_call,rt,medium,calls FP exception handler ptr [0x80840],symbols_rt.csv
+0004b98a,__x87_cos,rt,medium,x87 path (selector 2),symbols_rt.csv
+0004b993,__x87_sin,rt,medium,x87 path (selector 0) with range reduction,symbols_rt.csv
+0004ba30,__x87_tan,rt,medium,x87 tan path,symbols_rt.csv
+0004baaf,ungetc,rt,high,,symbols_rt.csv
+0004bb2a,__scnf,rt,high,scanf engine,symbols_rt.csv
+0004bd31,__scan_fmt_width,rt,low,scanf helper,symbols_rt.csv
+0004bdfe,__scan_skipws,rt,low,scanf helper,symbols_rt.csv
+0004be35,__scan_char,rt,low,scanf %c,symbols_rt.csv
+0004beae,__scan_ret0,rt,low,,symbols_rt.csv
+0004beb6,__scan_string,rt,low,scanf %s,symbols_rt.csv
+0004bfa6,__scan_report,rt,low,scanf %n,symbols_rt.csv
+0004bff1,__scan_charset_init,rt,low,scanf %[ set builder,symbols_rt.csv
+0004c035,__scan_charset,rt,low,scanf %[,symbols_rt.csv
+0004c114,__scan_float,rt,low,scanf %e/%f/%g (uses __FDFS and [0x80b38] cnvs2d hook),symbols_rt.csv
+0004c3d4,__scan_int,rt,low,scanf %d/%x/%o,symbols_rt.csv
+0004c5d1,__scan_hexval,rt,low,,symbols_rt.csv
+0004c605,__scan_getc,rt,low,,symbols_rt.csv
+0004c630,__memset_body,rt,medium,register-arg memset core,symbols_rt.csv
+0004c667,__memset_dwords,rt,medium,,symbols_rt.csv
+0004c6d4,__int386x_body,rt,medium,loads regs; executes INT via stub table,symbols_rt.csv
+0004c70b,__int_table,rt,medium,table of 'int N' stubs for all 256 vectors,symbols_rt.csv
+0004caac,write,rt,high,INT21 40h with text-mode LF->CRLF; append via 42h,symbols_rt.csv
+0004cc85,fputc,rt,high,,symbols_rt.csv
+0004cd2d,__getdatetime,rt,medium,INT21 2Ah/2Ch date+time,symbols_rt.csv
+0004cdcf,mktime,rt,medium,,symbols_rt.csv
+0004cef2,stackavail,rt,high,,symbols_rt.csv
+0004cefb,__init_stklen,rt,low,sets 0x80abc=0x8000,symbols_rt.csv
+0004cf06,__prtf,rt,high,printf engine,symbols_rt.csv
+0004d126,__get_fmt_spec,rt,medium,printf spec parser,symbols_rt.csv
+0004d22f,__get_fmt_number,rt,medium,printf width/precision parse,symbols_rt.csv
+0004d282,__prtf_set_str,rt,low,,symbols_rt.csv
+0004d2ab,__prtf_set_wstr,rt,low,,symbols_rt.csv
+0004d2d2,__prtf_string,rt,low,,symbols_rt.csv
+0004d325,__prtf_int,rt,low,integer formatting,symbols_rt.csv
+0004d3f1,__EFG_printf_call,rt,medium,calls [0x80b34] float formatter hook,symbols_rt.csv
+0004d408,__prtf_fmt,rt,medium,formats one conversion,symbols_rt.csv
+0004d841,strupr,rt,medium,uses toupper,symbols_rt.csv
+0004d861,_set_amblksiz,rt,low,setter returning old value (0x80ab8),symbols_rt.csv
+0004d877,sbrk,rt,medium,DPMI 0501h / INT21 4800h,symbols_rt.csv
+0004d911,__brk,rt,medium,INT21 EDh/4Ah DOS4G memory resize,symbols_rt.csv
+0004d9bb,isatty,rt,high,INT21 4400h,symbols_rt.csv
+0004d9db,__set_errno_dos_alt,rt,low,,symbols_rt.csv
+0004d9f3,__set_errno_dos2,rt,low,,symbols_rt.csv
+0004da1b,__set_errno_dos,rt,high,maps DOS error -> errno,symbols_rt.csv
+0004da8b,__set_errno_EBADF,rt,low,errno helper,symbols_rt.csv
+0004dadd,__SetIOMode,rt,medium,,symbols_rt.csv
+0004daf5,__InitFiles,rt,high,links stdin/out/err/aux/prn into stream list,symbols_rt.csv
+0004db3a,__full_io_exit,rt,high,closes all streams; frees FILE list,symbols_rt.csv
+0004db54,__closeall,rt,medium,,symbols_rt.csv
+0004dbad,flushall,rt,medium,__flushall(mask),symbols_rt.csv
+0004dbe5,__getche_stdin,rt,low,INT21 01h read char with echo,symbols_rt.csv
+0004dc00,__qwrite,rt,high,INT21 40h raw write (seek end for append),symbols_rt.csv
+0004dc7d,unlink,rt,high,INT21 41h,symbols_rt.csv
+0004dca1,__fsave,rt,low,saves FPU state,symbols_rt.csv
+0004dcad,__fld_tbyte,rt,low,,symbols_rt.csv
+0004dceb,__chk8087,rt,medium,detects 8087 (sets 0x80a58/0x80a59),symbols_rt.csv
+0004dd2a,__set_matherr,rt,low,sets matherr hook,symbols_rt.csv
+0004dd37,__math_error,rt,medium,calls matherr; prints func: DOMAIN error to stderr,symbols_rt.csv
+0004ddad,__stack_overflow_exit,rt,low,__fatal_runtime_error(1),symbols_rt.csv
+0004ddbc,_EFG_Format,rt,medium,printf %e/%f/%g formatter,symbols_rt.csv
+0004de98,__strip_zeros,rt,medium,%g trailing zero removal,symbols_rt.csv
+0004dee5,__cnvs2d,rt,medium,string -> double (scanf hook),symbols_rt.csv
+0004df00,__leapyear,rt,low,time helper,symbols_rt.csv
+0004df34,__brktime,rt,low,time helper,symbols_rt.csv
+0004e195,__isindst_cmp,rt,low,,symbols_rt.csv
+0004e1c5,__mkday,rt,low,time helper,symbols_rt.csv
+0004e2f4,_localtime_body,rt,low,,symbols_rt.csv
+0004e318,localtime,rt,low,,symbols_rt.csv
+0004e32e,tzset,rt,medium,,symbols_rt.csv
+0004e349,__tz_parse_num,rt,low,,symbols_rt.csv
+0004e372,__tz_parse_time,rt,low,,symbols_rt.csv
+0004e455,__tz_parse_rule,rt,low,,symbols_rt.csv
+0004e547,__parse_tz,rt,low,parses TZ env var,symbols_rt.csv
+0004e609,__ultoa_body,rt,medium,,symbols_rt.csv
+0004e651,ultoa,rt,medium,,symbols_rt.csv
+0004e681,toupper,rt,high,,symbols_rt.csv
+0004e6c8,__matherr_thunk,rt,low,,symbols_rt.csv
+0004e6cd,fputs,rt,high,,symbols_rt.csv
+0004e746,__set_tz_ptr,rt,low,,symbols_rt.csv
+0004e753,__fmt_exponent,rt,low,e+XX formatting,symbols_rt.csv
+0004e7f7,__fmt_fixed,rt,low,,symbols_rt.csv
+0004e873,__fmt_round,rt,low,,symbols_rt.csv
+0004e8de,__cvt,rt,medium,float to string (ecvt/fcvt core),symbols_rt.csv
+0004ead2,__strtod_body,rt,medium,,symbols_rt.csv
+0004ec99,getenv,rt,high,case-insensitive environment search,symbols_rt.csv
+0004ecee,__ret0_matherr,rt,low,default matherr returns 0,symbols_rt.csv
+0004ecf5,__fmt_infnan,rt,medium,INF/NAN formatting,symbols_rt.csv
+0004ed6c,__fp_helper1,rt,low,,symbols_rt.csv
+0004ed86,__fp_helper2,rt,low,,symbols_rt.csv
+0004eda1,__fp_helper3,rt,low,,symbols_rt.csv
+0004edbb,__fp_pow10,rt,low,,symbols_rt.csv
+0004edeb,__fp_helper4,rt,low,,symbols_rt.csv
+0004ee29,__fp_helper5,rt,low,,symbols_rt.csv
+0004ee6b,__fp_scale,rt,low,,symbols_rt.csv
+0004ef7c,__fp_to_digits,rt,low,,symbols_rt.csv
+0004f118,__fp_split,rt,low,integer/fraction split of double,symbols_rt.csv
+0004f1a8,__fp_norm_alt,rt,low,,symbols_rt.csv
+0004f1f3,__fp_normalize,rt,low,,symbols_rt.csv
+0004f246,strnicmp,rt,high,,symbols_rt.csv
+0004f29e,__fp_helper6,rt,low,,symbols_rt.csv
+0004f2dd,__fp_helper7,rt,low,,symbols_rt.csv
+0004f2f7,__fp_log10ish,rt,low,,symbols_rt.csv
+0004f494,__fp_helper8,rt,low,,symbols_rt.csv
+0004f4cc,__fp_table_lookup,rt,low,,symbols_rt.csv
+0004f506,__fp_u64,rt,low,,symbols_rt.csv
+0004f571,__fp_digits10000,rt,low,,symbols_rt.csv
+0004f5e3,__fp_data_or_code,rt,low,decompiles as garbage (likely data table),symbols_rt.csv
+0004f698,__fp_tbl_ptr,rt,low,,symbols_rt.csv
+0004f69a,__setenvp_alt,rt,low,,symbols_rt.csv
+0004f6a0,__setenvp,rt,medium,copies environment block into heap,symbols_rt.csv
+0004f780,log,rt,low,x87 log via log2*ln2,symbols_rt.csv
+00050000,LZW_Unpack,files,high,obj2 asm (src;dst) LZW 9..12 bit; dict in BSS 0x60000; first dword = unpacked size,symbols_game.csv
+00050020,LZW_Init,files,high,obj2,symbols_game.csv
+0005007c,asm_unpack_getbits,asm,low,obj2 asm helper (bit reader),symbols_rt.csv
+00050090,LZW_ReadCode,files,high,obj2,symbols_game.csv
+0005017c,asm_unpack_copy,asm,low,obj2 asm helper,symbols_rt.csv
+000501e0,LZW_Decode,files,high,obj2,symbols_game.csv
+00070000,GUS_Detect,sound,high,obj4 asm GUS driver,symbols_game.csv
+0007004c,GUS_Upload,sound,high,,symbols_game.csv
+000700a6,GUS_SelectVoice,sound,high,,symbols_game.csv
+000700d1,gus_read_port,asm,low,,symbols_rt.csv
+000700df,GUS_Shutdown,sound,medium,,symbols_game.csv
+000700f2,GUS_SetFreq,sound,medium,,symbols_game.csv
+0007012b,GUS_SetVolume,sound,medium,,symbols_game.csv
+000701fe,gus_delay,asm,low,,symbols_rt.csv
+0007020f,gus_probe_dram,asm,low,,symbols_rt.csv
+0007022e,gus_probe,asm,low,,symbols_rt.csv
+00070256,gus_ram_size,asm,low,,symbols_rt.csv
+00070282,gus_dram_test,asm,low,,symbols_rt.csv
+00070297,gus_reset,asm,low,GF1 reg 0x4C reset,symbols_rt.csv
+000702ad,gus_set_dram_addr,asm,low,,symbols_rt.csv
+000702d6,GUS_Reset,sound,medium,,symbols_game.csv
+0007034d,GUS_PlayVoice,sound,medium,,symbols_game.csv
+00080054,g_VSyncWaits,global,medium,,symbols_game.csv
+0008005c,g_BackPage,global,high,0x18c0 or 0x78c0,symbols_game.csv
+00080430,g_SoundDevice,global,high,0 none; 1 SB; 2 GUS,symbols_game.csv
+00081ad8,g_SpriteQueue,global,high,20-byte entries,symbols_game.csv
+00082ed8,g_Palette,global,high,768 bytes 6-bit,symbols_game.csv
+00083958,g_KeyDown,global,high,256 bytes by scancode,symbols_game.csv
+00083a54,g_SpriteTab,global,high,1-based ptrs; max 0x212,symbols_game.csv
+00084500,g_SpriteQueueCount,global,high,,symbols_game.csv
+00084536,g_DetailParallax,global,high,,symbols_game.csv
+00084538,g_JoyEnabled,global,high,,symbols_game.csv
+0008453a,g_KeySlots,global,high,remapped key words 0x8453a-0x84564 (JS.CFG),symbols_game.csv
+0008455c,g_Fire,global,high,,symbols_game.csv
+000845b8,g_TilePtrs,global,high,,symbols_game.csv
+000849d0,g_MapGrid,global,high,,symbols_game.csv
+000849d8,g_MapVal,global,high,.val attribute table,symbols_game.csv
+00084b48,g_TilesetName,global,high,,symbols_game.csv
+00085148,g_MapName,global,high,,symbols_game.csv
+00085c48,g_DamageMsgs,global,high,gendatad.dax,symbols_game.csv
+00086cb0,g_PlaneNames,global,high,jets.n,symbols_game.csv
+0008a428,g_HudText,global,high,hudtext.dat 0x50-byte lines,symbols_game.csv
+0008c8d8,g_WeaponNames,global,high,weapons.dat,symbols_game.csv
+0008f168,g_WeaponType,global,medium,6 ints per weapon,symbols_game.csv
+0008fe90,g_MapWidth,global,high,tiles,symbols_game.csv
+0008ff7c,g_GameMode,global,high,0 campaign M0; 1 training M1; 2 practice M2; 3 Aerolimits M3,symbols_game.csv
+00090214,g_PlayerScrX,global,medium,,symbols_game.csv
+00090218,g_PlayerScrY,global,medium,,symbols_game.csv
+000902f0,g_Lives,global,high,7 at start; -10 = game finished,symbols_game.csv
+000903a8,g_CamX,global,high,,symbols_game.csv
+000903ac,g_CamY,global,high,,symbols_game.csv
+000903e0,g_Mission,global,high,,symbols_game.csv
+000903e8,g_MissionResult,global,medium,2 = success,symbols_game.csv
+000904d0,g_HudMsgCount,global,medium,,symbols_game.csv
+000905c4,g_ShakeX,global,low,added to sprite x,symbols_game.csv
+000905c8,g_ShakeY,global,low,,symbols_game.csv
+00090800,g_AbortFlag,global,medium,,symbols_game.csv
+00091648,g_MissionParams,global,high,30 BE words from M record,symbols_game.csv
+00092992,g_BriefingText,global,high,,symbols_game.csv
+00093344,g_CDDrive,global,high,,symbols_game.csv
+00093388,g_SampleData,global,high,,symbols_game.csv
+000936b4,g_Config,global,high,JS.CFG 0x48 bytes,symbols_game.csv
+000936ee,g_SBIrq,global,high,JS.CFG +0x3a,symbols_game.csv
+000936f8,g_CDMusicOn,global,high,,symbols_game.csv
+000936fc,g_SfxOn,global,high,,symbols_game.csv

@@ -32,8 +32,8 @@ Working copy: `Game/` = `JETSTR/` (git-ignored; the port reads it at runtime).
 | `MISC/BIGFNT.RAW`, `SMALLFNT.RAW` | | fonts |
 | CD tracks 2-15 | | **Red Book audio** — the music (14 tracks, ~31 min). Track 1 is the data track |
 
-Video: VGA 320×200×256 (mode 13h, likely; confirm — could be mode X for scrolling).
-Sound: Sound Blaster digitised effects (auto-detected), CD audio music via MSCDEX. Input: keyboard
+Video: VGA mode X 320×240×256 (unchained, 384-pixel virtual width; see `port/RE_GUIDE.md`).
+Sound: Sound Blaster or Gravis UltraSound digitised effects (auto-detected), CD audio music via MSCDEX. Input: keyboard
 (remappable, `JS.CFG`), joystick.
 
 ## Phases
@@ -45,7 +45,15 @@ Sound: Sound Blaster digitised effects (auto-detected), CD audio music via MSCDE
 - Carried over from Street Rod: `gen_symbols.py`, `merge_symbols.py`, Ghidra `ApplySymbols`,
   `DecompileAll`, `postprocess.py`. Not carried over: the 16-bit tools.
 
-### 1. Executable map
+### 1. Executable map — done (2026-10-02, see `port/RE_GUIDE.md`)
+Result: LE loader + indexer + Ghidra pipeline (`tools/regen.sh`); JS 741 functions decompiled, 599 named
+(275 Watcom runtime / asm, ~290 game, 43 globals); INTRO 110 and CONFIG 99 runtime names by masked
+byte match. Findings: `main` 0x146f4 → `Game_Run` 0x1ba0c; **mode X 320×240** (384-pixel virtual width,
+double-buffered, CRTC scrolling, split-screen HUD at line 175); sound = **Sound Blaster or Gravis
+UltraSound** (obj 4 is a GUS driver), 4-channel software mixer at 50 Hz on SB; CD audio = random track
+of {2-6, 14, 15} per mission, endgame N → track N+7; obj 2 is an LZW unpacker used by PAX/SPX/MXP/TLX/DX0;
+no mission script interpreter (M0-M3 records drive fixed code; `.ASC` = story text).
+Original sub-plan:
 - `tools/lefile.py`: LE/LX parser — objects, page map, fixups → flat image + relocation list;
   dump each object to `work/`.
 - Ghidra: needs an LE loader (Ghidra has none built in) — either the `ghidra-lx-loader` extension
@@ -109,6 +117,7 @@ remastered sprites).
 5. **Config**: `CONFIG.EXE` not ported; its options (sound on/off, keys, joystick) go into the
    launcher; `JS.CFG` is still read/written in the original format.
 
+Confirmed by the user (2026-10-02). No floppy/AdLib version for now.
+
 ## Open questions
-- Is the scroller mode 13h or mode X? (affects only the video spec, not the port output)
-- Is there a floppy version with AdLib music we should also support? (not in this copy)
+- Meaning of the 30 mission parameters and of `.MP2`; fine detail of ~60 small AI helpers (phase 3).

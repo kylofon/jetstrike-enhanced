@@ -1,6 +1,5 @@
-// Headless post-script: applies merged port symbols to the Ghidra program.
-// args: <symbols_ghidra.txt> <dgroup segment hex, e.g. 1BE4>
-// Lines: "func 16C9:403B name" (Ghidra address) or "global DS:18C5 name" / "global 16C9:7DDC name".
+// Headless post-script: applies merged port symbols (tools/merge_symbols.py) to a flat LE image.
+// args: <work/<exe>_symbols_ghidra.txt>   lines: "func 0001a2b4 name" / "global 00081170 name"
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;
@@ -13,20 +12,15 @@ import java.nio.file.Paths;
 public class ApplySymbols extends GhidraScript {
     @Override
     public void run() throws Exception {
-        String[] args = getScriptArgs();
-        long dgroup = Long.parseLong(args[1], 16) << 4;
-        Address base = currentProgram.getMinAddress();
         int funcs = 0, globals = 0, failed = 0;
-        for (String line : Files.readAllLines(Paths.get(args[0]))) {
-            String[] p = line.trim().split("\\s+");
+        for (String line : Files.readAllLines(Paths.get(getScriptArgs()[0]))) {
+            String[] p = line.trim().split("\s+");
             if (p.length < 3) continue;
             try {
-                Address a = p[1].startsWith("DS:")
-                        ? base.add(dgroup + Long.parseLong(p[1].substring(3), 16))
-                        : currentProgram.getAddressFactory().getAddress(p[1]);
+                Address a = toAddr(Long.parseLong(p[1], 16));
                 if (p[0].equals("func")) {
                     Function f = getFunctionAt(a);
-                    if (f == null) f = createFunction(a, p[2]);
+                    if (f == null) { disassemble(a); f = createFunction(a, p[2]); }
                     if (f != null) { f.setName(p[2], SourceType.USER_DEFINED); funcs++; } else failed++;
                 } else {
                     Symbol s = getSymbolAt(a);

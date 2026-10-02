@@ -1,0 +1,337 @@
+address,name,module,confidence,note
+000146f4,main,game_flow,high,"Watcom main(): 2.5MB check; alloc pack buffers; kbd ISR; load jetstrike.spx; read js.cfg; joystick init; set mode X; CPU bench; Game_Run; shutdown; credits"
+0001ba0c,Game_Run,game_flow,high,"master loop: loads gendat3/gendat2/misc/misc.z; outer loop = MainMenu -> mission loop -> per-frame loop with object updaters -> debrief/end"
+000469e7,MainMenu,game_flow,high,"first call: CD check (Wrong CD) + Sound_Init; loads jets.n weapons.dat hudtext.dat l1l2 gendatad.dax gendata.dax; menu on miscon.pax (zone map) sets g_GameMode"
+00047ec2,MainMenu_Draw,game_flow,medium,"loads miscon.pax and registers menu hit zones"
+00048111,AeroOptions_Menu,game_flow,medium,"aoset.pax: 2-player Aerolimits options (Players 2 / Games 10)"
+000212ac,Mission_Setup,game_flow,high,"per-mission: stop CD; briefing; plane/weapon select; load map .val/.mp2/.mxp; tileset; parallax; HUD panel; init player state"
+0002299a,Mission_LoadBriefing,game_flow,high,"reads data/M<mode> record (0x1c2 bytes) for g_Mission: briefing text; map name; tileset name; 30 BE params; story .asc; data/enemies; jetlogo.pax briefing; 'Press f1 to f10 to save'"
+00023f6b,Story_ShowAsc,game_flow,medium,"opens data/<name>.asc (picture name + text lines) and displays story screen"
+000245a9,PlaneSelect_Screen,game_flow,high,"planech.pax plane choice (2 slots); Glider special case; calls WeaponSelect"
+000257c3,SelectScreen_LoadBg,game_flow,high,"arg 0 -> planech.pax; 1 -> wepch.pax"
+00029d90,WeaponSelect_Screen,game_flow,high,"wepch.pax weapon loadout selection"
+00025869,Text_DrawCenteredAt,video,medium,"center small text in a box"
+000258b6,SelectScreen_DrawInfoBox,game_flow,low,"clears box; prints name (player 1 etc.)"
+00025a5d,SelectScreen_ShowPlaneName,game_flow,low,"prints jets.n name for plane index"
+00025add,PilotRecord_Load,game_flow,low,"copies 0xdc-byte record from data/misc (descriptions)"
+0002ba3c,WeaponSelect_DrawCounts,game_flow,medium,"weapon counts/weights via Text_DrawNumber"
+0002bb33,WeaponSelect_DrawLine,game_flow,low,"builds weapon description line"
+0002c9cb,Mission_Debrief,game_flow,medium,"post-mission screen; loads sarcasm messages on first use"
+0002d2b8,Sarcasm_Load,files,high,"data/sarcasm: 0x1c lines x 0x50 -> 0x863f0"
+000301b2,EndGame_Screen,game_flow,high,"game over: gamedone.pax / AeroScores / endgameN.pax with text; plays CD track N+7"
+000304e0,TrainingCredits_Screen,game_flow,medium,"traincrt.pax / practcrt.pax"
+00045352,AeroScores_Screen,game_flow,high,"aoscores.pax 'player N scored ... wins !!'"
+00045144,WaitKey_Release,game_flow,medium,"waits for fire/space/enter"
+00045233,WaitKey_Press,game_flow,medium,"waits for fire/space/enter on briefing"
+0003c0fb,SaveGame_LoadMenu,game_flow,high,"'Press F1 to F10 to load game': reads js_save.00N"
+0003c367,SaveGame_Write,game_flow,high,"writes js_save.00N (slot from F-key)"
+0003c56c,SaveGame_DrawLoadPrompt,game_flow,high,
+0003c5b0,Input_GetFKey,platform,high,"returns 1..10 for F1..F10 (scancodes 0x3b-0x44)"
+0001b043,NameEntry_Init,game_flow,low,"alphabet table for name entry"
+0001b919,NameEntry_ReadString,game_flow,low,"text entry loop (key reader is a stub)"
+0001b752,NameEntry_Screen,game_flow,low,"dead code (no callers)"
+0001b3c5,UnusedMenu_Loop,game_flow,low,"dead code (no callers)"
+0001acf5,Input_PollMenu,platform,high,"ReadControls + menu cursor deltas + vsync"
+0003ceae,Input_ReadControls,platform,high,"merges remapped keys + joystick into g_Ctrl[11] at 0x90c98; fire -> 0x8455c"
+0001456d,Joystick_ReadDirs,platform,high,"reads axes vs calibration -> dir bits; buttons"
+000327c0,Joystick_Poll,platform,high,"port 0x201 timing loop -> 0x8054c/0x80550"
+000327fb,Joystick_GetX,platform,high,
+00032805,Joystick_GetY,platform,high,
+0003280f,Joystick_GetButtons,platform,high,"in 0x201"
+000122a3,Key_Up,platform,high,"key slot 0x84560"
+000122cb,Key_Left,platform,medium,"key slot 0x84552"
+000122f3,Key_Right,platform,medium,"key slot 0x84564"
+0001231b,Key_Down,platform,medium,"key slot 0x8454e"
+00011f20,Input_AnyKey,platform,medium,
+00011eab,Input_GetBits,platform,low,
+00010760,Kbd_ISR,platform,high,"INT 9 handler (code label): in 0x60; toggle 0x61; EOI; g_KeyDown[scan]; copies JS.CFG-mapped keys to slots 0x8453a-0x84564"
+00010a16,Kbd_Install,platform,high,"clears g_KeyDown; hooks INT 9"
+00010a88,Kbd_Restore,platform,high,
+00010abb,Timer_Install,platform,high,"DPMI 0x205 INT 8 -> 0x310ba; PIT ch0 divisor 0x5d37 (~50 Hz)"
+00010ba0,Timer_Restore,platform,high,"restores INT 8; PIT 18.2 Hz"
+00010bad,Timer_Restore2,platform,high,duplicate
+000310ba,Timer_ISR_SBMixer,sound,high,"INT 8 handler (code label): mixes 4 SFX channels into SB DMA ring buffer (0x80 = silence)"
+00031a31,SB_IRQ_ISR,sound,high,"SB IRQ handler (code label) -> SB_AckIRQ"
+00010c1d,FatalError,platform,high,"CD stop; sound shutdown; text mode; printf %s%s; exit"
+00010010,Video_SetModeX,video,high,"INT10 13h then unchain: 320x240 mode X (480-line CRTC; offset 0x30 = 384 px virtual width); clears VRAM"
+000100c2,Video_SetTextMode,video,high,"INT 10h"
+000100d0,Video_PutPixel,video,high,"(x;y;col) planar; 96 bytes/row"
+00010108,Video_WaitVSync,video,high,"0x3DA bit 3"
+00010128,Sprite_Blit,video,high,"(x;y;spr;pageofs) planar sprite; colour 0x40 transparent"
+000101c8,Sprite_BlitShift,video,high,"same; adds 0x20 to colour"
+0001026c,Sprite_BlitMirror,video,high,"horizontally flipped (ids > 0x8000)"
+0001040c,Tiles_DrawColumnsParallax,video,medium,"tile plane over parallax buffer (tile 0x80 transparent)"
+000104f8,Tiles_ParallaxRow,video,medium,helper
+00010540,Tiles_DrawColumns,video,high,"24x16 window of 16x16 tiles; one plane per call"
+000105d9,Video_SelectPlane,video,high,"sequencer map mask"
+000105ef,Video_SetSplitLine,video,high,"CRTC line compare (18h/07h/09h) = HUD split screen"
+0001063a,Video_BlitLinearToPlanar,video,high,"(src;x;y;w;h)"
+000106b0,Video_SetStartAndPan,video,high,"(x;y;pageofs) CRTC 0Ch/0Dh + attr 33h pel pan; waits vsync"
+000106fa,Video_ReadPixel,video,medium,"GC read map"
+00011145,Pal_SetColor,video,high,"(idx;r;g;b) store + upload"
+0001119e,Pal_SetColorNoUpload,video,high,
+000111e6,Pal_SetColor12,video,high,"(idx; 0xRGB 4 bits each)"
+0001125c,Pal_GetColor12,video,high,
+000119b6,Pal_Upload,video,high,"(first;last) 3C8/3C9 from g_Palette"
+0001195b,Pal_Black,video,high,"(first;last)"
+00013b01,Pal_Fade,video,high,"(first;last;type;steps) 0/2 out; 1/3 in"
+000120ea,Pal_UploadAll,video,high,
+00012e92,Video_ShowPage,video,high,"CRTC start = page*0x5a00"
+00012ef0,Video_GetPage,video,high,
+00013a68,Video_FlipPage,video,high,"show back page (scroll + 0x600); g_VSyncWaits vsyncs; colour cycling; swap 0x18c0/0x78c0"
+000143d3,Video_BenchmarkSpeed,video,medium,"tile draw speed vs vsync -> g_VSyncWaits 0/1/2"
+00031a19,Video_CountVSync,video,medium,
+0003197c,Tiles_ClearColumns,video,low,"benchmark helper"
+0003184c,Tiles_ParallaxBench,video,low,"benchmark helper"
+0001334f,Video_FillRect,video,high,"(x1;y1;x2;y2;col)"
+00031604,Video_DrawLine,video,medium,"planar line (radar)"
+00013041,Video_DrawLineColor,video,medium,
+000143b0,Video_SetLineColor,video,medium,
+00011bee,Video_CopyRect,video,high,"VRAM->VRAM latch copy (page;x1;y1;x2;y2;dstpage;dx;dy)"
+00011a1a,Pic_LoadPax,files,high,"(name;page;applyPal): gfx/<name> LZW -> page (320x200 at row 20); gfx/<name>.pal 64 colours"
+000130c8,Pic_LoadHudPanel,files,high,"gfx/display.pax to VRAM top + .pal; split 0xaf; start 0x1ec0"
+00012114,File_LoadWhole,files,high,"(dir;name;&buf;size) size 0=filesize; -1=alloc; fatal if missing"
+00050000,LZW_Unpack,files,high,"obj2 asm (src;dst) LZW 9..12 bit; dict in BSS 0x60000; first dword = unpacked size"
+00050020,LZW_Init,files,high,obj2
+00050090,LZW_ReadCode,files,high,obj2
+000501e0,LZW_Decode,files,high,obj2
+00011306,Sprites_LoadSpx,files,high,"data/jetstrike.spx -> g_SpriteTab (8-byte hdr x;y;w/4;h); on reload only data/jetsprit.pal colours 64-95"
+00012f67,Sprites_ReplaceFromBank,files,high,"(slot;n;bank) copy n-th sprite of a bank into slot"
+00013773,Sprites_CountInBank,files,medium,
+00026473,Plane_LoadSpx,files,high,"plane/<name>.spx into 0x849f0"
+00026256,Plane_SetupSprites,files,medium,"per-plane offsets from misc.z"
+000264eb,Plane_ReplaceSprite,files,medium,
+0003f991,Enemy_LoadSpx,files,high,"plane/enemyX.spx"
+0003ff4d,Truck_LoadSpx,files,high,"plane/truck<c>.spx"
+0003fa76,Enemy_ReplaceSprite,files,medium,
+0003faab,Enemy_SetupSpriteIds,play,low,
+000114da,Fonts_Load,files,high,"misc/smallfnt.raw; misc/bigfnt.raw"
+000133b3,Tileset_LoadTlx,files,high,"map/<name>.tlx (LZW 256 tiles x 0x40) + map/<name>.pal (64 colours at index 128)"
+00025c13,Tileset_Load,files,medium,wrapper
+0001351e,Parallax_Load,files,high,"map/<name>.dx0|dx1 (LZW 0x28000 backdrop) + .p00/.p01/.p10 palette; detail off -> plain sky colours"
+0002422d,Map_LoadMxp,files,high,"map/<name><NN>.mxp LZW -> g_MapGrid (BE width + width x 64); column height table"
+000243d6,Map_StampBertha,files,medium,"data/berthaX overlay stamped into map"
+00024377,Map_ResetCounters,level,low,
+00022223,Weapons_ReturnUnused,game_flow,low,
+000222f0,Mission_ResetState,game_flow,medium,"stops CD; resets per-mission globals"
+00010cb6,Map_GetTileAttr,level,high,"(x;y;layer) attribute via .val table"
+00010d22,Map_SetTile,level,high,
+000116dd,Map_GetTile,level,high,
+00012f18,Byte_Set,level,low,
+00012f3e,Byte_Get,level,low,
+00013842,Level_DrawBackground,level,high,"24x16 tile window at camera into back page; parallax/no-parallax per plane"
+00014677,Level_DrawOverviewMap,level,medium,"4x4 px per tile"
+000145f9,Video_Fill4x4,video,low,
+00040e8b,Map_FindTile,level,medium,
+0003f195,Map_DamageColumn,level,low,
+0003b777,Map_CraterAt,level,low,
+0003cdec,Map_ScanAround,level,low,
+0001aeaa,Mem_AllocMapBuffers,level,high,"0x849f0 150000; map grid 0xfa04"
+00010f11,Sprite_Queue,video,high,"(x;y;id) add to draw list; ids > 0x8000 mirrored; wrap at 384"
+0001155e,Sprite_DrawQueue,video,high,"draw list back-to-front"
+00010e70,Sprite_ClearQueue,video,high,
+00011847,Sprite_GetX,video,medium,"header word 0"
+000117f8,Sprite_GetY,video,medium,
+00011895,Sprite_GetWidth,video,medium,"w*4"
+000118e7,Sprite_GetHeight,video,medium,
+0001102d,Sprite_DrawNow,video,high,"immediate blit"
+00011066,Sprite_DrawNowShift,video,high,
+0001206e,Sprite_Mirror,video,high,"id + 0x8000"
+00010eb0,IsOnScreen,play,high,"(camx;camy;x;y)"
+0001172a,BoxOverlap,play,high,"(x1;y1;x2;y2;dx;dy) collision"
+00010d65,Rand,platform,high,"rand() % (n+1)"
+00010e11,Clamp,platform,high,
+0001178a,Wrap,platform,high,
+00013a25,Sign,platform,high,
+00010da7,SwapInt,platform,high,
+00010ddc,SwapByte,platform,high,
+00010c6b,Str_TrimRight,platform,high,
+00014331,Bit_Test,platform,high,
+00014382,Bit_Clear,platform,high,
+000137de,Div16,platform,high,
+00011d02,Zone_Add,game_flow,high,"menu hit zones (zonemap)"
+00011dbc,Zone_HitTest,game_flow,high,
+00011e64,Zone_Clear,game_flow,high,
+000124e0,Text_DrawSmall,video,high,"(x;y;str;page)"
+000126e9,Text_DrawBig,video,high,
+000128f1,Text_DrawNumber,video,high,"(x;y;val;digits) 3x5 digits"
+00012831,Text_DrawDigit,video,high,
+00012343,Font_DrawSmallGlyph,video,high,
+000123fa,Font_DrawBigGlyph,video,high,
+00012970,Font_GlyphWidth,video,high,
+000129ee,Text_FitWidth,video,high,"word wrap"
+00012bed,Text_WidthSmall,video,high,
+00012d8d,Text_WidthBig,video,high,
+00026e03,Hud_PushMessage,play,high,"queue HUD message (max 10; 40 frames)"
+00026e5a,Hud_DrawMessages,play,high,
+00026cc6,Hud_Nop,play,low,stub
+00026ce1,Hud_PlaneMessage,play,low,
+00026d24,Hud_WeaponMessage,play,low,
+00025c8b,Hud_DrawPanel,play,high,"display.pax HUD; weapon icons; lives"
+00026174,Hud_DrawRadarLine,play,medium,
+0002ec74,Hud_UpdateRadar,play,medium,"radar / Jammed"
+00045c09,Pal_CycleEffects,video,medium,"colour cycling from flip"
+00046617,Pal_SaveNight,video,medium,"night palette"
+0004699e,Pal_Restore,video,medium,
+0002d34e,Player_Update,play,high,"player plane control; flight; camera follow modes (weapon cam; B52; Fat Albert; camera pod)"
+00032846,Player_Weapons,play,medium,"fire handling"
+00032585,Player_ThrottleUp,play,medium,
+000326d3,Player_ThrottleDown,play,medium,
+000324ed,Player_PitchUp,play,low,
+00032635,Player_PitchDown,play,low,
+000323b9,Player_RotateA,play,low,
+00032476,Player_RotateB,play,low,
+000341e9,Weapon_Fire,play,high,"spawns projectile per weapon type (0x8f168)"
+000346f9,Weapon_FireFromStock,play,medium,
+00034e56,Projectile_Init,play,medium,
+000351e9,Weapon_FireBomb,play,low,
+0003529c,Weapon_FireMissile,play,low,"Nuclear Psychopath warning"
+00035532,Weapon_FireCamera,play,low,"camera pod"
+000356fe,Weapon_FireGuided,play,low,
+0003494e,Weapon_FireSpecialA,play,low,
+00034b94,Weapon_FireSpecialB,play,low,
+00034dd0,Weapon_ArmA,play,low,
+00034e13,Weapon_ArmB,play,low,
+00034f0d,Weapon_FireRepeat,play,low,
+000348db,Weapon_DropMarker,play,low,
+00038a61,Flares_Update,play,low,
+000346d3,Flares_Add,play,low,
+000332fb,Projectiles_Update,play,medium,"player projectiles (0x92720 arrays)"
+00033308,Projectiles_Update_b,play,medium,"duplicate entry of 332fb"
+000415e4,Projectiles_UpdateGuided,play,medium,
+0003b27c,Debris_Update,play,low,
+0003b5c0,Debris_Spawn,play,low,
+00039b69,Explosion_Damage,play,high,"(x;y;vx;vy;type;dmg) explosion + damage + terrain"
+0003a99f,Explosion_Terrain,play,medium,
+0003adf9,Explosion_Particles,play,low,
+00026560,Particle_Spawn,play,high,"(x<<8;y<<8;vx;vy;...) max 40"
+0002661e,Particles_Update,play,high,
+00026520,Particles_Nop,play,low,
+0002653b,Particles_Clear,play,high,
+000268d9,Bullet_Add,play,medium,"max 32"
+0002694b,Bullets_Update,play,medium,
+0002688f,Bullets_Clear,play,medium,
+000267da,Hud_DrawTargetArrow,play,low,
+00027008,Player_Ejection,play,low,
+0002780b,Player_DeathAndLanding,play,medium,"crash/eject/landing state machine"
+00029b29,Player_Collide,play,low,
+00036ae3,EnemyAir_Update,play,medium,"enemy aircraft AI (0x9264c arrays)"
+00035e20,EnemyGround_Update,play,medium,
+00038ba8,EnemyBomber_Spawn,play,medium,"Enemy Bomber Raiding!"
+00017c56,Turrets_Update,play,low,
+00019fda,Helis_Update,play,low,"B52 Hit / Hercules Hit"
+00019cc8,Targets_Update,play,low,
+0003d105,Convoy_Update,play,medium,"Friendly vehicle / Mission Failed"
+00044478,Ships_Update,play,low,
+0002c55b,Balloons_Update,play,low,
+0002bc0b,Airbase_Update,play,low,
+00045859,Pickup_Update,play,low,
+0004596f,Crate_Update,play,low,
+00035a33,Mines_Update,play,low,
+00045584,Waypoint_Update,play,low,
+00014b4a,Flak_Update,play,low,
+000149ae,Building_Update,play,low,
+00016f13,Bonus_Spawn,play,medium,"next bonus at"
+00017072,Bonus_Update,play,medium,
+00017214,Bonus_Award,play,high,"switch on bonus type: Extra Aircraft; Auto Eject ..."
+0003f2fe,Player_DamageSystems,play,high,"random system failure; gendatad.dax messages (switch 0..15)"
+00039388,Engine_SoundUpdate,sound,medium,
+00039817,Engine_SetPitch,sound,medium,
+000391e3,Engine_Sfx,sound,low,
+0003f02e,Mission_CheckComplete,play,medium,
+00044a5d,Mission_CheckObjectives,play,medium,
+0004011f,Mission_CompleteScreen,play,low,
+000403c1,Camera_Update,play,low,
+0004424d,Enemy_InitPositions,play,low,
+00015194,Runway_Update,play,low,
+00015d2b,PlayerState_ResetA,play,low,
+00015d38,PlayerState_ResetA_b,play,low,dup
+000160f4,PlayerState_ResetB,play,low,
+00016101,PlayerState_ResetB_b,play,low,dup
+000167b6,CheatKeys,play,low,
+000167c3,CheatKeys_b,play,low,dup
+000315bc,Sfx_Play,sound,high,"(id;freq;vol;x) if sfx enabled"
+00031a53,Sfx_PlayChannel,sound,high,
+00031c51,Sfx_PlayVoice,sound,medium,
+000321e5,Sound_StopAll,sound,high,
+000322c4,Sound_SetFreq,sound,high,
+0003235d,Sound_SetVolume,sound,medium,
+00031e24,Sound_Init,sound,high,"GUS (obj4) else SB; loads misc/jetsound.aaf; DOS buffer; IRQ; DMA; timer"
+00032119,Sound_Shutdown,sound,high,
+00030670,SB_Detect,sound,high,"ports 0x210-0x280"
+000305da,SB_ResetDSP,sound,high,
+0003060f,SB_WriteDSP,sound,high,
+00030624,SB_ReadDSP,sound,high,
+00030639,SB_MixerWrite,sound,medium,
+0003057c,SB_SpeakerOn,sound,medium,
+00030712,SB_SetRate,sound,medium,
+000307ab,SB_Stop,sound,medium,
+000307c5,SB_SetupDmaBuffer,sound,medium,
+00030875,SB_AckIRQ,sound,high,"EOI"
+000308c3,SB_SetStopFlag,sound,low,
+000308de,SB_UnmaskIRQ,sound,high,
+000308fa,SB_RestoreIRQMask,sound,high,
+00030906,SB_StartDMA,sound,high,"DMA ch1 auto-init mode 0x59; page 0x83"
+000309ab,Mixer_SetChannel,sound,high,"(ch;ptr;?;len;vol;rate)"
+00030ac7,DMA_WaitPos,sound,medium,
+00030ffa,Mixer_SetRate,sound,medium,
+00070000,GUS_Detect,sound,high,"obj4 asm GUS driver"
+0007004c,GUS_Upload,sound,high,
+000700a6,GUS_SelectVoice,sound,high,
+000700f2,GUS_SetFreq,sound,medium,
+0007012b,GUS_SetVolume,sound,medium,
+000702d6,GUS_Reset,sound,medium,
+0007034d,GUS_PlayVoice,sound,medium,
+000700df,GUS_Shutdown,sound,medium,
+000300b9,CD_Check,sound,high,"0 ok; 1 no MSCDEX; 2 old; 3 wrong CD (needs 15 tracks)"
+0002f7e6,CD_MSCDEX_Install,sound,high,"INT 2Fh AX=1500 via DPMI 0x300"
+0002f892,CD_MSCDEX_Version,sound,high,"AX=150C > 2.09"
+0002fc91,CD_GetDiscInfo,sound,high,"IOCTL 0Ah first/last track"
+0002fe82,CD_ReadTrackTable,sound,high,"IOCTL 0Bh per track"
+0002f951,CD_PlayTrackRaw,sound,high,"device cmd 0x84"
+0002fb5a,CD_StopRaw,sound,high,"cmd 0x85"
+00030136,CD_PlayTrack,sound,high,"if music enabled"
+00030176,CD_Stop,sound,high,
+00083958,g_KeyDown,global,high,"256 bytes by scancode"
+0008453a,g_KeySlots,global,high,"remapped key words 0x8453a-0x84564 (JS.CFG)"
+0008455c,g_Fire,global,high,
+000936b4,g_Config,global,high,"JS.CFG 0x48 bytes"
+000936f8,g_CDMusicOn,global,high,
+000936fc,g_SfxOn,global,high,
+000936ee,g_SBIrq,global,high,"JS.CFG +0x3a"
+00082ed8,g_Palette,global,high,"768 bytes 6-bit"
+00083a54,g_SpriteTab,global,high,"1-based ptrs; max 0x212"
+00081ad8,g_SpriteQueue,global,high,"20-byte entries"
+00084500,g_SpriteQueueCount,global,high,
+0008005c,g_BackPage,global,high,"0x18c0 or 0x78c0"
+00080054,g_VSyncWaits,global,medium,
+00084536,g_DetailParallax,global,high,
+00084538,g_JoyEnabled,global,high,
+000849d0,g_MapGrid,global,high,
+0008fe90,g_MapWidth,global,high,tiles
+000849d8,g_MapVal,global,high,".val attribute table"
+000845b8,g_TilePtrs,global,high,
+000903a8,g_CamX,global,high,
+000903ac,g_CamY,global,high,
+00090214,g_PlayerScrX,global,medium,
+00090218,g_PlayerScrY,global,medium,
+000905c4,g_ShakeX,global,low,"added to sprite x"
+000905c8,g_ShakeY,global,low,
+0008ff7c,g_GameMode,global,high,"0 campaign M0; 1 training M1; 2 practice M2; 3 Aerolimits M3"
+000903e0,g_Mission,global,high,
+000902f0,g_Lives,global,high,"7 at start; -10 = game finished"
+000903e8,g_MissionResult,global,medium,"2 = success"
+00090800,g_AbortFlag,global,medium,
+00091648,g_MissionParams,global,high,"30 BE words from M record"
+00092992,g_BriefingText,global,high,
+00085148,g_MapName,global,high,
+00084b48,g_TilesetName,global,high,
+0008a428,g_HudText,global,high,"hudtext.dat 0x50-byte lines"
+0008c8d8,g_WeaponNames,global,high,"weapons.dat"
+0008f168,g_WeaponType,global,medium,"6 ints per weapon"
+00086cb0,g_PlaneNames,global,high,"jets.n"
+00085c48,g_DamageMsgs,global,high,"gendatad.dax"
+00093344,g_CDDrive,global,high,
+00080430,g_SoundDevice,global,high,"0 none; 1 SB; 2 GUS"
+00093388,g_SampleData,global,high,
+000904d0,g_HudMsgCount,global,medium,
