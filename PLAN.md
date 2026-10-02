@@ -98,7 +98,13 @@ Split by call tree once the map is known; expected:
 - `level` — map/tile scroller, mission script interpreter, enemy spawning
 - `play` — player plane physics, weapons, enemies AI, collisions, damage, HUD, carrier/landing
 
-### 4. `jsport/` skeleton
+### 4. `jsport/` skeleton — done (2026-10-02, `jsport/PORTING.md`)
+MSYS2 mingw64 gcc + ninja + SDL3 3.4.16, warning-free. Host layer (59.94 Hz virtual retrace, set-1
+scancodes, audio: SB mixer stream + WAV music stream), mode-X VRAM/CRTC/DAC model, C LZW (187/187
+files identical to `tools/jsunpack.py`, `tools/lzw_check.py`), Pic_LoadPax (JETLOGO snapshot pixel-exact),
+Kbd_ISR, Watcom LCG, 8.3 file access, `tools/gen_symbols.py` → `src/symbols.h`. Placeholder shows
+JETLOGO, plays track 2, Space plays a sfx, Esc quits.
+Original sub-plan:
 CMake + SDL3 adapted from `srport`/`td3port`: host (timer, retrace, scancodes, mouse, gamepad,
 audio mixer for SB samples **plus a music stream for the ripped CD tracks**), 8-bit
 indexed framebuffer + palette, generated `symbols.h`, `PORTING.md`, headless test path
