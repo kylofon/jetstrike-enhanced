@@ -87,7 +87,7 @@ Original sub-plan:
 Nine specs with symbol tables: `platform`, `video`, `sound`, `game_flow`, `intro`, `level`, `player`,
 `weapons`, `enemies`; names merged (`tools/merge_symbols.py`, hand-resolved conflicts in
 `port/symbols_overrides.csv`): JS 1297 names, INTRO 209. Logic runs at 19.98 Hz (3 retraces of 59.94 Hz).
-Bugs and quirks: `port/QUIRKS.md` (policy: keep, fix only crashes / host dependence).
+Bugs and quirks: `port/QUIRKS.md` (all kept in this port; fixes go to Enhanced).
 Original sub-plan:
 Split by call tree once the map is known; expected:
 - `platform` — startup, config file, timer/IRQ, keyboard (remap), joystick, file I/O, memory
