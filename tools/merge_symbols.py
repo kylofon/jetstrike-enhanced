@@ -7,7 +7,7 @@ Also writes work/<exe>_symbols_ghidra.txt for tools/ghidra/ApplySymbols.java.
 
     python tools/merge_symbols.py js|intro|config
 """
-import csv, glob, os, re, sys
+import csv, glob, io, os, re, sys
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +17,7 @@ paths = [os.path.join(ROOT, 'port', f'symbols_{k}{sfx}.csv') for k in ('rt', 'ga
 specs = sorted(glob.glob(os.path.join(ROOT, 'port', 'spec', '*_symbols.csv')))
 if exe == 'js':
     paths += [p for p in specs if os.path.basename(p) != 'intro_symbols.csv']
+    paths.append(os.path.join(ROOT, 'port', 'symbols_overrides.csv'))  # hand-resolved conflicts, last
 elif exe == 'intro':
     paths += [p for p in specs if os.path.basename(p) == 'intro_symbols.csv']
 
@@ -25,8 +26,13 @@ for path in paths:
     if not os.path.exists(path):
         continue
     src = os.path.basename(path)
-    with open(path, newline='', encoding='utf-8') as fh:
-        for r in csv.DictReader(fh):
+    raw = open(path, 'rb').read()
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeDecodeError:  # an agent wrote it in the Windows code page
+        text = raw.decode('cp1252')
+    if True:
+        for r in csv.DictReader(io.StringIO(text, newline='')):
             try:
                 a = int(r['address'].strip(), 16)
             except (ValueError, AttributeError):
@@ -38,7 +44,10 @@ for path in paths:
 out, conflicts = [], []
 for a in sorted(rows):
     names = {n for _, n, _ in rows[a]}
-    if len(names) > 1:
+    first_pass = {'symbols_rt.csv', 'symbols_game.csv', 'symbols_data.csv'}
+    later = {n for src, n, _ in rows[a] if src not in first_pass}
+    resolved = rows[a][-1][0] == 'symbols_overrides.csv' or len(later) == 1
+    if len(names) > 1 and not resolved:  # specs beat the first-pass tables; overrides beat everything
         conflicts.append(f'{a:08x}: ' + ', '.join(f'{n} ({s})' for s, n, _ in rows[a]))
     src, name, r = rows[a][-1]  # spec files (last) win over the first-pass tables
     out.append(dict(address=f'{a:08x}', name=name, module=r.get('module', ''),
@@ -53,6 +62,6 @@ with open(os.path.join(ROOT, 'work', f'{exe}_symbols_ghidra.txt'), 'w', newline=
     for r in out:
         kind = 'global' if r['module'] == 'global' or r['name'].startswith('g_') else 'func'
         fh.write(f"{kind} {r['address']} {r['name']}\n")
-print(f'{exe}: {len(out)} symbols, {len(conflicts)} conflicts')
+print(f'{exe}: {len(out)} symbols, {len(conflicts)} unresolved conflicts')
 for c in conflicts:
     print('  ' + c)
