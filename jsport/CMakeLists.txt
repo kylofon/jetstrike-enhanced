@@ -36,3 +36,11 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:jsport> "-DSEARCH=${JS_DLL_DIR}"
                 -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_dlls.cmake)
 endif()
+
+# The launcher ("JetStrike"): the game folder, the CD music (and ripping it), the settings CONFIG.EXE kept
+# in JS.CFG, the port's options; built beside jsport.exe. It needs wxWidgets 3.2
+# (MSYS2: mingw-w64-x86_64-wxwidgets3.2-msw) and a C++17 compiler.
+option(JS_LAUNCHER "Also build the launcher, JetStrike.exe (wxWidgets)" OFF)
+if(JS_LAUNCHER)
+    add_subdirectory(launcher)
+endif()
