@@ -98,7 +98,10 @@ one per spec, with a header for the API other files use.
   `host_wait_vretrace` presents the frame, pumps events and sleeps to the next 59.94 Hz boundary. The CPU
   benchmark is not run: `g_VSyncWaits = 2` (logic at 19.98 Hz, platform.md §6.4). Nothing else paces the game.
 * **Keyboard**: the host delivers set-1 bytes to `Kbd_ISR` (E0 prefixes included; the ISR ignores them as
-  the original does). Key repeats are not delivered (equivalent, platform.md §3.3).
+  the original does). The PC keyboard's typematic repeat is emulated (host_input.c: the last key pressed resends its
+  make code after 500 ms, 30 per second, on the JS_KEYS clock); SDL's repeat events are ignored. It is not optional:
+  Player_Update clears the direction slots while looking around (KP*), the repeat brings them back (platform.md
+  Corrections 3). Keypad keys map by SDL scancode (position), so NumLock does not matter, as on DOS.
 * **Files**: all game files go through `Platform_Fopen` / `File_LoadWhole` with the original's DOS names
   (`"data/jetstrike.spx"` opens `DATA/JETSTRIK.SPX`).
 * **Sound**: the mixer runs on SDL's audio thread (`Mixer_Render`, sound.md §2.14); game-thread changes of

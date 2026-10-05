@@ -78,12 +78,40 @@ static u16 set1_scan(SDL_Scancode sc)
     }
 }
 
+/* Typematic repeat of the PC keyboard: the last key pressed resends its make code (E0 prefix included) while
+ * it is held, after TYPEMATIC_DELAY, at TYPEMATIC_RATE per second; releasing it stops the repeat, which does not
+ * resume for another key still held. The game depends on it: Kbd_ISR recomputes every key slot on each byte, and
+ * Player_Update clears the direction slots while "looking around" (KP*), so on DOS the held arrow comes back
+ * with the next repeat (the view stays shifted) and without repeats the look-around lasts one frame. SDL's own
+ * repeat events are not used (host-dependent, absent for JS_KEYS): the repeat runs on the JS_KEYS clock
+ * (host_script_seconds), so scripted runs with JS_VCLOCK=1 stay frame-exact. 500 ms / 30 per second: the
+ * DOSBox keyboard's values (the 8042 power-on default is 500 ms / 10.9 per second; BIOSes commonly program
+ * faster). */
+#define TYPEMATIC_DELAY 0.5
+#define TYPEMATIC_RATE  30.0
+static u16 tm_code;                      /* key being repeated (0 = none) */
+static double tm_next;                   /* time of its next repeat */
+
 static void send_key(u16 code, bool down)
 {
+    bool was = held[code & 0x1FF];
     held[code & 0x1FF] = down;
+    if (down && !was) { tm_code = code; tm_next = host_script_seconds() + TYPEMATIC_DELAY; }
+    else if (!down && tm_code == code) tm_code = 0;
     if (!kbd_handler) return;
     if (code & GREY) kbd_handler(0xE0);
     kbd_handler((u8)(down ? (code & 0x7F) : ((code & 0x7F) | 0x80)));
+}
+
+static void typematic(void)
+{
+    if (!tm_code || !held[tm_code & 0x1FF]) { tm_code = 0; return; }
+    double now = host_script_seconds();
+    if (now < tm_next) return;
+    tm_next = now + 1.0 / TYPEMATIC_RATE;    /* at most one repeat per poll (host_pump runs at least once per retrace) */
+    if (!kbd_handler) return;
+    if (tm_code & GREY) kbd_handler(0xE0);
+    kbd_handler((u8)(tm_code & 0x7F));
 }
 
 static void release_all(void)
@@ -96,7 +124,7 @@ void host_input_event(const SDL_Event *ev)
 {
     switch (ev->type) {
     case SDL_EVENT_KEY_DOWN:
-        if (ev->key.repeat) break;                       /* platform.md §3.3: repeats change nothing */
+        if (ev->key.repeat) break;                       /* the host's repeats: typematic() makes the PC's own */
         if (ev->key.key == SDLK_RETURN && (ev->key.mod & SDL_KMOD_ALT)) break;   /* full screen toggle */
         { u16 c = set1_scan(ev->key.scancode); if (c) send_key(c, true); }
         break;
@@ -146,6 +174,7 @@ void host_input_script(void)
     static u16 pending[8];                       /* keys of a tap, released after TAP_SECONDS */
     static int npending;
     static double release_at;
+    typematic();
     if (!checked) { spec = SDL_getenv("JS_KEYS"); checked = true; }
     if (npending) {
         /* The game polls g_KeyDown once per frame, so a tap is held for a few frames. */

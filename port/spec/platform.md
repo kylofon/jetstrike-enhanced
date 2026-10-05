@@ -578,3 +578,10 @@ None of it needs emulating; all is replaced by SDL.
    open (game_flow.md Corrections 1), so the first-dot rule of §8.2 is enough.
 2. §4.1/§4.2 port note: the shipped JS.CFG has the joystick off (+0x24 = 0); the port still reads a connected
    gamepad in Input_ReadControls (direction bits and button 1 directly), see jsport/PORTING.md.
+3. §3.3 port mapping: ignoring the typematic repeat is **not** equivalent. Kbd_ISR recomputes every key slot from
+   `g_KeyDown` on each byte, and Player_Update 0x2d6c1 clears `g_KeyUp/Dn/Left/Right` after computing the
+   look-around view (KP*, level.md §6.2). On DOS the held arrow's repeated make codes set the slot again (the view
+   stays shifted, and the plane answers held arrows again after KP* is released); without repeats the view shifts
+   for one frame only. The port emulates the keyboard's repeat (last key pressed, 500 ms delay, 30/s; the latches
+   are unaffected: `g_AltHeld`/`g_CtrlHeld` stay 1 while the key is held, the pending-request case of §3.3 then
+   behaves as on DOS).
