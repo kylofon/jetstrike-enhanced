@@ -3,6 +3,7 @@
 #include "video.h"
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,6 +30,11 @@ static VideoLayout layout_classic, layout_view;
 static bool mission_view;                       /* the screen is the view (from Pic_LoadHudPanel), else 320x240 */
 static bool classic_screen;                     /* ENH: a front-end style screen in a mission (Video_ClassicScreen): 320x240 */
 /* ENH: g_TileWindow (0x831D8, [16][24], 13 rows drawn), out of the image: vl.tile_rows x vl.tile_cols ids. */
+/* ENH: the backdrop origin of the last Level_DrawBackground (ground_px) and the JS_PROBECHECK counters. */
+static s32 bg_px, bg_py;
+static bool probe_check;
+static long probe_diffs, probe_total;
+static void probe_report(void) { fprintf(stderr, "probe: %ld reads, %ld differ\n", probe_total, probe_diffs); }
 static u8 tile_window[((VIEW_MAX_H - 65 + 46) / 16) * ((VIEW_MAX_W + 64) / 16)];
 
 /* The VRAM layout of a w x h view. Play page: the 16-row tile margin above the playfield, up to 15 rows of fine
@@ -105,6 +111,7 @@ void Video_Init(int view_w, int view_h)
     vram = calloc((size_t)n, 1);
     if (!vram) host_fatal_code(2, "out of memory (VRAM)");
     Video_UseLayout(false);
+    if (getenv("JS_PROBECHECK")) { probe_check = true; atexit(probe_report); }
     host_set_frame_source(compose);
 }
 
@@ -288,10 +295,34 @@ void Video_SetStartAndPan(u32 x, s32 y, s32 base)
     crtc.pan = (u8)(x & 3);
 }
 
-/* 0x106fa Video_ReadPixel: collision probe on the drawn page. */
+/* ENH: the pixel the background draw puts at (x, y) of a play page, from the tile window, the tile art and the
+ * backdrop (the same values as Tiles_DrawColumns / Tiles_DrawColumnsParallax write), 0 outside the window. */
+static u8 ground_px(s32 x, s32 y)
+{
+    if ((u32)x >= (u32)vl.stride) {
+        if (vl.view_w == 320) {                              /* the page row wraps into the next / previous row */
+            y += x < 0 ? -1 - (-x - 1) / vl.stride : x / vl.stride;
+            x = ((x % vl.stride) + vl.stride) % vl.stride;
+        } else x = x < 0 ? 0 : vl.stride - 1;               /* a wide view: the nearest column */
+    }
+    if ((u32)x >= (u32)(vl.tile_cols * 16) || (u32)y >= (u32)(vl.tile_rows * 16)) return 0;
+    u8 v = tile_px(g_TilePtrs[tile_window[(y / 16) * vl.tile_cols + x / 16]], x & 15, y & 15);
+    if (v == 0x80 && g_DetailParallax && x / 16 < vl.tile_cols - 2) v = par_px(g_ParallaxBuf, bg_py + y, bg_px + x);
+    return v;
+}
+
+/* 0x106fa Video_ReadPixel: collision probe. ENH: a tile lookup (ground_px) instead of a read of the drawn page.
+ * The JS_PROBECHECK environment variable compares both and reports the differences (E3.2 check). */
 int Video_ReadPixel(s32 x, s32 y, s32 base)
 {
-    u8 v = vget(VIDX(base, x, y));
+    u8 v = ground_px(x, y);
+    if (probe_check && base != 0) {
+        u8 pv = vget(VIDX(base, x, y));
+        if ((pv >= 0x80 && pv <= 0xC0 ? pv - 0x80 : 0) != (v >= 0x80 && v <= 0xC0 ? v - 0x80 : 0)) {
+            if (probe_diffs++ < 20) fprintf(stderr, "probe diff x=%d y=%d page=%02x tile=%02x\n", x, y, pv, v);
+        }
+        probe_total++;
+    }
     return (v >= 0x80 && v <= 0xC0) ? v - 0x80 : 0;
 }
 
@@ -513,6 +544,8 @@ void Level_DrawBackground(s32 col, s32 row)
      * view with the same bottom edge); the extra rows show the lines above it */
     s32 py = (s32)((double)(g_CamY + VIEW_EXTRA_ROWS + 0x7D8) / 9.25 - (double)g_ScrollFineY) - VIEW_EXTRA_ROWS;
     int pagesel = (g_BackPage == vl.page_a) ? 0 : 8;
+    bg_px = px;
+    bg_py = py;
     for (int plane = 0; plane < 4; plane++) {
         Video_SelectPlane(plane);
         if (g_DetailParallax)

@@ -16,7 +16,7 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Next is U-wide (look at the dumps), then E3.2. | | |
+| — | Nothing yet. Next is U-wide (look at the dumps), then U-play. | | |
 
 ## Status
 
@@ -25,7 +25,7 @@ remove it when it is done.
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
   parallax at any view; 76/76 at 320×240), E2.2 (camera limit, player box centred, blitter clipping), HUD centred (E4.1), E3.1 (screen-value
   sites: changed or tagged as kept; 76/76 at 320×240).
-- **Next:** U-wide (user), E3.2 (ground collision), Opus; then U-play.
+- **Next:** U-wide (user), U-play (user), E4.2 launcher (ground collision), Opus; then U-play.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -241,8 +241,19 @@ E2 notes (from E2.1):
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E3.1 | Tag every screen-value site (`/* ENH: view */`), confirm each against the spec; change `IsOnScreen`, culling and spawn edges | S | done 2026-10-06 (see E2 notes) |
-| E3.2 | Ground collision: tile lookup instead of the page read; verify it matches the page read at 320×240 over whole missions | O | M |
+| E3.2 | Ground collision: tile lookup instead of the page read; verify it matches the page read at 320×240 over whole missions | O | done 2026-10-06 (see E3 notes) |
 | U-play | Play-test every mission type (combat, city, jungle, bonus, training) at 480 and 640 wide; note difficulty | user | 45 min |
+
+E3 notes (from E3.2):
+- `Video_ReadPixel` (convoy, target vehicles, commandos, ground pickup) now reads the tile window: `ground_px` in
+  `video.c` (tile art, backdrop for 0x80 pixels, same values the background draw writes), no page read. Outside the
+  row: at 320 wide it wraps into the neighbouring row as the page did, in a wide view it takes the nearest column.
+  The pickup's lower probe clamp `0xbf` is `0xbf + VIEW_EXTRA_ROWS` (`support.c`).
+- Check: `JS_PROBECHECK=1` makes every read also read the page and report differences on exit (stderr). 80 missions
+  scripted at 320×240: only missions 31 and 65 reach a probe (618 reads); 4 differ, all with x < 0 (a unit 10–30 px
+  left of the view, where the page row wrap holds a sprite drawn earlier in the frame; the tile lookup gives the
+  ground). Every in-view read matches. Snapshots 76/76. Convoys and commandos are barely covered by the scripted
+  flights: U-play should watch vehicles sinking or climbing and commandos on slopes.
 
 ### Phase E4 — HUD and launcher (§5–6)
 | Id | Task | Model | Size |

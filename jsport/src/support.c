@@ -318,7 +318,7 @@ static void ground_pickup(void)
         else
             Sprite_Queue(g_PickupX - g_CamX, g_PickupY - g_CamY, g_PickAnim + 0xd6);
         int y = (g_PickupY - g_CamY) + 1 + g_ScrollFineY;
-        if (y >= 0xc0) y = 0xbf;
+        if (y >= 0xc0 + VIEW_EXTRA_ROWS) y = 0xbf + VIEW_EXTRA_ROWS;     /* ENH: view */
         if (Video_ReadPixel(g_PickupX - g_CamX + g_ScrollFineX, y, g_BackPage) == 0) {
             if (Video_ReadPixel(g_PickupX - g_CamX + g_ScrollFineX, (g_PickupY - g_CamY) + g_ScrollFineY, g_BackPage) != 0) {
                 g_PickupY--;
