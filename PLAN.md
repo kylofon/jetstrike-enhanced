@@ -204,9 +204,10 @@ E2 notes (from E2.1):
   (`camX + 0x140`, player.c) use the right edge + extra cols. Enemy ground units need nothing: they live on the
   map and are drawn by `IsOnScreen`. Bullets and explosions (user, 2026-10-06): player
   bullets live while in the view (weapons.c:294, `0x140`/`0xb0` + extra; the gun now reaches the view's right
-  edge), `Explosion_Terrain` runs for craters in the view (weapons.c:1515). Left for E3.1: winch release
-  (support.c:347), look-around step (player.c:709, ±0x140 / ±0xb0), enemy shell pixels (enemies.c:868, Q13),
-  lightning x clamp (frame.c:105).
+  edge), `Explosion_Terrain` runs for craters in the view (weapons.c:1515). Winch and look-around (user,
+  2026-10-06): the winch lets go past `camX + 0x17c + extra cols` (support.c:347); look-around steps one view
+  width / playfield height (player.c:709, `0x140`/`0xb0` + extra). Left for E3.1: enemy shell pixels
+  (enemies.c:868, Q13), lightning x clamp (frame.c:105).
 - Messages (user, 2026-10-06): `Hud_DrawMessages` and `Hud_DrawBriefing` centre on `vl.view_w / 2` (same rows
   from the top). The other centred `0xa0` texts are 320×240 front-end screens or HUD-panel text.
 - The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from

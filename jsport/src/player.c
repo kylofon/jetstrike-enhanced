@@ -706,8 +706,9 @@ void Player_Update(void)
     if (g_KeyLook != 0) {
         if (DS32(0x8FFA4) == 0 && DS32(0x8FF50) == 0) Hud_PushMessage(DSTR(0x81278));   /* "Looking around" */
         g_ViewTarget = -1;
-        g_ViewX = g_CamX + ((s32)g_KeyLeft - (s32)g_KeyRight) * -0x140;
-        g_ViewY = g_CamY + ((s32)g_KeyUp - (s32)g_KeyDn) * -0xb0;
+        /* ENH: view: one view width / playfield height (0x140 / 0xb0 at 320x240) */
+        g_ViewX = g_CamX + ((s32)g_KeyLeft - (s32)g_KeyRight) * -(0x140 + VIEW_EXTRA_COLS);
+        g_ViewY = g_CamY + ((s32)g_KeyUp - (s32)g_KeyDn) * -(0xb0 + VIEW_EXTRA_ROWS);
         g_KeyUp = 0;
         g_KeyDn = 0;
         g_KeyLeft = 0;

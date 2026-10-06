@@ -344,7 +344,7 @@ static void ground_pickup(void)
             Hud_PushMessage(DSTR(0x8B058));                              /* AGENT KILLED ! */
         }
     }
-    if (g_Winch == 1 && (g_PickupX < g_CamX - 0x40 || g_CamX + 0x17c < g_PickupX)) g_Winch = 3;
+    if (g_Winch == 1 && (g_PickupX < g_CamX - 0x40 || g_CamX + 0x17c + VIEW_EXTRA_COLS < g_PickupX)) g_Winch = 3;   /* ENH: view */
     if (0 < g_Winch && g_IsHeli == 1) {
         Sprite_Queue(g_PlayerScrX, g_PlayerScrY + g_WinchLen, 0xab);
         if (g_Winch == 1) {
