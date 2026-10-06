@@ -200,6 +200,8 @@ E2 notes (from E2.1):
 - `IsOnScreen` (decision 2): right edge `camX + 0x140 + extra cols`, bottom `camY + 200 + extra rows`
   (else the plane and units in the new area are culled). `Lock_Draw` clamps the reticle to the view edges.
   Spawn edges and the other screen-value sites are still E3.1.
+- Messages (user, 2026-10-06): `Hud_DrawMessages` and `Hud_DrawBriefing` centre on `vl.view_w / 2` (same rows
+  from the top). The other centred `0xa0` texts are 320×240 front-end screens or HUD-panel text.
 - The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from
   `camY + extra`, minus extra); the extra rows show lines above it, line 0 repeated above the top of the art
   (plain sky at 960×540 high up).

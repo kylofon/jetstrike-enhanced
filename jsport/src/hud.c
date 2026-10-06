@@ -125,7 +125,7 @@ void Hud_DrawMessages(void)
     int row = 0, k0 = 0;
     for (g_LoopI = 0; g_LoopI < g_HudMsgCount; g_LoopI++) {
         strcpy(buf, g_HudMsgs + g_LoopI * 100);
-        Text_DrawSmall(0xa0 - Text_WidthSmall(buf) / 2 + g_ScrollFineX, row * 8 + 0x2e + g_ScrollFineY, buf, 1);
+        Text_DrawSmall(vl.view_w / 2 - Text_WidthSmall(buf) / 2 + g_ScrollFineX, row * 8 + 0x2e + g_ScrollFineY, buf, 1);   /* ENH: view */
         if (--g_HudMsgTime[g_LoopI] == 0) {
             for (int k = k0; k < g_HudMsgCount - 1; k++) {
                 memmove(g_HudMsgs + k * 100, g_HudMsgs + (k + 1) * 100, strlen(g_HudMsgs + (k + 1) * 100) + 1);
@@ -161,7 +161,7 @@ void Hud_DrawBriefing(void)
             line[n + 1] = 0;
             memmove(tmp, tmp + n + 1, strlen(tmp + n + 1) + 1);
         }
-        Text_DrawSmall(0xa0 - Text_WidthSmall(line) / 2 + g_ScrollFineX, DS32(0x90434) * 8 + 10 + g_ScrollFineY, line, 1);
+        Text_DrawSmall(vl.view_w / 2 - Text_WidthSmall(line) / 2 + g_ScrollFineX, DS32(0x90434) * 8 + 10 + g_ScrollFineY, line, 1);   /* ENH: view */
         DS32(0x90434)++;
     }
 }
