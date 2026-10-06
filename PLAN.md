@@ -9,6 +9,39 @@ The original: VGA mode X 320×240, with a **320×175 playfield** above a 65-line
 Tiles are 16×16. The map is W×64 tiles (1024 px tall) and wraps horizontally. The parallax backdrop is
 320×512. Game logic runs at 19.98 Hz.
 
+## User to-do
+
+What the agents need from you now, most urgent first. Agents add a row when they hand you a task and
+remove it when it is done.
+
+| Task | What to do | For | Time |
+|---|---|---|---|
+| — | Nothing yet. Start E0.2 (below). | | |
+
+## Status
+
+- **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed).
+- **Next:** E0.2 (reference snapshots), Sonnet.
+- Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
+  (symptom, file, what was tried). Never carry an old transcript over.
+
+## Model guide
+
+| Model (app model picker) | Effort | Use for | Relative cost |
+|---|---|---|---|
+| **Haiku 4.5** | low–medium | Running the snapshot check, regenerating outputs, packaging, release files, PLAN bookkeeping | 1× |
+| **Sonnet 5.5** | medium | Default: harnesses, launcher/HUD/settings code, tagging screen-value sites against the spec, QUIRKS fixes | ~3× |
+| **Opus 5.5** | high | Video model and stride/page rework, the wide renderer, collision rework, render interpolation, cross-module bugs, escalations | ~5× |
+
+## How to run a subtask (user, every time)
+
+1. Code tab → **New session** in `C:\Coding\JetStrikeEnhanced` (never continue an old session for a new
+   subtask: the old context is re-billed on every turn).
+2. Pick the model from the subtask table in the model picker; set the effort from the Model guide.
+3. Send exactly: `Do E0.2 from PLAN.md.` (with the subtask id).
+4. When the agent says it is done: glance at the commit (`git log -1 --stat`), do any U-check it asks
+   for, then close the session.
+
 ## Ground rules
 - **Same game, more view.** The rules, physics and AI distances measured from the player stay as they are.
   The only things that change are values that mean "the screen edge".
@@ -95,22 +128,62 @@ Two kinds of values. Look at each site and tag it in the code (`/* ENH: view */`
   the window integer scale for that view. The window should fit the desktop (pick the largest integer
   scale that fits).
 
-## Phases
-- **E0 Repo setup.** Done: jetstrike-sdl3 history merged; binaries renamed (game `jsenh`, launcher `JetStrikeEnhanced`, own settings folder; CMake targets keep their names for clean upstream merges). Still to do:
-  Make a set of reference snapshots at 320×240 (headless
-  `SDL_VIDEO_DRIVER=dummy`, scripted keys) for regression tests.
-- **E1 Runtime view size.** Video model, stride, pages, split, presentation, switching between front end
-  and mission. At 320×240 the output must match the snapshots byte for byte.
-- **E2 Wide renderer.** Tile window, draw loops, parallax wrap and extension, map bottom fill, sprite
-  clipping, camera box. Visible milestone: wide missions draw correctly, with the logic unchanged.
-- **E3 Gameplay edges.** Tag all ~70 sites, change the "on screen" and spawn values, and replace the
-  page-read collision with tile lookups. Play-test every mission type (combat, city, jungle, bonus,
-  training) at 480 and 640 wide.
-- **E4 HUD and launcher.** Centred HUD, view setting, desktop-fit scaling.
-- **E5 Fixes.** Bug-fix list from QUIRKS.md, each behind the Enhanced build only.
-- **E6 Release.** Zip, launcher, `RELEASE_NOTES.md`, `SHA256SUMS.txt`, same as the sdl3 release.
-- Later, optional: 60 Hz render interpolation (logic stays 19.98 Hz; smooths the 3-frame scroll steps),
-  a wider HUD art panel, remastered sprites.
+## Subtasks
+
+Model: H = Haiku, S = Sonnet, O = Opus. Size: S < 1 h of agent work, M = one session, L = one long session
+(split it if the context gets large).
+
+### Phase E0 — Repository
+| Id | Task | Model | Size / Status |
+|---|---|---|---|
+| E0.1 | jetstrike-sdl3 history merged; binaries renamed (game `jsenh`, launcher `JetStrikeEnhanced`, own settings folder; CMake targets keep their names for clean upstream merges) | O | done 2026-10-06 |
+| E0.2 | Reference snapshots at 320×240: headless (`SDL_VIDEO_DRIVER=dummy`), scripted keys, frame dumps for front end + one mission of each type, plus a compare script (`tools/snapcheck`) that prints only pass/fail counts | S | M |
+
+### Phase E1 — Runtime view size (§1–2; gate: E0.2 snapshots match byte for byte at 320×240)
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E1.1 | Video model: runtime `view_w × view_h`, stride, page layout and split, `--view` parsing and validation | O | L |
+| E1.2 | Presentation and switching between the 320×240 front end and the mission view (pillarbox / integer scale) | S | M |
+| E1.3 | Run the snapshot check at 320×240, fix-or-report diffs (escalate real diffs to Opus) | H | S |
+
+### Phase E2 — Wide renderer (§3)
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E2.1 | Tile window, draw loops, parallax wrap and extension (`x + stride`) | O | L |
+| E2.2 | Map bottom fill, blitter clipping, camera box / lead margin | S | M |
+| E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
+| U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
+
+### Phase E3 — Gameplay edges (§4)
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E3.1 | Tag every screen-value site (`/* ENH: view */`), confirm each against the spec; change `IsOnScreen`, culling and spawn edges | S | M |
+| E3.2 | Ground collision: tile lookup instead of the page read; verify it matches the page read at 320×240 over whole missions | O | M |
+| U-play | Play-test every mission type (combat, city, jungle, bonus, training) at 480 and 640 wide; note difficulty | user | 45 min |
+
+### Phase E4 — HUD and launcher (§5–6)
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E4.1 | HUD panel centred with side fill | S | S |
+| E4.2 | Launcher "View size" (presets + custom) → `--view WxH`; desktop-fit integer scale | S | M |
+
+### Phase E5 — Fixes
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E5.n | One session per 3–5 related items from `port/QUIRKS.md` "For JetStrike Enhanced", each behind the Enhanced build only; snapshot check after each | S | M each |
+
+### Phase E6 — Release
+| Id | Task | Model | Size |
+|---|---|---|---|
+| E6.1 | Zip, launcher, `RELEASE_NOTES.md`, `SHA256SUMS.txt`, same as the sdl3 release | H | S |
+| U-release | Install from the zip on a clean folder, play one mission, approve publishing | user | 15 min |
+
+### Later, optional
+| Id | Task | Model | Size |
+|---|---|---|---|
+| L1 | 60 Hz render interpolation (logic stays 19.98 Hz; smooths the 3-frame scroll steps) | O | L |
+| L2 | Wider HUD art panel (art by the user or sourced; code to load it) | S | M |
+| L3 | Remastered sprites (art pipeline + loader) | S | M |
 
 ## Risks
 - Hidden 320/384 assumptions in the asm-derived blitters. The E1 snapshot match catches these at the
