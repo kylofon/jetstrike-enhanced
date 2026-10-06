@@ -1,5 +1,5 @@
 // app.cpp -- the JetStrike launcher: the game folder, the CD music, the settings CONFIG.EXE kept in
-// JS.CFG, the port's options, then jsport.
+// JS.CFG, the port's options, then jsenh.
 //
 // Two developer checks run without a window (they print to the console they are started from):
 //   JetStrike --selftest-cfg <JS.CFG>   reads the file, writes it back to a temporary file and checks
@@ -100,7 +100,7 @@ int Rip(const wxString& cue, const wxString& out) {
 class LauncherApp : public wxApp {
 public:
     bool OnInit() override {
-        SetAppName("JetStrike");
+        SetAppName("JetStrikeEnhanced");
         SetVendorName("Krzysztof Kania");
         // The developer checks, before wxWidgets' own command-line parsing (which knows no such options).
         if (argc >= 3 && (argv[1] == "--selftest-cfg" || argv[1] == "--rip")) AttachConsoleOutput();

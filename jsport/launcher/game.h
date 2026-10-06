@@ -1,4 +1,4 @@
-// game.h -- what a game folder holds, where jsport is, and starting it.
+// game.h -- what a game folder holds, where jsenh is, and starting it.
 #pragma once
 
 #include <wx/string.h>
@@ -20,12 +20,12 @@ GameFolder ReadGameFolder(const wxString& dir);
 // The folder the launcher runs from.
 wxString LauncherDir();
 
-// Where things are by default: "Game" and jsport(.exe) beside the launcher.
+// Where things are by default: "Game" and jsenh(.exe) beside the launcher.
 wxString DefaultGameDir();
 wxString DefaultProgram();
 
 struct GameOptions {
-    wxString program;       // jsport(.exe)
+    wxString program;       // jsenh(.exe)
     wxString gameDir;       // --game-dir
     int scale = 3;          // --scale: the window is 320x240 times this
     bool fullscreen = false;  // --fullscreen

@@ -1,6 +1,6 @@
-"""Compare the port's C LZW unpacker (jsport --lzw-dump) with tools/jsunpack.py, byte for byte.
+"""Compare the port's C LZW unpacker (jsenh --lzw-dump) with tools/jsunpack.py, byte for byte.
 
-    python tools/lzw_check.py [path/to/jsport.exe]      (default jsport/build/jsport.exe)
+    python tools/lzw_check.py [path/to/jsenh.exe]      (default jsport/build/jsenh.exe)
 
 Unpacks every PAX/SPX/TLX/MXP/DX0/DX1 file of Game/ with both and reports mismatches.
 """
@@ -18,7 +18,7 @@ EXTS = (".PAX", ".SPX", ".TLX", ".MXP", ".DX0", ".DX1")
 
 
 def main():
-    exe = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "jsport", "build", "jsport.exe")
+    exe = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "jsport", "build", "jsenh.exe")
     subprocess.run([exe, "--game-dir", GAME, "--lzw-dump", OUT], check=True)
     ok = bad = 0
     per_ext = {}

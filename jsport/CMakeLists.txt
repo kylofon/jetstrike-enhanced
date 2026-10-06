@@ -14,6 +14,7 @@ file(GLOB JS_SOURCES CONFIGURE_DEPENDS src/*.c)
 add_executable(jsport ${JS_SOURCES})
 target_include_directories(jsport PRIVATE src)
 target_link_libraries(jsport PRIVATE SDL3::SDL3)
+set_target_properties(jsport PROPERTIES OUTPUT_NAME "jsenh")  # Enhanced: jsenh.exe
 if(MSVC)
     target_compile_options(jsport PRIVATE /W3)
 else()
@@ -37,10 +38,10 @@ if(WIN32)
                 -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_dlls.cmake)
 endif()
 
-# The launcher ("JetStrike"): the game folder, the CD music (and ripping it), the settings CONFIG.EXE kept
-# in JS.CFG, the port's options; built beside jsport.exe. It needs wxWidgets 3.2
+# The launcher ("JetStrike Enhanced"): the game folder, the CD music (and ripping it), the settings CONFIG.EXE kept
+# in JS.CFG, the port's options; built beside jsenh.exe. It needs wxWidgets 3.2
 # (MSYS2: mingw-w64-x86_64-wxwidgets3.2-msw) and a C++17 compiler.
-option(JS_LAUNCHER "Also build the launcher, JetStrike.exe (wxWidgets)" OFF)
+option(JS_LAUNCHER "Also build the launcher, JetStrikeEnhanced.exe (wxWidgets)" OFF)
 if(JS_LAUNCHER)
     add_subdirectory(launcher)
 endif()

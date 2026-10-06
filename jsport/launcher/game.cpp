@@ -56,7 +56,7 @@ wxString LauncherDir() { return wxFileName(wxStandardPaths::Get().GetExecutableP
 wxString DefaultGameDir() { return wxFileName(LauncherDir(), "Game").GetFullPath(); }
 
 wxString DefaultProgram() {
-    wxFileName name(LauncherDir(), "jsport");
+    wxFileName name(LauncherDir(), "jsenh");
 #ifdef __WXMSW__
     name.SetExt("exe");
 #endif

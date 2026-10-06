@@ -1,9 +1,9 @@
-# The game's launcher, "JetStrike": the game folder, the CD music (ripped from a .cue/.img), the settings
-# CONFIG.EXE kept in JS.CFG, the port's options, then jsport.
+# The game's launcher, "JetStrike Enhanced": the game folder, the CD music (ripped from a .cue/.img), the settings
+# CONFIG.EXE kept in JS.CFG, the port's options, then jsenh.
 #
 #   cmake -S launcher -B launcher/build -G Ninja && cmake --build launcher/build
 #
-# or, from the main project, -DJS_LAUNCHER=ON builds it next to jsport.exe.
+# or, from the main project, -DJS_LAUNCHER=ON builds it next to jsenh.exe.
 # Needs wxWidgets 3.2 (MSYS2: mingw-w64-x86_64-wxwidgets3.2-msw; Debian and Ubuntu: libwxgtk3.2-dev).
 cmake_minimum_required(VERSION 3.24)
 project(jslauncher LANGUAGES CXX)
@@ -31,10 +31,10 @@ add_executable(jslauncher WIN32
     rip.cpp
     settings.cpp
 )
-set_target_properties(jslauncher PROPERTIES OUTPUT_NAME "JetStrike" CXX_EXTENSIONS OFF)
+set_target_properties(jslauncher PROPERTIES OUTPUT_NAME "JetStrikeEnhanced" CXX_EXTENSIONS OFF)
 target_compile_features(jslauncher PRIVATE cxx_std_17)
 target_link_libraries(jslauncher PRIVATE ${JSL_WX_LIBRARIES})
-# Built from the main project: beside jsport.exe, where it looks for it.
+# Built from the main project: beside jsenh.exe, where it looks for it.
 if(NOT PROJECT_IS_TOP_LEVEL)
     set_target_properties(jslauncher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()

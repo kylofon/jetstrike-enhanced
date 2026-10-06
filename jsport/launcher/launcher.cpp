@@ -30,7 +30,7 @@
 #include "settings.h"
 #include "version.h"
 
-const char* const APP_TITLE = "JetStrike";
+const char* const APP_TITLE = "JetStrike Enhanced";
 
 namespace {
 
@@ -131,7 +131,7 @@ LauncherDialog::LauncherDialog()
     folder_ = PathRow(fb, filesGrid, "&Folder:",
                       "The folder with the original game's files (JS_CDROM.EXE, INTRO, DATA, GFX, MAP, MISC, PLANE ...).",
                       &browseFolder);
-    program_ = PathRow(fb, filesGrid, "&Program:", "jsport, the game.", &browseProgram);
+    program_ = PathRow(fb, filesGrid, "&Program:", "jsenh, the game.", &browseProgram);
     auto* statusRow = new wxBoxSizer(wxHORIZONTAL);
     statusIcon_ = new wxStaticBitmap(fb, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_WARNING, wxART_MENU));
     statusNote_ = new wxStaticText(fb, wxID_ANY, wxEmptyString);
@@ -523,7 +523,7 @@ void LauncherDialog::BrowseProgram() {
 #else
     const char* const filter = "All files|*";
 #endif
-    wxFileDialog dialog(this, "Choose jsport", current.GetPath(), current.GetFullName(), filter,
+    wxFileDialog dialog(this, "Choose jsenh", current.GetPath(), current.GetFullName(), filter,
                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if (dialog.ShowModal() == wxID_OK) program_->SetValue(dialog.GetPath());  // raises wxEVT_TEXT
 }
@@ -564,8 +564,8 @@ void LauncherDialog::Save() {
 void LauncherDialog::About() {
     const wxString title = wxString("About ") + APP_TITLE;
     const wxString heading = wxString(APP_TITLE) + " " + APP_VERSION_TEXT;
-    const wxString blurb = "Starts jsport, the SDL3 port of JetStrike (PC CD version, 1994, "
-                           "converted by Team Hoi Games), and replaces its CONFIG.EXE.";
+    const wxString blurb = "Starts jsenh, JetStrike Enhanced: the SDL3 port of JetStrike (PC CD version, 1994, "
+                           "converted by Team Hoi Games) with a larger view, and replaces its CONFIG.EXE.";
 #ifdef __WXMSW__
     // The Windows task dialog.
     const wxString content = wxString::Format(

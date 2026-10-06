@@ -21,13 +21,13 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "FileDescription", "JetStrike"
-      VALUE "ProductName", "JetStrike"
+      VALUE "FileDescription", "JetStrike Enhanced"
+      VALUE "ProductName", "JetStrike Enhanced"
       VALUE "FileVersion", APP_VERSION_TEXT
       VALUE "ProductVersion", APP_VERSION_TEXT
       VALUE "CompanyName", "Krzysztof Kania"
-      VALUE "InternalName", "JetStrike"
-      VALUE "OriginalFilename", "JetStrike.exe"
+      VALUE "InternalName", "JetStrikeEnhanced"
+      VALUE "OriginalFilename", "JetStrikeEnhanced.exe"
     END
   END
   BLOCK "VarFileInfo"

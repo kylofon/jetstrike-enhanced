@@ -1,4 +1,4 @@
-# Copies every DLL jsport.exe needs from outside Windows (SDL3.dll and what it loads in turn)
+# Copies every DLL jsenh.exe needs from outside Windows (SDL3.dll and what it loads in turn)
 # next to it, so it starts without MSYS2 on the PATH.
 #   cmake -DEXE=<launcher> -DSEARCH=<dir with the DLLs> [-DCMAKE_OBJDUMP=<objdump>] -P copy_dlls.cmake
 if(POLICY CMP0207)

@@ -96,7 +96,7 @@ Two kinds of values. Look at each site and tag it in the code (`/* ENH: view */`
   scale that fits).
 
 ## Phases
-- **E0 Repo setup.** Done: jetstrike-sdl3 history merged (2026-10-06). Still to do: rename the binaries to JetStrikeEnhanced.
+- **E0 Repo setup.** Done: jetstrike-sdl3 history merged; binaries renamed (game `jsenh`, launcher `JetStrikeEnhanced`, own settings folder; CMake targets keep their names for clean upstream merges). Still to do:
   Make a set of reference snapshots at 320×240 (headless
   `SDL_VIDEO_DRIVER=dummy`, scripted keys) for regression tests.
 - **E1 Runtime view size.** Video model, stride, pages, split, presentation, switching between front end

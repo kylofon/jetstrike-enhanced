@@ -1,6 +1,6 @@
 /* JetStrike SDL3 port: entry point.
  *
- * usage: jsport [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro] [--lzw-dump OUTDIR]
+ * usage: jsenh [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro] [--lzw-dump OUTDIR]
  *   --game-dir    folder with the original game files (default: "Game" in the working directory)
  *   --scale       initial window size: 320x240 times N (default 3)
  *   --fullscreen  start in full screen (Alt+Enter switches)

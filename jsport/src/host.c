@@ -124,7 +124,7 @@ _Noreturn void host_fatal_code(int code, const char *fmt, ...)
     fprintf(stderr, "%s\n", msg);
     const char *drv = SDL_GetCurrentVideoDriver();
     if (host_window && !(drv && SDL_strcmp(drv, "dummy") == 0))
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "JetStrike", msg, host_window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "JetStrike Enhanced", msg, host_window);
     host_shutdown();
     exit(code);
 }

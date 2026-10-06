@@ -27,7 +27,7 @@ wxString Path(const wxString& section, const wxString& key) { return "/" + secti
 
 wxString Folder() {
 #ifdef __WXMSW__
-    wxString dir = wxStandardPaths::Get().GetUserConfigDir() + "\\JetStrike";
+    wxString dir = wxStandardPaths::Get().GetUserConfigDir() + "\\JetStrikeEnhanced";
 #else
     wxString base;
     if (!wxGetEnv("XDG_CONFIG_HOME", &base) || base.empty()) base = wxGetHomeDir() + "/.config";

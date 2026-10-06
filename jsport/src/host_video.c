@@ -9,7 +9,7 @@ static u32 frame[HOST_FRAME_W * HOST_FRAME_H];
 bool host_video_init(int window_scale, bool fullscreen)
 {
     if (window_scale < 1) window_scale = 3;
-    if (!SDL_CreateWindowAndRenderer("JetStrike", HOST_FRAME_W * window_scale, HOST_FRAME_H * window_scale,
+    if (!SDL_CreateWindowAndRenderer("JetStrike Enhanced", HOST_FRAME_W * window_scale, HOST_FRAME_H * window_scale,
                                      SDL_WINDOW_RESIZABLE, &host_window, &host_renderer)) {
         fprintf(stderr, "window/renderer failed: %s\n", SDL_GetError());
         return false;

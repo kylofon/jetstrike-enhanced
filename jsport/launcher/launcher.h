@@ -1,4 +1,4 @@
-// launcher.h -- the launcher window: the game folder and jsport, the CD music (and ripping it), the
+// launcher.h -- the launcher window: the game folder and jsenh, the CD music (and ripping it), the
 // settings CONFIG.EXE kept in JS.CFG (music, effects, detail, joystick, keys), the port's own options,
 // then Play.
 #pragma once
