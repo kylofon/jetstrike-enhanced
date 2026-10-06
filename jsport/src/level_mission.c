@@ -581,7 +581,8 @@ void Runway_Update(void)
     DS32(0x901A4) = 1 - DS32(0x901A4);
     if (DS32(0x901A4) == 0) {
         DS32(0x9017C) += 0x20;
-        s32 hi = g_CamX + 0x160 < g_BaseEndX - 0x20 ? g_CamX + 0x160 : g_BaseEndX - 0x20;
+        s32 r = g_CamX + 0x160 + VIEW_EXTRA_COLS;                    /* ENH: view: off the right edge */
+        s32 hi = r < g_BaseEndX - 0x20 ? r : g_BaseEndX - 0x20;
         if (hi < DS32(0x9017C)) DS32(0x9017C) = g_BaseStartX + 8 < g_CamX - 0x40 ? g_CamX - 0x40 : g_BaseStartX + 8;
     }
     if (IsOnScreen(g_CamX, g_CamY, DS32(0x9017C), 0x3df - g_BaseYOff))

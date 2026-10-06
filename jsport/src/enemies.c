@@ -1414,7 +1414,7 @@ void Airbase_Update(void)
         DS32(0x8FF08) = 1;
     }
     if (g_EngineFire == 0 && g_SpeedBits == 0 && g_Fuel < g_FuelBase) {
-        int hi = min_i(g_CamX + 0x14a, g_BaseEndX - 0x20);
+        int hi = min_i(g_CamX + 0x14a + VIEW_EXTRA_COLS, g_BaseEndX - 0x20);   /* ENH: view: off the right edge */
         int lo = max_i(g_CamX - 0x40, g_BaseStartX);
         int d = PX - DS32(0x901FC);
         int step = abs(d) < 5 ? abs(d) : 4;
@@ -1433,7 +1433,7 @@ void Airbase_Update(void)
             DS32(0x8FF08) = 1;
         }
         if (g_SpeedBits < 0x3f800000) {
-            int hi = min_i(g_CamX + 0x14a, g_BaseEndX - 0x20);
+            int hi = min_i(g_CamX + 0x14a + VIEW_EXTRA_COLS, g_BaseEndX - 0x20);   /* ENH: view: off the right edge */
             int lo = max_i(g_CamX - 0x40, g_BaseStartX);
             DS32(0x903D8) = Clamp(Sign(PX - DS32(0x903D8)) * 5 + DS32(0x903D8), lo, hi);
             if (DS32(0x903D8) <= g_PlayerScrX + g_CamX + 6 && g_PlayerScrX + g_CamX - 6 <= DS32(0x903D8) && g_EjectState == 0
@@ -1451,7 +1451,7 @@ void Airbase_Update(void)
     if (g_EngineFire < 1 || 0x3fffffff < g_SpeedBits) {
         DS32(0x905D4) = min_i(DS32(0x905D4) + 4, g_BaseEndX - 0x30);
     } else {
-        int hi = min_i(g_CamX + 0x14a, g_BaseEndX - 0x30);
+        int hi = min_i(g_CamX + 0x14a + VIEW_EXTRA_COLS, g_BaseEndX - 0x30);   /* ENH: view: off the right edge */
         DS32(0x905D4) = Clamp(Sign(PX - DS32(0x905D4) + 0x3c) * 6 + DS32(0x905D4), g_BaseStartX, hi);
     }
     if (DS32(0x905D4) <= g_PlayerScrX + g_CamX + 0x20) DS32(0x905D4) += 4;
@@ -1465,7 +1465,7 @@ void Airbase_Update(void)
         DS32(0x8FF08) = 1;
     }
     if (g_EngineFire == 0 && g_SpeedBits == 0 && g_CatapultCount == 0 && DS32(0x90854) > 8) {
-        int hi = min_i(g_CamX + 0x14a, g_BaseEndX - 0x30);
+        int hi = min_i(g_CamX + 0x14a + VIEW_EXTRA_COLS, g_BaseEndX - 0x30);   /* ENH: view: off the right edge */
         int lo = max_i(g_CamX - 0x154, g_BaseStartX);
         int d = PX - DS32(0x9082C);
         int step = abs(d) < 5 ? abs(d) : 4;

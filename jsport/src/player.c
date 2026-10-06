@@ -654,7 +654,7 @@ void Player_Update(void)
         g_TowVY = 0;
         g_TowRope = 0;
         g_TowTime = 0;
-        g_TowX = g_CamX + 0x140;
+        g_TowX = g_CamX + 0x140 + VIEW_EXTRA_COLS;                   /* ENH: view: at the right edge */
         g_TowY = g_CamY + g_PlayerScrY;
         g_TowFrame = 2;
         g_TowState = 0;
