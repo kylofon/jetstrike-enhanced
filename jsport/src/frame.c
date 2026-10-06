@@ -193,7 +193,7 @@ static void flight_move(void)                    /* GF step 68, player.md §3.2 
         g_PlayerScrX -= Sign(g_PlayerScrX - 0xa0) * 4;
     if (g_IsHeli == 0) {
         if (g_OnGround == 0 || g_PlayerVY < 0) {
-            if (g_CamY < 0x340) {
+            if (g_CamY < CAM_Y_MAX) {          /* ENH: view */
                 g_CamY += Clamp(g_PlayerVY, -0x10, 0x10);
             } else {
                 g_Scratch690 = g_PlayerVY;
@@ -206,7 +206,7 @@ static void flight_move(void)                    /* GF step 68, player.md §3.2 
     } else {
         int v = ((g_HeliLift - 5) * g_PlayerVY) / 10;
         if (g_OnGround == 0 || v < 0) {
-            if (g_CamY < 0x340) g_CamY += Clamp(v, -0x10, 0x10);
+            if (g_CamY < CAM_Y_MAX) g_CamY += Clamp(v, -0x10, 0x10);      /* ENH: view */
             else g_PlayerScrY += Clamp(v, -0x10, 0x10);
         }
     }
@@ -471,7 +471,7 @@ static void auto_eject(void)                     /* GF step 79 */
 
 static int loop_condition(void)                  /* game_flow.md §8.1 */
 {
-    return (g_DeathTimer < 0x20 || (DS32(0x90344) > 0 && g_DeathTimer < 0x50) || g_PlayerScrY < 0x9d || g_EjectState > 0)
+    return (g_DeathTimer < 0x20 || (DS32(0x90344) > 0 && g_DeathTimer < 0x50) || g_PlayerScrY < 0x9d + VIEW_EXTRA_ROWS || g_EjectState > 0)
         && g_EjectState < 99 && g_MissionResult < 2 && g_MissionActive == 1
         && (g_OnGround != 8 || DS32(0x9041C) > 7 || g_SpeedBits != 0 || g_EjectState != 0);
 }
@@ -519,9 +519,9 @@ void Mission_Run(void)
         }
         /* 5 */ if (g_MapWidthPx < g_CamX) { g_CamX &= 0xf; g_ViewTarget = -1; }
         if (g_CamX < 1) { g_CamX = g_MapWidthPx - 0x10 + (g_CamX & 0xf); g_ViewTarget = -1; }
-        /* 6 */ g_CamY = Clamp(g_CamY, -0x7d0, 0x340);
+        /* 6 */ g_CamY = Clamp(g_CamY, -0x7d0, CAM_Y_MAX);                /* ENH: view */
         DS32(0x9039C) = g_CamY;
-        if (DS32(0x9039C) > 0x340) DS32(0x9039C) = 0x340;
+        if (DS32(0x9039C) > CAM_Y_MAX) DS32(0x9039C) = CAM_Y_MAX;
         if (DS32(0x9039C) < 0) DS32(0x9039C) = DS32(0x9039C) % 0x40;
         /* 7 */ DS32(0x904F0) = Div16(g_CamX);
         DS32(0x904F4) = Div16(DS32(0x9039C));                          /* 0x13810, same as Div16 */
@@ -736,7 +736,7 @@ void Mission_Run(void)
             g_CamX = g_PlayerWX - g_PlayerScrXSave;
             g_PlayerScrX = g_PlayerScrXSave;
             g_CamY = g_PlayerWY - g_PlayerScrYSave;
-            if (g_CamY > 0x340) g_CamY = 0x340;
+            if (g_CamY > CAM_Y_MAX) g_CamY = CAM_Y_MAX;                 /* ENH: view */
             g_PlayerScrY = g_PlayerScrYSave;
         }
         /* 48 */ lightning();
@@ -853,8 +853,12 @@ void Mission_Run(void)
             if (g_FireOrConfirm != 0) DS32(0x9067C) = 1;
         }
         /* 86 */ DS32(0x905B4) -= Sign(DS32(0x905B4));
-        if (g_PlayerScrY < 0x50) { g_CamY += g_PlayerScrY - 0x50; g_PlayerScrY = 0x50; }
-        if (g_PlayerScrY > 0xa0) { g_CamY += g_PlayerScrY - 0xa0; g_PlayerScrY = 0xa0; }
+        {   /* ENH: view: the box moves down by half the extra rows at the top (the plane keeps its place in the
+             * height) and by all of them at the bottom (the ground line at the lowest camera) */
+            s32 top = 0x50 + VIEW_EXTRA_ROWS / 2, bot = 0xa0 + VIEW_EXTRA_ROWS;
+            if (g_PlayerScrY < top) { g_CamY += g_PlayerScrY - top; g_PlayerScrY = top; }
+            if (g_PlayerScrY > bot) { g_CamY += g_PlayerScrY - bot; g_PlayerScrY = bot; }
+        }
         /* 87 */ if (DS32(0x90114) > 0 && Rand(100) == 1 && DS32(0x90158) == 0) {
             DS32(0x90158) = 1; DS32(0x900CC) = 0; DS32(0x900D0) = DS32(0x90114); DS32(0x900C8) = 0;
             DS32(0x900BC) = -1; DS32(0x900D4) = 0x3df;

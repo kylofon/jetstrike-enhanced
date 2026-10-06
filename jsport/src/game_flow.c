@@ -950,7 +950,7 @@ void Mission_Setup(void)
     g_Throttle = 0;
     g_CamX = g_BaseEndX - 0x140;
     if (g_IsHeli != 0) g_Throttle = 9;
-    g_CamY = g_StallTopY;
+    g_CamY = g_StallTopY - VIEW_EXTRA_ROWS;                          /* ENH: view (CAM_Y_MAX) */
     for (g_LoopI = Div16(g_BaseStartX) + 1; g_LoopI <= Div16(g_BaseEndX) - 1; g_LoopI++)   /* re-pave the runway */
         if (Map_GetTileAttr(g_LoopI, 0x3f - Div16(g_BaseYOff), 0) != 0x81)
             Map_SetTile(g_LoopI, 0x3f - Div16(g_BaseYOff), (u8)g_RunwayFill);
@@ -964,7 +964,7 @@ void Mission_Setup(void)
     g_Dir = 0;
     g_DirHalf = 0;
     g_GearDown = 1;
-    g_PlayerScrY = (0x9f - g_GearHeight) - g_BaseYOff;
+    g_PlayerScrY = (0x9f + VIEW_EXTRA_ROWS - g_GearHeight) - g_BaseYOff;   /* ENH: view */
     g_StallSink = 0;
     g_DeathTimer = 0;
     g_Crashed = 0;

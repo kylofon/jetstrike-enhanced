@@ -81,9 +81,16 @@ static void compose(u32 *out, int *w, int *h)
     int sw = wide ? vl.view_w : 320, sh = wide ? vl.view_h : 240;
     int split = classic_screen ? 175 : crtc.split_rows;     /* the original HUD split */
     u32 mask = (u32)VRAM_SIZE - 1;
+    int hud_x = wide ? (sw - 320) / 2 : 0;      /* ENH: the 320-wide HUD panel is centred, colour 0 at its sides */
     *w = sw;
     *h = sh;
     for (int r = 0; r < sh; r++) {
+        if (r >= split && hud_x > 0) {
+            u32 base = (u32)((r - split) * VRAM_ROW);
+            for (int c = 0; c < sw; c++)
+                out[r * sw + c] = rgb[(c >= hud_x && c < hud_x + 320) ? vram[(base + (u32)(c - hud_x)) & mask] : 0];
+            continue;
+        }
         u32 base = r < split ? crtc.start * 4 + (u32)(r * VRAM_ROW) + crtc.pan
                                        : (u32)((r - split) * VRAM_ROW);
         for (int c = 0; c < sw; c++) out[r * sw + c] = rgb[vram[(base + (u32)c) & mask]];
@@ -492,7 +499,9 @@ void Level_DrawBackground(s32 col, s32 row)
             tile_window[j * vl.tile_cols + i] = (k >= 0 && k < 0xfa00) ? grid[k] : 0;
         }
     s32 px = (s32)((double)g_CamX / dbits(0x4010AAAAAA9F36A3ull)) % 320 - g_ScrollFineX;
-    s32 py = (s32)((double)(g_CamY + 0x7D8) / 9.25 - (double)g_ScrollFineY);
+    /* ENH: view: the backdrop line at the bottom of the view is the original's (from the camera of the original
+     * view with the same bottom edge); the extra rows show the lines above it */
+    s32 py = (s32)((double)(g_CamY + VIEW_EXTRA_ROWS + 0x7D8) / 9.25 - (double)g_ScrollFineY) - VIEW_EXTRA_ROWS;
     int pagesel = (g_BackPage == vl.page_a) ? 0 : 8;
     for (int plane = 0; plane < 4; plane++) {
         Video_SelectPlane(plane);

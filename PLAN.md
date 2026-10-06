@@ -23,8 +23,8 @@ remove it when it is done.
 - **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
   E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240), E1.2 (integer-scale presentation, desktop-fit
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
-  parallax at any view; 76/76 at 320×240).
-- **Next:** E2.2 (map bottom fill, blitter clipping, camera box), Sonnet.
+  parallax at any view; 76/76 at 320×240), camera bottom limit + vertical box (part of E2.2), HUD centred (E4.1).
+- **Next:** E2.2 (rest: blitter clipping, horizontal camera box / lead margin), Sonnet.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -173,7 +173,7 @@ E1 notes (from E1.1):
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | done 2026-10-06 (see E2 notes) |
-| E2.2 | Map bottom fill, blitter clipping, camera box / lead margin | S | M |
+| E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, camera box / lead margin (vertical done, horizontal left) | S | M |
 | E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
 
@@ -185,7 +185,20 @@ E2 notes (from E2.1):
 - Backdrop (`par_px`): at 320 wide it stays linear (Q4); wider views wrap x at 320 on the same line. At 240 high
   out-of-buffer reads stay 0; taller views repeat lines 0 and 511 (the bottom line fills in below the art at
   960×540 and low camera positions; the camera clamp in E2.2 decides how much of it shows).
-- Map rows past 63 still read tile 0 (`Level_DrawBackground`) and show at 640×360 near the ground: E2.2.
+- Camera (user, 2026-10-06: the view must not go below the original's bottom edge): `VIEW_EXTRA_ROWS`
+  (= playfield − 175) and `CAM_Y_MAX` (= 0x340 − extra) in `video.h` replace every camera-max 0x340
+  (`frame.c` flight move, step 6 clamp, eject camera; `player.c` eject and follow views). Screen-Y values tied
+  to the lowest camera move down by the extra rows: runway start `0x9f`, the loop condition `0x9d`, the wreck
+  tumble `0x9c`, the eject ground line `0x9f`. The player box is `0x50 + extra/2 .. 0xa0 + extra` (the plane
+  keeps its place in the height), follow views centre on `0x58 + extra/2`. Mission start: `g_CamY =
+  g_StallTopY − extra` (`g_StallTopY` keeps its world meaning). Map rows past 63 never show now.
+- `IsOnScreen`: the bottom edge is `camY + 200 + extra` (else the plane and ground units at the bottom of a tall
+  view are culled). The horizontal window is still the original one: E3.1.
+- The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from
+  `camY + extra`, minus extra); the extra rows show lines above it, line 0 repeated above the top of the art
+  (plain sky at 960×540 high up).
+- HUD (E4.1): `compose()` shows the 320-wide panel at `(view_w − 320) / 2` with colour 0 at the sides; all
+  HUD drawing keeps its 320-wide coordinates.
 - Build from Git Bash needs `PATH=/c/msys64/mingw64/bin:$PATH` (gcc fails silently without it, and
   `cmake --build` output then hides the failure behind the old exe).
 
@@ -199,7 +212,7 @@ E2 notes (from E2.1):
 ### Phase E4 — HUD and launcher (§5–6)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E4.1 | HUD panel centred with side fill | S | S |
+| E4.1 | HUD panel centred with side fill | S | done 2026-10-06 (colour 0 at the sides, in `compose()`) |
 | E4.2 | Launcher "View size" (presets + custom) → `--view WxH`; desktop-fit integer scale | S | M |
 
 ### Phase E5 — Fixes

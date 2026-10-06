@@ -133,7 +133,7 @@ void Engine_SoundUpdate(void)
     }
     if (g_Crashed > 0) {                         /* the wreck tumbles (non-sound part, js.c 20702) */
         if (g_PlayerVX != 0) {
-            if (Rand(3) == 3 && g_PlayerScrY > 0x9c) {
+            if (Rand(3) == 3 && g_PlayerScrY > 0x9c + VIEW_EXTRA_ROWS) {
                 g_PlayerVY = -Rand(abs(g_PlayerVX));
                 if (g_IsHeli == 0) {
                     int a = Rand(1);

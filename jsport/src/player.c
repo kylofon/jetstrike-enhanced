@@ -439,12 +439,12 @@ void Player_EjectUpdate(void)
         g_EjectState = 100;
         g_ChuteVY = 0;
     }
-    if (g_EjectCamY > 0x340) {
+    if (g_EjectCamY > CAM_Y_MAX) {                                   /* ENH: view */
         int water = (Map_GetTileAttr((g_CamX + g_PlayerScrX) / 16, 0x3f, 0) == 0x82);
         DS32(0x8FF44) = water * 4;
-        DS32(0x90244) = DS32(0x8FF44) + 0x9f;
+        DS32(0x90244) = DS32(0x8FF44) + 0x9f + VIEW_EXTRA_ROWS;
         if (water) g_CrashAttr = 0x82;
-        g_EjectCamY = 0x340;
+        g_EjectCamY = CAM_Y_MAX;
         g_EjectScrY += g_ChuteVY;
         if (DS32(0x90244) <= g_EjectScrY && g_EjectState < 7 && DS32(0x8FF44) < g_EjectState) {
             Sprite_Queue(g_PlayerScrX, DS32(0x90244), 0x4b);
@@ -794,13 +794,14 @@ void Player_Update(void)
     } else {
         g_GearLatch = 0;
     }
-    /* follow views (level.md §6.2) */
+    /* follow views (level.md §6.2). ENH: view: the target sits 0x58 rows down, plus half the extra rows */
+#define VIEW_MID_Y (0x58 + VIEW_EXTRA_ROWS / 2)
     if (g_ViewTarget > -1 && g_ViewTarget < g_ProjCount) {
         if (g_ProjKind[g_ProjCount] == 8) {                          /* Q8: the slot after the last one */
             g_ViewTarget = -1;
         } else {
             g_ViewX = g_ProjX[g_ViewTarget] - 0xa0;
-            g_ViewY = g_ProjY[g_ViewTarget] - 0x58 < 0x341 ? g_ProjY[g_ViewTarget] - 0x58 : 0x340;
+            g_ViewY = g_ProjY[g_ViewTarget] - VIEW_MID_Y <= CAM_Y_MAX ? g_ProjY[g_ViewTarget] - VIEW_MID_Y : CAM_Y_MAX;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;
         }
@@ -809,7 +810,7 @@ void Player_Update(void)
         if (DS32(0x90998) == 0) g_ViewTarget = -1;
         else {
             g_ViewX = DS32(0x90984) - 0xa0;
-            g_ViewY = DS32(0x90988) - 0x58;
+            g_ViewY = DS32(0x90988) - VIEW_MID_Y;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;
@@ -819,7 +820,7 @@ void Player_Update(void)
         if (DS32(0x90528) == 0) g_ViewTarget = -1;
         else {
             g_ViewX = DS32(0x90520) - 0xa0;
-            g_ViewY = DS32(0x904C0) - 0x58;
+            g_ViewY = DS32(0x904C0) - VIEW_MID_Y;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;
@@ -829,8 +830,8 @@ void Player_Update(void)
         if (DS32(0x902E0) == 0) g_ViewTarget = -1;
         else {
             g_ViewX = DS32(0x8DDC0) - 0xa0;
-            g_ViewY = DS32(0x8DD98) - 0x58;
-            if (g_ViewY > 0x340) g_ViewY = 0x340;
+            g_ViewY = DS32(0x8DD98) - VIEW_MID_Y;
+            if (g_ViewY > CAM_Y_MAX) g_ViewY = CAM_Y_MAX;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;
@@ -840,8 +841,8 @@ void Player_Update(void)
         if (g_EnemyAirCount == 0) g_ViewTarget = -1;
         else {
             g_ViewX = g_EnemyAirX[0] - 0xa0;
-            g_ViewY = g_EnemyAirY[0] - 0x58;
-            if (g_ViewY > 0x340) g_ViewY = 0x340;
+            g_ViewY = g_EnemyAirY[0] - VIEW_MID_Y;
+            if (g_ViewY > CAM_Y_MAX) g_ViewY = CAM_Y_MAX;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;

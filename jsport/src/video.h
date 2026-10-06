@@ -94,6 +94,11 @@ extern u8 *g_TilePtrs[256];                      /* 0x845B8 */
 #define g_NightMission     DS32(0x9035C)
 #define g_CamX             DS32(0x903A8)
 #define g_CamY             DS32(0x903AC)
+/* ENH: playfield rows beyond the original 175 (0 at 320x240). The lowest camera (0x340) puts the map bottom at the
+ * bottom of a 175-row playfield; a taller view lowers it by the extra rows so it never shows below the map, and the
+ * player's screen-Y values tied to that camera (box, ground line) move down by the same amount. */
+#define VIEW_EXTRA_ROWS    (vl.split - 175)
+#define CAM_Y_MAX          (0x340 - VIEW_EXTRA_ROWS)
 #define g_MapWidth         DS32(0x8FE90)
 extern u8 *g_MapGrid;                            /* 0x849D0 (level.c) */
 
