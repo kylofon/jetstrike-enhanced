@@ -94,7 +94,7 @@ static void lightning(void)                      /* GF step 48, video.md §7.1 *
     g_LightningCooldown = 0x32;
     Sfx_Play(0x12, 0x157c, 0x3f, g_CamX + g_PlayerScrX);
     g_BoltX = Rand(200) + 0x2c;
-    g_BoltY = g_BackPage / 0x60;
+    g_BoltY = g_BackPage / VRAM_ROWB;
     for (;;) {
         if (Rand(0x28) + 0x3c <= g_BoltY) break;      /* page B (row 322): no bolt (video.md Q6) */
         int y = g_BoltY + 0x14;

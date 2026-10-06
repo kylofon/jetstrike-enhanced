@@ -5,12 +5,13 @@
  *
  *   host.c        init / shutdown, event pump, file lookup, fatal
  *   host_timer.c  59.94 Hz retrace clock (host_wait_vretrace)
- *   host_video.c  window, 320x240 presentation, snapshots
+ *   host_video.c  window, presentation (320x240 or the view), snapshots
  *   host_input.c  keyboard -> set-1 scancodes, scripted keys, mouse, gamepad
  *   host_audio.c  SDL audio device, mixer stream (pull callback), music stream, WAV dump */
 #include "types.h"
 
-bool host_init(const char *game_dir, int window_scale, bool fullscreen, bool open_window);
+/* ENH: the window opens at view_w x view_h times window_scale (the view: main.c --view). */
+bool host_init(const char *game_dir, int view_w, int view_h, int window_scale, bool fullscreen, bool open_window);
 void host_shutdown(void);
 
 /* Handles window events, scripted keys and gamepad hot-plug. Every busy-wait loop of the original must
@@ -30,10 +31,13 @@ bool host_in_vretrace(void);             /* port 3DAh bit 3 (first ~1.4 ms of ea
  * has passed since the last present, sleeps ~0.5 ms. */
 void host_idle(void);
 
-/* ---- Video: the frame source fills a 320x240 XRGB8888 image (the VGA model, video.c). */
+/* ---- Video: the frame source fills an XRGB8888 image (the VGA model, video.c) and sets its size: 320x240 (the
+ * original screen), ENH: or the view in a mission, at most HOST_FRAME_MAX_W x HOST_FRAME_MAX_H. */
 #define HOST_FRAME_W 320
 #define HOST_FRAME_H 240
-void host_set_frame_source(void (*compose)(u32 *xrgb));
+#define HOST_FRAME_MAX_W 960
+#define HOST_FRAME_MAX_H 540
+void host_set_frame_source(void (*compose)(u32 *xrgb, int *w, int *h));
 void host_present(void);                 /* compose + show + snapshot (called by host_wait_vretrace) */
 
 /* ---- Keyboard: the game's INT 9 handler receives the set-1 bytes the keyboard controller would deliver:

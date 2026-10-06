@@ -8,7 +8,7 @@ extern SDL_Window *host_window;          /* NULL when running without a window (
 extern SDL_Renderer *host_renderer;
 extern Uint64 host_start_ns;
 
-bool host_video_init(int window_scale, bool fullscreen);
+bool host_video_init(int view_w, int view_h, int window_scale, bool fullscreen);
 void host_video_shutdown(void);
 void host_video_event(const SDL_Event *ev);
 

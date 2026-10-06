@@ -4,26 +4,57 @@
  *
  * VRAM: 4 planes x 64 KiB as one linear buffer, pixel index = byte offset * 4 + plane, so pixel x+1 is
  * always index + 1 (video.md §0). 96 bytes = 384 pixels per row. Writes outside the buffer are dropped
- * (they did not reach VRAM on the PC). Globals live in the data-segment image at their original addresses. */
+ * (they did not reach VRAM on the PC). Globals live in the data-segment image at their original addresses.
+ *
+ * ENH: the layout is a run-time value (PLAN.md §1). The game runs on the layout of its view (--view WxH, the
+ * whole mission screen including the HUD); the intro and the 320x240 view use the original one. The model
+ * stays linear: rows of view_w + 64 pixels (the 64 is the sprite wrap margin), the HUD at offset 0, two play
+ * pages after it, the HUD save area after them, the whole buffer a power of two (the CRTC address wraps
+ * there). At 320x240 every value below is the original one. */
 #include "dseg.h"
 
-#define VRAM_SIZE  0x40000
-#define VRAM_ROW   384                          /* pixels per row (96 bytes x 4 planes) */
-#define PAGE_BYTES 0x5A00                       /* one 240-row picture page, in byte offsets */
+typedef struct {
+    int view_w, view_h;                         /* the mission screen, pixels (320 x 240) */
+    int split;                                  /* first HUD line = playfield height (175 = 0xAF) */
+    s32 stride;                                 /* VRAM row, pixels (384) */
+    s32 row;                                    /* VRAM row, byte offsets (96) */
+    s32 size;                                   /* VRAM, pixels (0x40000) */
+    s32 page_rows;                              /* rows per play page (256) */
+    s32 page_a, page_b;                         /* play page bases, byte offsets (0x18C0, 0x78C0) */
+    s32 save_row;                               /* HUD save area (radar, altimeter), absolute row (0x246) */
+} VideoLayout;
+extern VideoLayout vl;
+
+#define VIEW_MIN_W 320                          /* --view limits (PLAN.md ground rules) */
+#define VIEW_MAX_W 960
+#define VIEW_MIN_H 240
+#define VIEW_MAX_H 540
+#define HUD_ROWS   0x42                         /* display.pax rows at the top of VRAM (65 of them shown) */
+
+#define VRAM_SIZE  (vl.size)
+#define VRAM_ROW   (vl.stride)                  /* pixels per row */
+#define VRAM_ROWB  (vl.row)                     /* byte offsets per row */
+#define PAGE_BYTES (240 * vl.row)               /* one 240-row picture page, in byte offsets (0x5A00) */
 #define VIDX(pageofs, x, y) ((s32)(pageofs) * 4 + (s32)(y) * VRAM_ROW + (s32)(x))
 
-extern u8 vram[VRAM_SIZE];
+extern u8 *vram;                                /* VRAM_SIZE bytes (allocated for the largest layout) */
 extern u8 dac[768];                             /* the hardware DAC (changes only on uploads) */
 
 typedef struct {
-    u16 start;                                  /* CRTC start address (byte offset) */
+    u32 start;                                  /* CRTC start address (byte offset; wraps at VRAM_SIZE / 4) */
     u8  pan;                                    /* attribute 13h pel panning, pixels 0..3 */
-    u16 split_rows;                             /* line compare: first HUD line; 240 = off */
+    u16 split_rows;                             /* line compare: first HUD line; >= the screen height = off */
 } Crtc;
 extern Crtc crtc;
 
-static inline void vput(s32 i, u8 c) { if ((u32)i < VRAM_SIZE) vram[i] = c; }
-static inline u8 vget(s32 i) { return (u32)i < VRAM_SIZE ? vram[i] : 0; }
+static inline void vput(s32 i, u8 c) { if ((u32)i < (u32)VRAM_SIZE) vram[i] = c; }
+static inline u8 vget(s32 i) { return (u32)i < (u32)VRAM_SIZE ? vram[i] : 0; }
+
+/* ENH: view setup. Video_CheckView returns NULL when w x h is a valid view, else the reason. Video_Init
+ * allocates VRAM for that view and installs the frame source. Video_UseLayout(false) selects the original
+ * 320x240 layout (the intro), true the layout of the view (the game, from Video_SetModeX on). */
+const char *Video_CheckView(int w, int h);
+void Video_UseLayout(bool view);
 
 /* ---- Globals (video.md §1) */
 #define g_SpriteColorOfs   D8(0x80008)
@@ -66,7 +97,7 @@ extern u8 *g_TilePtrs[256];                      /* 0x845B8 */
 extern u8 *g_MapGrid;                            /* 0x849D0 (level.c) */
 
 /* ---- Mode X, pages (§3, §4) */
-void Video_Init(void);                          /* PORT: installs the frame source (host) */
+void Video_Init(int view_w, int view_h);        /* PORT: installs the frame source (host); ENH: the view */
 void Video_SetModeX(void);                      /* 0x10010 */
 void Video_SetTextMode(void);                   /* 0x100c2 */
 void Video_PutPixel(u32 x, s32 y, u8 col);      /* 0x100d0 */

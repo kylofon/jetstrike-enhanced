@@ -11,9 +11,10 @@
 #include "lzw.h"
 #include "platform.h"
 
-u8 vram[VRAM_SIZE];
+u8 *vram;
 u8 dac[768];
 Crtc crtc = { 0, 0, 240 };
+VideoLayout vl;
 
 u8 *g_SmallFont;
 u8 *g_BigFont;
@@ -23,35 +24,89 @@ u8 *g_SpriteTab[SPRITE_TAB_SIZE];
 u8 *g_TilePtrs[256];
 static u8 *g_SpriteBank;                        /* 0x8450C: the unpacked JETSTRIK.SPX */
 
+/* ENH: the view and its layout (video.h). */
+static VideoLayout layout_classic, layout_view;
+static bool mission_view;                       /* the screen is the view (from Pic_LoadHudPanel), else 320x240 */
+
+/* The VRAM layout of a w x h view. Play page: the 16-row tile margin above the playfield, up to 15 rows of fine
+ * scroll, the playfield, rounded up to whole tile rows (13 at 320x240), then 48 rows for sprites below it. */
+static VideoLayout layout_for(int w, int h)
+{
+    VideoLayout l;
+    l.view_w = w;
+    l.view_h = h;
+    l.split = h - 65;
+    l.stride = w + 64;
+    l.row = l.stride / 4;
+    l.page_rows = (16 + 15 + l.split + 15) / 16 * 16 + 48;
+    l.page_a = HUD_ROWS * l.row;
+    l.page_b = (HUD_ROWS + l.page_rows) * l.row;
+    l.save_row = HUD_ROWS + 2 * l.page_rows + 4;
+    s32 rows = l.save_row + 0x24;               /* the save area: rows 0x246..0x269 at 320x240 */
+    if (rows < 0x40000 / 384) rows = 0x40000 / 384;    /* the front end keeps the 682 rows of the original */
+    l.size = 0x40000;
+    while (l.size < rows * l.stride) l.size <<= 1;
+    return l;
+}
+
+const char *Video_CheckView(int w, int h)
+{
+    if (w < VIEW_MIN_W || w > VIEW_MAX_W) return "width must be 320..960";
+    if (w % 16) return "width must be a multiple of 16";
+    if (h < VIEW_MIN_H || h > VIEW_MAX_H) return "height must be 240..540";
+    return NULL;
+}
+
+void Video_UseLayout(bool view) { vl = view ? layout_view : layout_classic; }
+
 /* PORT: what the monitor shows at a retrace (video.md §10): 240 lines from the CRTC start with pel
  * panning, from the line-compare line on VRAM offset 0 without panning (attribute mode 0x61). The CRTC
- * address counter wraps at 64 KiB (= 0x40000 pixels). */
-static void compose(u32 *out)
+ * address counter wraps at 64 KiB (= 0x40000 pixels). ENH: in a mission the screen is the view (the CRTC
+ * wraps at VRAM_SIZE); elsewhere it stays 320x240. */
+static void compose(u32 *out, int *w, int *h)
 {
     u32 rgb[256];
     for (int i = 0; i < 256; i++) {
         u32 r = dac[3 * i] & 63, g = dac[3 * i + 1] & 63, b = dac[3 * i + 2] & 63;
         rgb[i] = (r << 2 | r >> 4) << 16 | (g << 2 | g >> 4) << 8 | (b << 2 | b >> 4);
     }
-    for (int r = 0; r < HOST_FRAME_H; r++) {
-        s32 base = r < crtc.split_rows ? (s32)crtc.start * 4 + r * VRAM_ROW + crtc.pan
-                                       : (r - crtc.split_rows) * VRAM_ROW;
-        for (int c = 0; c < HOST_FRAME_W; c++) out[r * HOST_FRAME_W + c] = rgb[vram[(base + c) & (VRAM_SIZE - 1)]];
+    int sw = mission_view ? vl.view_w : 320, sh = mission_view ? vl.view_h : 240;
+    u32 mask = (u32)VRAM_SIZE - 1;
+    *w = sw;
+    *h = sh;
+    for (int r = 0; r < sh; r++) {
+        u32 base = r < crtc.split_rows ? crtc.start * 4 + (u32)(r * VRAM_ROW) + crtc.pan
+                                       : (u32)((r - crtc.split_rows) * VRAM_ROW);
+        for (int c = 0; c < sw; c++) out[r * sw + c] = rgb[vram[(base + (u32)c) & mask]];
     }
 }
 
-void Video_Init(void) { host_set_frame_source(compose); }
+void Video_Init(int view_w, int view_h)
+{
+    layout_classic = layout_for(320, 240);
+    layout_view = layout_for(view_w, view_h);
+    s32 n = layout_view.size > layout_classic.size ? layout_view.size : layout_classic.size;
+    vram = calloc((size_t)n, 1);
+    if (!vram) host_fatal_code(2, "out of memory (VRAM)");
+    Video_UseLayout(false);
+    host_set_frame_source(compose);
+}
 
 /* ================================================================ §3 low-level routines */
 
-/* 0x10010 Video_SetModeX: mode 13h, DAC black, unchained 320x240 60 Hz, 96-byte rows, all VRAM cleared. */
+/* 0x10010 Video_SetModeX: mode 13h, DAC black, unchained 320x240 60 Hz, 96-byte rows, all VRAM cleared.
+ * ENH: switches to the layout of the view (called once, right after the data-segment image is loaded) and
+ * moves g_BackPage to its page A (the image value 0x18C0 is page A of the 320x240 layout). */
 void Video_SetModeX(void)
 {
+    Video_UseLayout(true);
     memset(dac, 0, sizeof dac);
-    memset(vram, 0, sizeof vram);
+    memset(vram, 0, (size_t)VRAM_SIZE);
     crtc.start = 0;
     crtc.pan = 0;
     crtc.split_rows = 240;                      /* CRTC 18h from mode 13h: never matches */
+    mission_view = false;
+    g_BackPage = vl.page_a;
 }
 
 /* 0x100c2 Video_SetTextMode: INT 10h on the way out; nothing to do. */
@@ -61,7 +116,7 @@ void Video_SetTextMode(void) {}
  * PORT: addresses outside the 64 KiB window are dropped (they were not VRAM on the PC). */
 void Video_PutPixel(u32 x, s32 y, u8 col)
 {
-    int64_t off = (int64_t)y * 96 + (x >> 2);
+    int64_t off = (int64_t)y * VRAM_ROWB + (x >> 2);
     if (off >= 0 && off < VRAM_SIZE / 4) vram[off * 4 + (x & 3)] = col;
 }
 
@@ -126,10 +181,13 @@ void Sprite_BlitMirror(s32 x, s32 y, const u8 *s, s32 pageofs)
 /* Tile pixel (x, y) of a 16x16 tile: tile[(x&3)*64 + y*4 + (x>>2)] (video.md §3 Tiles_DrawColumns). */
 static u8 tile_px(const u8 *t, int x, int y) { return t ? t[(x & 3) * 64 + y * 4 + (x >> 2)] : 0; }
 
+/* Base of play page pagesel (0 = A, 8 = B: the original's 0x18C0 + pagesel * 0xC00). */
+static s32 play_page(int pagesel) { return vl.page_a + pagesel / 8 * (vl.page_b - vl.page_a); }
+
 /* 0x10540 Tiles_DrawColumns: 24 x 13 tiles, one plane, into 0x18C0 + pagesel*0xC00. */
 void Tiles_DrawColumns(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane)
 {
-    s32 base = 0x18C0 + pagesel * 0xC00;
+    s32 base = play_page(pagesel);
     for (int k = 0; k < 0x138; k++) {
         int tx = k % 24, ty = k / 24;
         const u8 *t = tileptrs[ids[k]];
@@ -148,7 +206,7 @@ void Tiles_DrawColumnsParallax(const u8 *ids, u8 *const *tileptrs, int pagesel, 
                                const u8 *par, s32 parofs, s32 unused)
 {
     (void)unused;
-    s32 base = 0x18C0 + pagesel * 0xC00;
+    s32 base = play_page(pagesel);
     for (int ty = 0; ty < 13; ty++)
         for (int tx = 0; tx < 22; tx++) {
             const u8 *t = tileptrs[ids[ty * 24 + tx]];
@@ -165,11 +223,13 @@ void Tiles_DrawColumnsParallax(const u8 *ids, u8 *const *tileptrs, int pagesel, 
 /* 0x105d9 Video_SelectPlane: map mask; implicit in the port. */
 void Video_SelectPlane(int plane) { (void)plane; }
 
-/* 0x105ef Video_SetSplitLine: line compare = rows*2 - 1 (10 bits; double scan). */
+/* 0x105ef Video_SetSplitLine: line compare = rows*2 - 1 (10 bits; double scan). ENH: only the front end calls
+ * it (400 = no split); the screen goes back to 320x240. The mission split is set by Pic_LoadHudPanel. */
 void Video_SetSplitLine(s16 rows)
 {
     u16 lc = (u16)((rows * 2 - 1) & 0x3FF);
     crtc.split_rows = lc < 480 ? (u16)((lc + 1) / 2) : 240;
+    mission_view = false;
 }
 
 /* 0x1063a Video_BlitLinearToPlanar: plane by plane from plane x&3; the source advances 4 bytes per
@@ -186,7 +246,7 @@ void Video_BlitLinearToPlanar(const u8 *src, u32 x, s32 y, u32 w, s32 h)
 /* 0x106b0 Video_SetStartAndPan: CRTC start = y*96 + (x>>2) + base, one retrace wait, then pan. */
 void Video_SetStartAndPan(u32 x, s32 y, s32 base)
 {
-    crtc.start = (u16)(y * 96 + (s32)(x >> 2) + base);
+    crtc.start = (u32)(y * VRAM_ROWB + (s32)(x >> 2) + base);     /* ENH: no u16 cut (compose wraps) */
     host_wait_vretrace();                       /* PORT: the start address latches at the retrace */
     crtc.pan = (u8)(x & 3);
 }
@@ -203,16 +263,16 @@ int Video_ReadPixel(s32 x, s32 y, s32 base)
 /* 0x13a68 Video_FlipPage: shows the back page (1 + g_VSyncWaits retraces), swaps pages. */
 void Video_FlipPage(void)
 {
-    Video_SetStartAndPan((u32)g_ScrollFineX, g_ScrollFineY, g_BackPage + 0x600);
+    Video_SetStartAndPan((u32)g_ScrollFineX, g_ScrollFineY, g_BackPage + 16 * VRAM_ROWB);    /* + 0x600 */
     for (int i = 0; i < g_VSyncWaits; i++) Video_WaitVSync();
     if (g_FlashCounter != 0) Pal_CycleEffects();
-    g_BackPage = (g_BackPage == 0x18C0) ? 0x78C0 : 0x18C0;
+    g_BackPage = (g_BackPage == vl.page_a) ? vl.page_b : vl.page_a;
 }
 
 /* 0x12e92 Video_ShowPage: CRTC start = p * 0x5a00 (pan unchanged), no wait. */
 void Video_ShowPage(int p)
 {
-    crtc.start = (u16)(p * PAGE_BYTES);
+    crtc.start = (u32)(p * PAGE_BYTES);
     g_ShownPage = (s16)p;
 }
 
@@ -220,13 +280,14 @@ void Video_ShowPage(int p)
 int Video_GetPage(void) { return g_ShownPage; }
 
 /* 0x130c8 Pic_LoadHudPanel(name): all VRAM cleared, gfx/<name> (LZW, 320x66) at offset 0, its .pal into
- * g_Palette 0..63 (no upload), split at 0xAF, CRTC start 0x1EC0. */
+ * g_Palette 0..63 (no upload), split at 0xAF, CRTC start 0x1EC0. ENH: the split is the playfield height of
+ * the view, the start the top of page A + 16 rows, and the screen becomes the view. */
 void Pic_LoadHudPanel(const char *name)
 {
     char path[100];
     strcpy(path, DSTR(0x80CC3));                /* "gfx/" */
     strcat(path, name);
-    memset(vram, 0, sizeof vram);
+    memset(vram, 0, (size_t)VRAM_SIZE);
     FILE *f = Platform_Fopen(path, DSTR(0x80C77));
     if (!f) FatalError(path, DSTR(0x80C8C), 1);
     u8 *pic = malloc(0x5280);
@@ -253,8 +314,9 @@ void Pic_LoadHudPanel(const char *name)
     memcpy(path + n - 4, DSTR(0x80D81), 5);     /* ".pax" again */
     for (int i = 0; i < 0x40; i++) SwapByte(&pic[i * 3], &pic[i * 3 + 2]);
     for (int i = 0; i < 0xc0; i++) g_Palette[i] = (u8)(pic[i] >> 2);
-    Video_SetSplitLine(0xAF);
-    crtc.start = 0x1EC0;
+    crtc.split_rows = (u16)vl.split;            /* Video_SetSplitLine(0xAF) */
+    mission_view = true;
+    crtc.start = (u32)(vl.page_a + 16 * VRAM_ROWB);                     /* 0x1EC0 */
     free(pic);
 }
 
@@ -357,11 +419,11 @@ void Sprite_Queue(s32 x, s32 y, s32 id)
 
 static const u8 *spr_ptr(s32 idx) { return (idx > 0 && idx < SPRITE_TAB_SIZE) ? g_SpriteTab[idx] : NULL; }
 
-/* 0x1155e Sprite_DrawQueue: last queued first; wrapped entries at x + 384. */
+/* 0x1155e Sprite_DrawQueue: last queued first; wrapped entries at x + 384 (ENH: + the row). */
 void Sprite_DrawQueue(void)
 {
     for (s32 i = g_SpriteQueueCount - 1; i > -1; i--) {
-        s32 xx = q_get(i, 8) + (q_get(i, 4) ? 0x180 : 0);
+        s32 xx = q_get(i, 8) + (q_get(i, 4) ? VRAM_ROW : 0);
         const u8 *s = spr_ptr(q_get(i, 16));
         if (q_get(i, 0) == 0) Sprite_Blit((u32)xx, (u32)q_get(i, 12), s, g_BackPage);
         else Sprite_BlitMirror(xx, q_get(i, 12), s, g_BackPage);
@@ -410,7 +472,7 @@ void Level_DrawBackground(s32 col, s32 row)
         }
     s32 px = (s32)((double)g_CamX / dbits(0x4010AAAAAA9F36A3ull)) % 320 - g_ScrollFineX;
     s32 py = (s32)((double)(g_CamY + 0x7D8) / 9.25 - (double)g_ScrollFineY);
-    int pagesel = (g_BackPage == 0x18C0) ? 0 : 8;
+    int pagesel = (g_BackPage == vl.page_a) ? 0 : 8;
     for (int plane = 0; plane < 4; plane++) {
         Video_SelectPlane(plane);
         if (g_DetailParallax)
@@ -666,7 +728,7 @@ letter:
 void Text_DrawSmall(int x, int y, const char *s, int onPage)
 {
     int cx = x;
-    y += (onPage * g_BackPage) / 0x60;
+    y += (onPage * g_BackPage) / VRAM_ROWB;
     const u8 *f = g_SmallFont;
     for (; *s; s++) {
         int ch = upper((u8)*s);
@@ -699,7 +761,7 @@ void Text_DrawSmall(int x, int y, const char *s, int onPage)
 void Text_DrawBig(int x, int y, const char *s, int onPage)
 {
     int cx = x;
-    y += (onPage * g_BackPage) / 0x60;
+    y += (onPage * g_BackPage) / VRAM_ROWB;
     for (; *s; s++) {
         int ch = upper((u8)*s);
         if (ch == 10) { y += 0xc; cx = x; continue; }
@@ -864,15 +926,15 @@ void Video_FillRect(int x1, int y1, int x2, int y2, u8 col)
 void Video_CopyRect(int srcPage, int x1, int y1, int x2, int y2, int dstPage, int dx, int dy)
 {
     s8 rows = (s8)(y2 - y1);
-    s32 src = y1 * 0x60 + (x1 >> 2) + srcPage * PAGE_BYTES;
-    s32 srcEnd = y1 * 0x60 + (x2 >> 2) + srcPage * PAGE_BYTES;
-    s32 dst = dy * 0x60 + (dx >> 2) + dstPage * PAGE_BYTES;
+    s32 src = y1 * VRAM_ROWB + (x1 >> 2) + srcPage * PAGE_BYTES;
+    s32 srcEnd = y1 * VRAM_ROWB + (x2 >> 2) + srcPage * PAGE_BYTES;
+    s32 dst = dy * VRAM_ROWB + (dx >> 2) + dstPage * PAGE_BYTES;
     for (; rows != 0; rows--) {
         s32 d = dst;
         for (s32 sb = src; sb <= srcEnd; sb++, d++)
             for (int p = 0; p < 4; p++) vput(d * 4 + p, vget(sb * 4 + p));
-        src += 0x60;
-        srcEnd += 0x60;
-        dst += 0x60;
+        src += VRAM_ROWB;
+        srcEnd += VRAM_ROWB;
+        dst += VRAM_ROWB;
     }
 }

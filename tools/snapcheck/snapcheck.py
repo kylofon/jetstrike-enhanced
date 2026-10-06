@@ -9,7 +9,7 @@ tools/snapcheck/ref.txt. Prints only the pass / fail counts (and the failing fra
   python tools/snapcheck/snapcheck.py --update   rewrite ref.txt from this build (only from a build known to be right)
   python tools/snapcheck/snapcheck.py --twice    run twice and compare the runs with each other (determinism check)
   options: --exe PATH (default jsport/build/jsenh.exe[/jsport.exe]), --game-dir DIR (default Game),
-           --only NAME[,NAME] (scenario names), --view WxH (passed to the game once it has --view; default none)
+           --only NAME[,NAME] (scenario names), --view WxH (passed to the game; default none = the game's default view)
 
 Frames land in work/snapcheck/<scenario>/at_NNN.png (look at them when a hash differs).
 Scenario times are game seconds; a mission scenario takes about 40 s of real time, scenarios run in parallel.

@@ -66,8 +66,8 @@ void Hud_DrawPanel(void)
         Video_FillRect(0, 0x40, 0x7e, 0x59, 0);
         DS32(0x902F8) = 0;
     }
-    Video_CopyRect(0, 0xdc, 5, 0x11a, 0x1e, 0, 0, 0x246);           /* radar background */
-    Video_CopyRect(0, 0x95, 0x14, 0x9f, 0x37, 0, 0x40, 0x246);      /* altimeter background */
+    Video_CopyRect(0, 0xdc, 5, 0x11a, 0x1e, 0, 0, vl.save_row);       /* radar background (row 0x246) */
+    Video_CopyRect(0, 0x95, 0x14, 0x9f, 0x37, 0, 0x40, vl.save_row);  /* altimeter background */
     if (g_GameMode > 0) {
         DS32(0x9040C) = 0;
         DS32(0x901D4) = 0x3e;
@@ -221,7 +221,7 @@ void Hud_UpdateRadar(void)
 {
     if (g_DamageFlags[7] == 0 && g_RadarJammed == 0) {
         DS32(0x90480) = 0;
-        Video_CopyRect(0, 0, 0x246, 0x3e, 0x25f, 0, 0xdc, 5);       /* clear the radar */
+        Video_CopyRect(0, 0, vl.save_row, 0x3e, vl.save_row + 0x19, 0, 0xdc, 5);   /* clear the radar */
     } else if (DS32(0x90480) == 0 && g_DamageFlags[7] == 0) {
         strcpy(g_InfoText, DSTR(0x81304));                           /* "Jammed" */
         Text_DrawSmall(0xfd - Text_WidthSmall(g_InfoText) / 2, 0x10, g_InfoText, 0);
@@ -297,7 +297,7 @@ void Hud_UpdateRadar(void)
     Pal_SetColor(0x1e, D32(0x80384) & 0xff, 0xc, 0xc);
     DS32(0x80384) += DS32(0x80390) * 3;
     if (DS32(0x80384) > 0x3d || DS32(0x80384) < 0x23) DS32(0x80388) = -DS32(0x80388);   /* sic (Q16) */
-    Video_CopyRect(0, 0x40, 0x246, 0x4a, 0x269, 0, 0x95, 0x14);    /* restore the altimeter */
+    Video_CopyRect(0, 0x40, vl.save_row, 0x4a, vl.save_row + 0x23, 0, 0x95, 0x14);    /* restore the altimeter */
     s32 py = g_CamY + g_PlayerScrY;
     if (py < 0) py = 0;
     s32 ay = (s32)((double)py / 29.1764);        /* 0x403d2d288ce703b0 */

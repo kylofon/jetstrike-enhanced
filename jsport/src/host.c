@@ -12,7 +12,7 @@ Uint64 host_start_ns;
 static char *game_dir;
 static double quit_after = -1;
 
-bool host_init(const char *dir, int window_scale, bool fullscreen, bool open_window)
+bool host_init(const char *dir, int view_w, int view_h, int window_scale, bool fullscreen, bool open_window)
 {
     SDL_InitFlags flags = open_window ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD) : 0;
     if (!SDL_Init(flags)) {
@@ -23,7 +23,7 @@ bool host_init(const char *dir, int window_scale, bool fullscreen, bool open_win
     host_start_ns = SDL_GetTicksNS();
     const char *q = SDL_getenv("JS_QUIT_AFTER");
     if (q && *q) quit_after = SDL_atof(q);
-    if (open_window && !host_video_init(window_scale, fullscreen)) return false;
+    if (open_window && !host_video_init(view_w, view_h, window_scale, fullscreen)) return false;
     return true;
 }
 

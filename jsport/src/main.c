@@ -1,8 +1,11 @@
 /* JetStrike SDL3 port: entry point.
  *
- * usage: jsenh [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro] [--lzw-dump OUTDIR]
+ * usage: jsenh [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro]
+ *              [--lzw-dump OUTDIR]
  *   --game-dir    folder with the original game files (default: "Game" in the working directory)
- *   --scale       initial window size: 320x240 times N (default 3)
+ *   --view        ENH: the mission screen including the HUD (PLAN.md): width a multiple of 16 in 320..960,
+ *                 height 240..540; 320x240 is the original (default for now). Front end and intro stay 320x240.
+ *   --scale       initial window size: the view times N (default 3)
  *   --fullscreen  start in full screen (Alt+Enter switches)
  *   --sb-rate     Sound Blaster mixer rate: 19920 (designed, default) or 3906 (what the original programs);
  *                 the intro's mixer: 40000 (designed) or 3906
@@ -25,10 +28,14 @@
 #include "sound.h"
 #include "video.h"
 
+/* ENH: the view without --view. PLAN.md decision 1 makes 640x360 the default once the wide renderer is in. */
+#define VIEW_DEFAULT_W 320
+#define VIEW_DEFAULT_H 240
+
 static int usage(const char *prog)
 {
-    fprintf(stderr, "usage: %s [--game-dir DIR] [--scale N] [--fullscreen] [--sb-rate 19920|3906] "
-                    "[--lzw-dump OUTDIR]\n", prog);
+    fprintf(stderr, "usage: %s [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--sb-rate 19920|3906] "
+                    "[--no-intro] [--lzw-dump OUTDIR]\n", prog);
     return 2;
 }
 
@@ -87,11 +94,21 @@ static int lzw_dump(const char *game_dir, const char *out_dir)
 int main(int argc, char **argv)
 {
     const char *dir = "Game", *dump = NULL;
-    int scale = 3;
+    int scale = 3, view_w = VIEW_DEFAULT_W, view_h = VIEW_DEFAULT_H;
     bool fullscreen = false, intro = true;
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
         if (!strcmp(a, "--game-dir") && v) { dir = v; i++; }
+        else if (!strcmp(a, "--view") && v) {
+            char x, end;
+            const char *err = (sscanf(v, "%d%c%d%c", &view_w, &x, &view_h, &end) == 3 && (x == 'x' || x == 'X'))
+                              ? Video_CheckView(view_w, view_h) : "expected WxH, e.g. 640x360";
+            if (err) {
+                fprintf(stderr, "%s: --view %s: %s\n", argv[0], v, err);
+                return 2;
+            }
+            i++;
+        }
         else if (!strcmp(a, "--scale") && v) { scale = atoi(v); i++; }
         else if (!strcmp(a, "--fullscreen")) fullscreen = true;
         else if (!strcmp(a, "--sb-rate") && v) {
@@ -104,14 +121,14 @@ int main(int argc, char **argv)
     }
 
     if (dump) {
-        if (!host_init(dir, scale, false, false)) return 1;
+        if (!host_init(dir, view_w, view_h, scale, false, false)) return 1;
         int rc = lzw_dump(dir, dump);
         host_shutdown();
         return rc;
     }
 
-    if (!host_init(dir, scale, fullscreen, true)) return 1;
-    Video_Init();
+    if (!host_init(dir, view_w, view_h, scale, fullscreen, true)) return 1;
+    Video_Init(view_w, view_h);
     if (intro) Intro_Run();                     /* JS.BAT: cd intro / intro / cd .. / js_cdrom */
     Dseg_Load();
     int rc = js_main();                         /* 0x146f4 main */

@@ -296,7 +296,7 @@ void Bullets_Update(int camX, int camY)
             memmove(b, &g_Bullets[g_BulletCount * 4], 16);
             i--;
         } else {
-            Video_PutPixel((u32)(sx + g_ScrollFineX), sy + g_BackPage / 0x60 + g_ScrollFineY, 0xff);
+            Video_PutPixel((u32)(sx + g_ScrollFineX), sy + g_BackPage / VRAM_ROWB + g_ScrollFineY, 0xff);
         }
     }
 }

@@ -1763,7 +1763,7 @@ void Sarcasm_Load(void)
 /* 0x2c9cb Mission_Debrief: text over the last frame, on the page being shown. */
 void Mission_Debrief(void)
 {
-    g_BackPage = (g_BackPage == 0x18C0) ? 0x78C0 : 0x18C0;
+    g_BackPage = (g_BackPage == vl.page_a) ? vl.page_b : vl.page_a;
     if (g_SarcasmLines[0] == 0) Sarcasm_Load();
     g_EndGameIndex = 3;
     g_AbortFlag = 1;

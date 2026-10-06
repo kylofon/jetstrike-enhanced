@@ -3,23 +3,30 @@
 #include <stdio.h>
 
 static SDL_Texture *texture;
-static void (*frame_source)(u32 *);
-static u32 frame[HOST_FRAME_W * HOST_FRAME_H];
+static void (*frame_source)(u32 *, int *, int *);
+static u32 frame[HOST_FRAME_MAX_W * HOST_FRAME_MAX_H];
+static int frame_w = HOST_FRAME_W, frame_h = HOST_FRAME_H;     /* size of the last composed frame */
 
-bool host_video_init(int window_scale, bool fullscreen)
+/* Texture and logical presentation for a w x h frame. Mode X has square pixels: the frame is letterboxed
+ * (ENH: a 320x240 front-end frame in a wider window is pillarboxed the same way). */
+static void set_frame_size(int w, int h)
+{
+    if (texture) SDL_DestroyTexture(texture);
+    texture = SDL_CreateTexture(host_renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+    if (texture) SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    SDL_SetRenderLogicalPresentation(host_renderer, w, h, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+}
+
+bool host_video_init(int view_w, int view_h, int window_scale, bool fullscreen)
 {
     if (window_scale < 1) window_scale = 3;
-    if (!SDL_CreateWindowAndRenderer("JetStrike Enhanced", HOST_FRAME_W * window_scale, HOST_FRAME_H * window_scale,
+    if (!SDL_CreateWindowAndRenderer("JetStrike Enhanced", view_w * window_scale, view_h * window_scale,
                                      SDL_WINDOW_RESIZABLE, &host_window, &host_renderer)) {
         fprintf(stderr, "window/renderer failed: %s\n", SDL_GetError());
         return false;
     }
     if (fullscreen) SDL_SetWindowFullscreen(host_window, true);
-    /* 320x240 mode X has square pixels: a 4:3 letterboxed logical presentation. */
-    SDL_SetRenderLogicalPresentation(host_renderer, HOST_FRAME_W, HOST_FRAME_H, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-    texture = SDL_CreateTexture(host_renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING,
-                                HOST_FRAME_W, HOST_FRAME_H);
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    set_frame_size(frame_w, frame_h);
     return true;
 }
 
@@ -41,7 +48,7 @@ void host_video_event(const SDL_Event *ev)
         SDL_SetWindowFullscreen(host_window, !(SDL_GetWindowFlags(host_window) & SDL_WINDOW_FULLSCREEN));
 }
 
-void host_set_frame_source(void (*compose)(u32 *)) { frame_source = compose; }
+void host_set_frame_source(void (*compose)(u32 *, int *, int *)) { frame_source = compose; }
 
 /* Developer aid: JS_SNAPSHOT_DIR / JS_SNAPSHOT_MS (host.h). */
 static void snapshot(void)
@@ -61,8 +68,7 @@ static void snapshot(void)
     Uint64 now = SDL_GetTicksNS();
     if (n && now - last_ns < interval_ns) return;
     last_ns = now;
-    SDL_Surface *s = SDL_CreateSurfaceFrom(HOST_FRAME_W, HOST_FRAME_H, SDL_PIXELFORMAT_XRGB8888, frame,
-                                           HOST_FRAME_W * 4);
+    SDL_Surface *s = SDL_CreateSurfaceFrom(frame_w, frame_h, SDL_PIXELFORMAT_XRGB8888, frame, frame_w * 4);
     if (!s) return;
     char path[512];
     SDL_snprintf(path, sizeof path, "%s/snap%04d.png", dir, n++);
@@ -89,14 +95,13 @@ static void snapshot_at(void)
     if (end == spec) { spec = NULL; return; }
     if (host_script_seconds() < at) return;
     uint32_t h = 2166136261u;
-    for (int i = 0; i < HOST_FRAME_W * HOST_FRAME_H; i++) {
+    for (int i = 0; i < frame_w * frame_h; i++) {
         uint32_t px = frame[i];
         for (int k = 0; k < 3; k++) { h ^= (px >> (8 * k)) & 0xFF; h *= 16777619u; }
     }
     const char *dir = SDL_getenv("JS_SNAPSHOT_DIR");
     char path[512];
-    SDL_Surface *s = SDL_CreateSurfaceFrom(HOST_FRAME_W, HOST_FRAME_H, SDL_PIXELFORMAT_XRGB8888, frame,
-                                           HOST_FRAME_W * 4);
+    SDL_Surface *s = SDL_CreateSurfaceFrom(frame_w, frame_h, SDL_PIXELFORMAT_XRGB8888, frame, frame_w * 4);
     SDL_snprintf(path, sizeof path, "%s/at_%03d.png", dir, n);
     if (s) { SDL_SavePNG(s, path); SDL_DestroySurface(s); }
     SDL_snprintf(path, sizeof path, "%s/snap.txt", dir);
@@ -109,11 +114,17 @@ static void snapshot_at(void)
 void host_present(void)
 {
     if (!frame_source) return;
-    frame_source(frame);
+    int w = HOST_FRAME_W, h = HOST_FRAME_H;
+    frame_source(frame, &w, &h);
+    bool resized = w != frame_w || h != frame_h;
+    frame_w = w;
+    frame_h = h;
     snapshot();
     snapshot_at();
+    if (!host_renderer) return;
+    if (resized) set_frame_size(w, h);
     if (!texture) return;
-    SDL_UpdateTexture(texture, NULL, frame, HOST_FRAME_W * 4);
+    SDL_UpdateTexture(texture, NULL, frame, frame_w * 4);
     SDL_SetRenderDrawColor(host_renderer, 0, 0, 0, 255);
     SDL_RenderClear(host_renderer);
     SDL_RenderTexture(host_renderer, texture, NULL, NULL);

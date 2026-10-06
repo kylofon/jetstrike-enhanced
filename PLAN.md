@@ -16,12 +16,13 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Start E1.1 (below). | | |
+| — | Nothing yet. Start E1.2 (below). | | |
 
 ## Status
 
-- **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic).
-- **Next:** E1.1 (runtime view size), Opus.
+- **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
+  E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240).
+- **Next:** E1.2 (presentation and switching), Sonnet.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -53,7 +54,7 @@ remove it when it is done.
   the in-mission view gets larger.
 
 ## Decisions (user, 2026-10-06)
-1. **View 640×360** (playfield 640×294) is the target and the default; 320×240 stays as the regression mode.
+1. **View 640×360** (playfield 640×295) is the target and the default; 320×240 stays as the regression mode.
 2. **"On screen" grows with the view**: `IsOnScreen`, culling and spawn edges use the new view (no separate
    320-wide activation window). Player-relative AI/lock ranges stay as they are (§4).
 3. **HUD**: the original 320×66 panel, centred, with side fill.
@@ -63,9 +64,9 @@ remove it when it is done.
 | View | Playfield | Visible vs original | Notes |
 |---|---|---|---|
 | 320×240 | 320×175 | 1× | original, regression mode |
-| 480×270 (16:9) | 480×204 | 1.5× wide, 1.17× tall | keeps the game tight; 4× = 1920×1080 |
-| **640×360 (16:9)** | 640×294 | **2× wide, 1.7× tall** | recommended; 3× = 1920×1080 |
-| 640×480 (4:3) | 640×414 | 2×, 2.4× | shows a lot of sky; the backdrop runs out (512 rows) |
+| 480×270 (16:9) | 480×205 | 1.5× wide, 1.17× tall | keeps the game tight; 4× = 1920×1080 |
+| **640×360 (16:9)** | 640×295 | **2× wide, 1.7× tall** | recommended; 3× = 1920×1080 |
+| 640×480 (4:3) | 640×415 | 2×, 2.4× | shows a lot of sky; the backdrop runs out (512 rows) |
 
 Width matters most in a side-scroller: you see threats sooner. Extra height mostly shows sky and ground.
 The map is only 1024 px tall, so more than ~400 playfield rows shows the whole altitude band at once.
@@ -142,14 +143,30 @@ Model: H = Haiku, S = Sonnet, O = Opus. Size: S < 1 h of agent work, M = one ses
 ### Phase E1 — Runtime view size (§1–2; gate: E0.2 snapshots match byte for byte at 320×240)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E1.1 | Video model: runtime `view_w × view_h`, stride, page layout and split, `--view` parsing and validation | O | L |
+| E1.1 | Video model: runtime `view_w × view_h`, stride, page layout and split, `--view` parsing and validation | O | done 2026-10-06 (see E1 notes) |
 | E1.2 | Presentation and switching between the 320×240 front end and the mission view (pillarbox / integer scale) | S | M |
 | E1.3 | Run the snapshot check at 320×240, fix-or-report diffs (escalate real diffs to Opus) | H | S |
+
+E1 notes (from E1.1):
+- Playfield = `view_h − 65` (the HUD shows 65 of its 66 rows), so 640×360 has a 295-row playfield.
+- The layout lives in `vl` (`video.h`, computed by `layout_for` in `video.c`): stride `view_w + 64`, play page
+  = tile rows covering 16 + 15 + playfield rows, + 48 rows for sprites; page A after the 66 HUD rows, page B
+  after A, the HUD save area (radar/altimeter, was row 0x246) 4 rows after B; VRAM a power of two ≥ the
+  original 0x40000. The whole game (front end too) runs on the view's stride; only the intro keeps the
+  320×240 layout. Front-end frames hash identically at every view size (checked at 336×241, 480×270,
+  640×360, 960×540).
+- The screen is the view from `Pic_LoadHudPanel` until the next `Video_SetSplitLine` (front end), else
+  320×240. `host_present` recreates the texture and letterboxed logical presentation when the size changes.
+  Left for E1.2: window size (now view × `--scale`, no desktop fit), integer scaling, how the 320×240 screens
+  sit in the window, and the screens shown in mission view that are really front-end style
+  (`Mission_CompleteScreen` overview, `Mission_Debrief` text over the last frame).
+- Default view is still 320×240 (`VIEW_DEFAULT_W/H` in `main.c`); switch it to 640×360 when E2 lands
+  (decision 1). `snapcheck.py` runs without `--view`, so it then needs `--view 320x240` by default.
 
 ### Phase E2 — Wide renderer (§3)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E2.1 | Tile window, draw loops, parallax wrap and extension (`x + stride`) | O | L |
+| E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | L |
 | E2.2 | Map bottom fill, blitter clipping, camera box / lead margin | S | M |
 | E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |

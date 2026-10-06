@@ -103,7 +103,8 @@ static int Intro_ReadKey(void)
 static void I_Video_SetModeX(void)
 {
     memset(dac, 0, sizeof dac);
-    memset(vram, 0, sizeof vram);
+    Video_UseLayout(false);                             /* ENH: the intro keeps the 320x240 layout */
+    memset(vram, 0, (size_t)VRAM_SIZE);
     crtc.start = 0;
     crtc.pan = 0;
     crtc.split_rows = 240;
