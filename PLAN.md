@@ -16,7 +16,7 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Next is E2.3 (Haiku), then E3.2. | | |
+| — | Nothing yet. Next is U-wide (look at the dumps), then E3.2. | | |
 
 ## Status
 
@@ -25,7 +25,7 @@ remove it when it is done.
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
   parallax at any view; 76/76 at 320×240), E2.2 (camera limit, player box centred, blitter clipping), HUD centred (E4.1), E3.1 (screen-value
   sites: changed or tagged as kept; 76/76 at 320×240).
-- **Next:** E2.3 (snapshot check + wide dumps), Haiku; E3.2 (ground collision), Opus; then U-play.
+- **Next:** U-wide (user), E3.2 (ground collision), Opus; then U-play.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -175,7 +175,7 @@ E1 notes (from E1.1):
 |---|---|---|---|
 | E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | done 2026-10-06 (see E2 notes) |
 | E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, ~~camera box / lead margin~~ (done) | S | done 2026-10-06 (see E2 notes) |
-| E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
+| E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | done 2026-10-06 (76/76 at 320×240; dumps in `work/wide_480x270`, `work/wide_640x360`) |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
 
 E2 notes (from E2.1):
