@@ -1832,7 +1832,7 @@ void Mission_Debrief(void)
             strncpy(s_Line85248, s_Tmp85048, (size_t)n);         /* no terminator (Q13, kept) */
             memmove(s_Tmp85048, s_Tmp85048 + n, strlen(s_Tmp85048 + n) + 1);
         }
-        Text_DrawSmall((0xa0 - Text_WidthSmall(s_Line85248) / 2) + g_ScrollFineX, DS32(0x90434) + 0x2c + g_ScrollFineY, s_Line85248, 1);
+        Text_DrawSmall((vl.view_w / 2 - Text_WidthSmall(s_Line85248) / 2) + g_ScrollFineX, DS32(0x90434) + 0x2c + g_ScrollFineY, s_Line85248, 1);
         DS32(0x90434) += 10;
     }
     if (g_EjectState == 99 && g_GameMode == 0) {
@@ -1840,7 +1840,7 @@ void Mission_Debrief(void)
         itoa_js(g_Lives, s_Num85548);
         strcat(g_InfoText, s_Num85548);
         strcat(g_InfoText, HUDTEXT(99));                          /* " CRASHES LEFT" */
-        Text_DrawSmall((0xa0 - Text_WidthSmall(g_InfoText) / 2) + g_ScrollFineX, DS32(0x90354) * 8 + 0x50 + g_ScrollFineY, g_InfoText, 1);
+        Text_DrawSmall((vl.view_w / 2 - Text_WidthSmall(g_InfoText) / 2) + g_ScrollFineX, DS32(0x90354) * 8 + 0x50 + g_ScrollFineY, g_InfoText, 1);
     }
     if (g_MissionResult == 2) {
         s_Line85248[0] = 0;
@@ -1865,9 +1865,9 @@ void Mission_Debrief(void)
                 strcat(s_Line85248, HUDTEXT(70));                 /* " FOR BRAVERY" */
             }
         }
-        Text_DrawSmall((g_ScrollFineX + 0xa0) - Text_WidthSmall(g_InfoText) / 2, DS32(0x90354) * 8 + 0x50 + g_ScrollFineY, g_InfoText, 1);
+        Text_DrawSmall((g_ScrollFineX + vl.view_w / 2) - Text_WidthSmall(g_InfoText) / 2, DS32(0x90354) * 8 + 0x50 + g_ScrollFineY, g_InfoText, 1);
         if (s_Line85248[0] != 0)                                  /* sic: centred with line 1's width */
-            Text_DrawSmall((g_ScrollFineX + 0xa0) - Text_WidthSmall(g_InfoText) / 2, DS32(0x90354) * 8 + 0x52 + g_ScrollFineY, s_Line85248, 1);
+            Text_DrawSmall((g_ScrollFineX + vl.view_w / 2) - Text_WidthSmall(g_InfoText) / 2, DS32(0x90354) * 8 + 0x52 + g_ScrollFineY, s_Line85248, 1);
     }
     if (g_GameMode == 3) {
         for (int k = 0; k < 2; k++) {                             /* "PLAYER 1" twice (Q14, kept) */
@@ -1875,7 +1875,7 @@ void Mission_Debrief(void)
             strcat(s_Line85248, HUDTEXT(63));
             itoa_js(g_Score[k], s_Num85548);
             strcat(s_Line85248, s_Num85548);
-            Text_DrawSmall((g_ScrollFineX + 0xa0) - Text_WidthSmall(s_Line85248) / 2,
+            Text_DrawSmall((g_ScrollFineX + vl.view_w / 2) - Text_WidthSmall(s_Line85248) / 2,
                            DS32(0x90354) * 8 + (k ? 0x72 : 0x66) + g_ScrollFineY, s_Line85248, 1);
         }
     }

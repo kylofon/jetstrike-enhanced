@@ -7,19 +7,25 @@ static void (*frame_source)(u32 *, int *, int *);
 static u32 frame[HOST_FRAME_MAX_W * HOST_FRAME_MAX_H];
 static int frame_w = HOST_FRAME_W, frame_h = HOST_FRAME_H;     /* size of the last composed frame */
 
-/* Texture and logical presentation for a w x h frame. Mode X has square pixels: the frame is letterboxed
- * (ENH: a 320x240 front-end frame in a wider window is pillarboxed the same way). */
+/* Texture and logical presentation for a w x h frame. Mode X has square pixels. ENH: the frame is scaled by the
+ * largest whole factor that fits the window (pillar/letterboxed; smaller windows scale it down), so a 320x240
+ * front-end frame in a mission-sized window is centred with borders and stays sharp. */
 static void set_frame_size(int w, int h)
 {
     if (texture) SDL_DestroyTexture(texture);
     texture = SDL_CreateTexture(host_renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
     if (texture) SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
-    SDL_SetRenderLogicalPresentation(host_renderer, w, h, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    SDL_SetRenderLogicalPresentation(host_renderer, w, h, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
 }
 
 bool host_video_init(int view_w, int view_h, int window_scale, bool fullscreen)
 {
     if (window_scale < 1) window_scale = 3;
+    /* ENH: the window is the view times the scale, lowered until it fits the desktop (never below 1). */
+    SDL_Rect usable;
+    if (SDL_GetDisplayUsableBounds(SDL_GetPrimaryDisplay(), &usable) && usable.w > 0 && usable.h > 0)
+        while (window_scale > 1 && (view_w * window_scale > usable.w || view_h * window_scale > usable.h - 40))
+            window_scale--;                         /* 40: the title bar */
     if (!SDL_CreateWindowAndRenderer("JetStrike Enhanced", view_w * window_scale, view_h * window_scale,
                                      SDL_WINDOW_RESIZABLE, &host_window, &host_renderer)) {
         fprintf(stderr, "window/renderer failed: %s\n", SDL_GetError());

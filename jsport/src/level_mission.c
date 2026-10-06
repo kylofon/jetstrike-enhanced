@@ -680,6 +680,7 @@ void Mission_CompleteScreen(void)
         DS32(0x901B8) = DS32A(0x91304)[DS32(0x9028C)];
         DS32(0x9028C)++;
     }
+    Video_ClassicScreen(true);                  /* ENH: the overview is a 320x240 screen, pillarboxed in a wide view */
     while (DS32(0x901B8) > 0) {
         while (g_AnyInput != 0) { Input_ReadControls(); Platform_Spin(); }   /* PORT: pump events */
         Video_SetStartAndPan(0, 100, 0);
@@ -712,4 +713,5 @@ void Mission_CompleteScreen(void)
             DS32(0x901B8) = 0;
         }
     }
+    Video_ClassicScreen(false);
 }

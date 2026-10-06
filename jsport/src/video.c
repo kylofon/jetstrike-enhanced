@@ -27,6 +27,7 @@ static u8 *g_SpriteBank;                        /* 0x8450C: the unpacked JETSTRI
 /* ENH: the view and its layout (video.h). */
 static VideoLayout layout_classic, layout_view;
 static bool mission_view;                       /* the screen is the view (from Pic_LoadHudPanel), else 320x240 */
+static bool classic_screen;                     /* ENH: a front-end style screen in a mission (Video_ClassicScreen): 320x240 */
 
 /* The VRAM layout of a w x h view. Play page: the 16-row tile margin above the playfield, up to 15 rows of fine
  * scroll, the playfield, rounded up to whole tile rows (13 at 320x240), then 48 rows for sprites below it. */
@@ -57,6 +58,8 @@ const char *Video_CheckView(int w, int h)
     return NULL;
 }
 
+void Video_ClassicScreen(bool on) { classic_screen = on; }
+
 void Video_UseLayout(bool view) { vl = view ? layout_view : layout_classic; }
 
 /* PORT: what the monitor shows at a retrace (video.md §10): 240 lines from the CRTC start with pel
@@ -70,13 +73,15 @@ static void compose(u32 *out, int *w, int *h)
         u32 r = dac[3 * i] & 63, g = dac[3 * i + 1] & 63, b = dac[3 * i + 2] & 63;
         rgb[i] = (r << 2 | r >> 4) << 16 | (g << 2 | g >> 4) << 8 | (b << 2 | b >> 4);
     }
-    int sw = mission_view ? vl.view_w : 320, sh = mission_view ? vl.view_h : 240;
+    bool wide = mission_view && !classic_screen;
+    int sw = wide ? vl.view_w : 320, sh = wide ? vl.view_h : 240;
+    int split = classic_screen ? 175 : crtc.split_rows;     /* the original HUD split */
     u32 mask = (u32)VRAM_SIZE - 1;
     *w = sw;
     *h = sh;
     for (int r = 0; r < sh; r++) {
-        u32 base = r < crtc.split_rows ? crtc.start * 4 + (u32)(r * VRAM_ROW) + crtc.pan
-                                       : (u32)((r - crtc.split_rows) * VRAM_ROW);
+        u32 base = r < split ? crtc.start * 4 + (u32)(r * VRAM_ROW) + crtc.pan
+                                       : (u32)((r - split) * VRAM_ROW);
         for (int c = 0; c < sw; c++) out[r * sw + c] = rgb[vram[(base + (u32)c) & mask]];
     }
 }

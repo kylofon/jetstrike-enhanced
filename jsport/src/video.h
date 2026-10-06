@@ -103,6 +103,7 @@ void Video_SetTextMode(void);                   /* 0x100c2 */
 void Video_PutPixel(u32 x, s32 y, u8 col);      /* 0x100d0 */
 int  Video_WaitVSync(void);                     /* 0x10108 */
 void Video_SelectPlane(int plane);              /* 0x105d9 */
+void Video_ClassicScreen(bool on);             /* ENH: show the 320x240 screen (HUD split at 175) while in a mission view */
 void Video_SetSplitLine(s16 rows);              /* 0x105ef */
 void Video_BlitLinearToPlanar(const u8 *src, u32 x, s32 y, u32 w, s32 h);   /* 0x1063a */
 void Video_SetStartAndPan(u32 x, s32 y, s32 base);                          /* 0x106b0 */
