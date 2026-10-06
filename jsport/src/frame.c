@@ -188,9 +188,9 @@ static void flight_move(void)                    /* GF step 68, player.md §3.2 
 {
     g_CamX += g_PlayerVX;
     if (abs(g_PlayerVX) == 0x10 && g_SpeedBits > 0x40a00000)
-        g_PlayerScrX = Clamp(g_PlayerScrX - Sign(g_PlayerVX) * 4, 0x20, 0x120);
+        g_PlayerScrX = Clamp(g_PlayerScrX - Sign(g_PlayerVX) * 4, 0x20 + VIEW_EXTRA_COLS / 2, 0x120 + VIEW_EXTRA_COLS / 2);
     else if (g_TaxiStopTimer == 0)
-        g_PlayerScrX -= Sign(g_PlayerScrX - 0xa0) * 4;
+        g_PlayerScrX -= Sign(g_PlayerScrX - (0xa0 + VIEW_EXTRA_COLS / 2)) * 4;      /* ENH: view */
     if (g_IsHeli == 0) {
         if (g_OnGround == 0 || g_PlayerVY < 0) {
             if (g_CamY < CAM_Y_MAX) {          /* ENH: view */
@@ -269,8 +269,8 @@ static void flight_ground_contact(void)          /* GF step 69, player.md §3.3 
         g_Speed = (float)((double)g_Speed + -0.5);
         if (g_SpeedBits < 0) g_Speed = 0;
         g_PlayerScrX--;
-        if (--g_TaxiStopTimer == 0 || (g_SpeedBits == 0 && abs(old - 0x95) < 0x10)) {
-            g_PlayerScrX = 0x94;
+        if (--g_TaxiStopTimer == 0 || (g_SpeedBits == 0 && abs(old - (0x95 + VIEW_EXTRA_COLS / 2)) < 0x10)) {
+            g_PlayerScrX = 0x94 + VIEW_EXTRA_COLS / 2;                   /* ENH: view */
             g_Speed = 0;
             g_TaxiStopTimer = 0;
         }

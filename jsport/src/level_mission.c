@@ -88,11 +88,11 @@ void Parallax_Load(char *name)
     }
 }
 
-/* 0x10eb0 IsOnScreen(camX, camY, x, y). ENH: view: the bottom edge moves down with the extra playfield rows (the
- * camera stops higher, CAM_Y_MAX); the horizontal window is still the original one (E3.1). */
+/* 0x10eb0 IsOnScreen(camX, camY, x, y). ENH: view: the right and bottom edges move out with the extra columns and
+ * playfield rows (decision 2; the camera stops higher, CAM_Y_MAX). */
 int IsOnScreen(int camX, int camY, int x, int y)
 {
-    return (camX - 0x40 < x && x < camX + 0x140 && camY < y && y < camY + 200 + VIEW_EXTRA_ROWS) ? 1 : 0;
+    return (camX - 0x40 < x && x < camX + 0x140 + VIEW_EXTRA_COLS && camY < y && y < camY + 200 + VIEW_EXTRA_ROWS) ? 1 : 0;
 }
 
 /* 0x1172a BoxOverlap(x1, y1, x2, y2, w, h): |dx| < w && |dy| < h, strict */

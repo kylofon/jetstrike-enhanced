@@ -99,6 +99,9 @@ extern u8 *g_TilePtrs[256];                      /* 0x845B8 */
  * player's screen-Y values tied to that camera (box, ground line) move down by the same amount. */
 #define VIEW_EXTRA_ROWS    (vl.split - 175)
 #define CAM_Y_MAX          (0x340 - VIEW_EXTRA_ROWS)
+/* ENH: columns beyond the original 320 (0 at 320 wide). The player's screen-X values (box, centre, taxi stop) move
+ * right by half of them, so the plane keeps its place relative to the centre of the view. */
+#define VIEW_EXTRA_COLS    (vl.view_w - 320)
 #define g_MapWidth         DS32(0x8FE90)
 extern u8 *g_MapGrid;                            /* 0x849D0 (level.c) */
 

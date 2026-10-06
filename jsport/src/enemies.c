@@ -273,9 +273,9 @@ void Lock_Draw(int dist, int ldx, int ldy, int lockid, int xmax, int ymin, int u
         if (g_LockDist < rng) { g_Reticle = 0x9b; g_LockTarget = lockid; }
         if (upgrade && g_LockDist < 0x140) g_Reticle = 0x9c;
         if (g_Reticle > 0) {
-            int y = min_i(g_PlayerScrY + g_LockDY, 0xa8);
+            int y = min_i(g_PlayerScrY + g_LockDY, 0xa8 + VIEW_EXTRA_ROWS);     /* ENH: view: the screen edges */
             if (y < ymin) y = ymin;
-            int x = min_i(g_PlayerScrX + g_LockDX, xmax);
+            int x = min_i(g_PlayerScrX + g_LockDX, xmax + VIEW_EXTRA_COLS);
             if (x < 8) x = 8;
             Sprite_Queue(x, y, g_Reticle);
         }

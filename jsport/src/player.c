@@ -794,13 +794,14 @@ void Player_Update(void)
     } else {
         g_GearLatch = 0;
     }
-    /* follow views (level.md §6.2). ENH: view: the target sits 0x58 rows down, plus half the extra rows */
+    /* follow views (level.md §6.2). ENH: view: the target sits at (0xa0, 0x58), plus half the extra columns/rows */
+#define VIEW_MID_X (0xa0 + VIEW_EXTRA_COLS / 2)
 #define VIEW_MID_Y (0x58 + VIEW_EXTRA_ROWS / 2)
     if (g_ViewTarget > -1 && g_ViewTarget < g_ProjCount) {
         if (g_ProjKind[g_ProjCount] == 8) {                          /* Q8: the slot after the last one */
             g_ViewTarget = -1;
         } else {
-            g_ViewX = g_ProjX[g_ViewTarget] - 0xa0;
+            g_ViewX = g_ProjX[g_ViewTarget] - VIEW_MID_X;
             g_ViewY = g_ProjY[g_ViewTarget] - VIEW_MID_Y <= CAM_Y_MAX ? g_ProjY[g_ViewTarget] - VIEW_MID_Y : CAM_Y_MAX;
             DS32(0x903C8) = g_ViewY;
             DS32(0x903C4) = g_ViewX;
@@ -809,7 +810,7 @@ void Player_Update(void)
     if (g_ViewTarget == 0x32) {
         if (DS32(0x90998) == 0) g_ViewTarget = -1;
         else {
-            g_ViewX = DS32(0x90984) - 0xa0;
+            g_ViewX = DS32(0x90984) - VIEW_MID_X;
             g_ViewY = DS32(0x90988) - VIEW_MID_Y;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
@@ -819,7 +820,7 @@ void Player_Update(void)
     if (g_ViewTarget == 100) {
         if (DS32(0x90528) == 0) g_ViewTarget = -1;
         else {
-            g_ViewX = DS32(0x90520) - 0xa0;
+            g_ViewX = DS32(0x90520) - VIEW_MID_X;
             g_ViewY = DS32(0x904C0) - VIEW_MID_Y;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
             DS32(0x903C8) = g_ViewY;
@@ -829,7 +830,7 @@ void Player_Update(void)
     if (g_ViewTarget == 0x96) {
         if (DS32(0x902E0) == 0) g_ViewTarget = -1;
         else {
-            g_ViewX = DS32(0x8DDC0) - 0xa0;
+            g_ViewX = DS32(0x8DDC0) - VIEW_MID_X;
             g_ViewY = DS32(0x8DD98) - VIEW_MID_Y;
             if (g_ViewY > CAM_Y_MAX) g_ViewY = CAM_Y_MAX;
             if (g_ViewY < -0x800) g_ViewY = -0x800;
@@ -840,7 +841,7 @@ void Player_Update(void)
     if (g_ViewTarget == 200) {
         if (g_EnemyAirCount == 0) g_ViewTarget = -1;
         else {
-            g_ViewX = g_EnemyAirX[0] - 0xa0;
+            g_ViewX = g_EnemyAirX[0] - VIEW_MID_X;
             g_ViewY = g_EnemyAirY[0] - VIEW_MID_Y;
             if (g_ViewY > CAM_Y_MAX) g_ViewY = CAM_Y_MAX;
             if (g_ViewY < -0x800) g_ViewY = -0x800;

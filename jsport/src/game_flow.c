@@ -948,14 +948,14 @@ void Mission_Setup(void)
     g_StallTopY = 0x340 - DS32(0x90064);
     g_StallLimit = 0x40;
     g_Throttle = 0;
-    g_CamX = g_BaseEndX - 0x140;
+    g_CamX = g_BaseEndX - 0x140 - VIEW_EXTRA_COLS / 2;               /* ENH: view (the plane's world x is kept) */
     if (g_IsHeli != 0) g_Throttle = 9;
     g_CamY = g_StallTopY - VIEW_EXTRA_ROWS;                          /* ENH: view (CAM_Y_MAX) */
     for (g_LoopI = Div16(g_BaseStartX) + 1; g_LoopI <= Div16(g_BaseEndX) - 1; g_LoopI++)   /* re-pave the runway */
         if (Map_GetTileAttr(g_LoopI, 0x3f - Div16(g_BaseYOff), 0) != 0x81)
             Map_SetTile(g_LoopI, 0x3f - Div16(g_BaseYOff), (u8)g_RunwayFill);
     DS32(0x906A4) = 0;
-    g_PlayerScrX = 0xa0;
+    g_PlayerScrX = 0xa0 + VIEW_EXTRA_COLS / 2;
     g_PlayerVY = 0;
     g_PlayerVX = 0;
     g_TargetVY = 0;

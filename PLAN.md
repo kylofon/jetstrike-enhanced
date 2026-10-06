@@ -23,8 +23,8 @@ remove it when it is done.
 - **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
   E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240), E1.2 (integer-scale presentation, desktop-fit
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
-  parallax at any view; 76/76 at 320×240), camera bottom limit + vertical box (part of E2.2), HUD centred (E4.1).
-- **Next:** E2.2 (rest: blitter clipping, horizontal camera box / lead margin), Sonnet.
+  parallax at any view; 76/76 at 320×240), camera bottom limit + player box centred in the view (E2.2 camera part), HUD centred (E4.1).
+- **Next:** E2.2 (rest: blitter clipping), Sonnet.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -173,7 +173,7 @@ E1 notes (from E1.1):
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | done 2026-10-06 (see E2 notes) |
-| E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, camera box / lead margin (vertical done, horizontal left) | S | M |
+| E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, ~~camera box / lead margin~~ (done) | S | M |
 | E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
 
@@ -192,8 +192,14 @@ E2 notes (from E2.1):
   tumble `0x9c`, the eject ground line `0x9f`. The player box is `0x50 + extra/2 .. 0xa0 + extra` (the plane
   keeps its place in the height), follow views centre on `0x58 + extra/2`. Mission start: `g_CamY =
   g_StallTopY − extra` (`g_StallTopY` keeps its world meaning). Map rows past 63 never show now.
-- `IsOnScreen`: the bottom edge is `camY + 200 + extra` (else the plane and ground units at the bottom of a tall
-  view are culled). The horizontal window is still the original one: E3.1.
+- Horizontal (user, 2026-10-06: centre the plane): `VIEW_EXTRA_COLS` (= view_w − 320). The player's screen-X
+  values move right by half of it: box `0x20..0x120` (fast flight lead) and centre `0xa0` in `flight_move`,
+  taxi stop `0x94`/`0x95`, mission start (`g_PlayerScrX`, and `g_CamX` moves left by the same amount so the
+  plane's world x is kept), follow views centre on `0xa0 + extra/2`. So the plane keeps its offset from the
+  view centre (±128 at full speed, as in the original); the lead margin does not grow with the view.
+- `IsOnScreen` (decision 2): right edge `camX + 0x140 + extra cols`, bottom `camY + 200 + extra rows`
+  (else the plane and units in the new area are culled). `Lock_Draw` clamps the reticle to the view edges.
+  Spawn edges and the other screen-value sites are still E3.1.
 - The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from
   `camY + extra`, minus extra); the extra rows show lines above it, line 0 repeated above the top of the art
   (plain sky at 960×540 high up).
