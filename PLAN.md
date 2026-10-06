@@ -16,13 +16,15 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Start E1.2 (below). | | |
+| — | Nothing yet. Next is E2.2 (below). | | |
 
 ## Status
 
 - **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
-  E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240).
-- **Next:** E1.2 (presentation and switching), Sonnet.
+  E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240), E1.2 (integer-scale presentation, desktop-fit
+  window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
+  parallax at any view; 76/76 at 320×240).
+- **Next:** E2.2 (map bottom fill, blitter clipping, camera box), Sonnet.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -144,8 +146,8 @@ Model: H = Haiku, S = Sonnet, O = Opus. Size: S < 1 h of agent work, M = one ses
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E1.1 | Video model: runtime `view_w × view_h`, stride, page layout and split, `--view` parsing and validation | O | done 2026-10-06 (see E1 notes) |
-| E1.2 | Presentation and switching between the 320×240 front end and the mission view (pillarbox / integer scale) | S | M |
-| E1.3 | Run the snapshot check at 320×240, fix-or-report diffs (escalate real diffs to Opus) | H | S |
+| E1.2 | Presentation and switching between the 320×240 front end and the mission view (pillarbox / integer scale) | S | done 2026-10-06 (see E1 notes) |
+| E1.3 | Run the snapshot check at 320×240, fix-or-report diffs (escalate real diffs to Opus) | H | done 2026-10-06 (76/76, no diffs) |
 
 E1 notes (from E1.1):
 - Playfield = `view_h − 65` (the HUD shows 65 of its 66 rows), so 640×360 has a 295-row playfield.
@@ -160,16 +162,32 @@ E1 notes (from E1.1):
   Left for E1.2: window size (now view × `--scale`, no desktop fit), integer scaling, how the 320×240 screens
   sit in the window, and the screens shown in mission view that are really front-end style
   (`Mission_CompleteScreen` overview, `Mission_Debrief` text over the last frame).
+- E1.2: the presentation is `SDL_LOGICAL_PRESENTATION_INTEGER_SCALE` (largest whole factor, borders around it);
+  the window is view × `--scale`, lowered until it fits the desktop's usable area. `Video_ClassicScreen(true)`
+  shows a 320×240 screen (HUD split at 175) while in a mission view: used by the `Mission_CompleteScreen`
+  overview. `Mission_Debrief` text is centred on `vl.view_w / 2` over the last mission frame.
 - Default view is still 320×240 (`VIEW_DEFAULT_W/H` in `main.c`); switch it to 640×360 when E2 lands
   (decision 1). `snapcheck.py` runs without `--view`, so it then needs `--view 320x240` by default.
 
 ### Phase E2 — Wide renderer (§3)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | L |
+| E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | done 2026-10-06 (see E2 notes) |
 | E2.2 | Map bottom fill, blitter clipping, camera box / lead margin | S | M |
 | E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
+
+E2 notes (from E2.1):
+- `g_TileWindow` (0x831D8) is out of the image: `tile_window` in `video.c`, `vl.tile_rows × vl.tile_cols`
+  (`tile_cols` = stride / 16, `tile_rows` = (16 + 15 + playfield + 15) / 16; 24 × 13 at 320×240, 44 × 21 at
+  640×360). Nothing else read the old address (0x831D8..0x83357; `g_Zones` starts at 0x83358).
+  `Tiles_DrawColumns` draws the whole window, the parallax loop `tile_cols − 2` columns, as the original.
+- Backdrop (`par_px`): at 320 wide it stays linear (Q4); wider views wrap x at 320 on the same line. At 240 high
+  out-of-buffer reads stay 0; taller views repeat lines 0 and 511 (the bottom line fills in below the art at
+  960×540 and low camera positions; the camera clamp in E2.2 decides how much of it shows).
+- Map rows past 63 still read tile 0 (`Level_DrawBackground`) and show at 640×360 near the ground: E2.2.
+- Build from Git Bash needs `PATH=/c/msys64/mingw64/bin:$PATH` (gcc fails silently without it, and
+  `cmake --build` output then hides the failure behind the old exe).
 
 ### Phase E3 — Gameplay edges (§4)
 | Id | Task | Model | Size |

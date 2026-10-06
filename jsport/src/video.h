@@ -19,6 +19,7 @@ typedef struct {
     s32 stride;                                 /* VRAM row, pixels (384) */
     s32 row;                                    /* VRAM row, byte offsets (96) */
     s32 size;                                   /* VRAM, pixels (0x40000) */
+    int tile_cols, tile_rows;                   /* tiles drawn per play page: the stride x the playfield (24 x 13) */
     s32 page_rows;                              /* rows per play page (256) */
     s32 page_a, page_b;                         /* play page bases, byte offsets (0x18C0, 0x78C0) */
     s32 save_row;                               /* HUD save area (radar, altimeter), absolute row (0x246) */
@@ -73,7 +74,7 @@ extern u8 *g_TileData;                           /* 0x80058, malloc(0x10000) */
 #define g_LastFadeType     D32(0x8006C)
 #define g_NightPalActive   DS32(0x80070)        /* = g_FogActive of game_flow.md */
 #define g_Palette          DSEG(0x82ED8)        /* [768] 6-bit shadow palette */
-#define g_TileWindow       DSEG(0x831D8)        /* [16][24] */
+/* g_TileWindow (0x831D8, [16][24]): ENH: moved out of the image (video.c tile_window, sized by the view) */
 #define SPRITE_TAB_SIZE    0x800
 extern u8 *g_SpriteTab[SPRITE_TAB_SIZE];         /* 0x83A54: 1-based sprite headers */
 #define g_SpriteQueue      DSEG(0x81AD8)        /* 20-byte entries, no bound: entry 256 = g_Palette */
@@ -134,7 +135,7 @@ u32  Sprite_GetHeight(int id);                  /* 0x118e7 */
 /* ---- Level renderer (§3, §6) */
 void Tiles_DrawColumns(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane);           /* 0x10540 */
 void Tiles_DrawColumnsParallax(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane,
-                               const u8 *par, s32 parofs, s32 unused);                        /* 0x1040c */
+                               const u8 *par, s32 parofs, s32 px);                           /* 0x1040c */
 void Level_DrawBackground(s32 col, s32 row);    /* 0x13842 */
 
 /* ---- Palette (§7) */

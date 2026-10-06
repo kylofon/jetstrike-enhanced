@@ -28,6 +28,8 @@ static u8 *g_SpriteBank;                        /* 0x8450C: the unpacked JETSTRI
 static VideoLayout layout_classic, layout_view;
 static bool mission_view;                       /* the screen is the view (from Pic_LoadHudPanel), else 320x240 */
 static bool classic_screen;                     /* ENH: a front-end style screen in a mission (Video_ClassicScreen): 320x240 */
+/* ENH: g_TileWindow (0x831D8, [16][24], 13 rows drawn), out of the image: vl.tile_rows x vl.tile_cols ids. */
+static u8 tile_window[((VIEW_MAX_H - 65 + 46) / 16) * ((VIEW_MAX_W + 64) / 16)];
 
 /* The VRAM layout of a w x h view. Play page: the 16-row tile margin above the playfield, up to 15 rows of fine
  * scroll, the playfield, rounded up to whole tile rows (13 at 320x240), then 48 rows for sprites below it. */
@@ -39,7 +41,9 @@ static VideoLayout layout_for(int w, int h)
     l.split = h - 65;
     l.stride = w + 64;
     l.row = l.stride / 4;
-    l.page_rows = (16 + 15 + l.split + 15) / 16 * 16 + 48;
+    l.tile_cols = l.stride / 16;
+    l.tile_rows = (16 + 15 + l.split + 15) / 16;
+    l.page_rows = l.tile_rows * 16 + 48;
     l.page_a = HUD_ROWS * l.row;
     l.page_b = (HUD_ROWS + l.page_rows) * l.row;
     l.save_row = HUD_ROWS + 2 * l.page_rows + 4;
@@ -189,12 +193,13 @@ static u8 tile_px(const u8 *t, int x, int y) { return t ? t[(x & 3) * 64 + y * 4
 /* Base of play page pagesel (0 = A, 8 = B: the original's 0x18C0 + pagesel * 0xC00). */
 static s32 play_page(int pagesel) { return vl.page_a + pagesel / 8 * (vl.page_b - vl.page_a); }
 
-/* 0x10540 Tiles_DrawColumns: 24 x 13 tiles, one plane, into 0x18C0 + pagesel*0xC00. */
+/* 0x10540 Tiles_DrawColumns: 24 x 13 tiles, one plane, into 0x18C0 + pagesel*0xC00. ENH: vl.tile_cols x
+ * vl.tile_rows (the whole stride, the playfield rows). */
 void Tiles_DrawColumns(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane)
 {
     s32 base = play_page(pagesel);
-    for (int k = 0; k < 0x138; k++) {
-        int tx = k % 24, ty = k / 24;
+    for (int k = 0; k < vl.tile_cols * vl.tile_rows; k++) {
+        int tx = k % vl.tile_cols, ty = k / vl.tile_cols;
         const u8 *t = tileptrs[ids[k]];
         for (int r = 0; r < 16; r++)
             for (int j = 0; j < 4; j++)
@@ -205,21 +210,31 @@ void Tiles_DrawColumns(const u8 *ids, u8 *const *tileptrs, int pagesel, int plan
 /* PORT: backdrop reads outside the 0x280C8-byte buffer read 0 (video.md Q4: margins instead of heap). */
 static u8 par_get(const u8 *par, s32 i) { return (par && i >= 0 && i < PARALLAX_BYTES) ? par[i] : 0; }
 
-/* 0x1040c Tiles_DrawColumnsParallax (+ 0x104f8 Tiles_ParallaxRow): 22 x 13 tiles (2 ids skipped per row),
- * tile pixel 0x80 shows the backdrop byte (linear, no wrap at 320). */
-void Tiles_DrawColumnsParallax(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane,
-                               const u8 *par, s32 parofs, s32 unused)
+/* ENH: the backdrop pixel at line y, column x of the 320x512 picture. At 320 wide it stays linear (Q4: x past
+ * 319 reads the next line); a wider view wraps x at 320 on the same line. At 240 high reads outside the buffer
+ * read 0 (as above); a taller view repeats the top and bottom lines (it can show rows the original never did). */
+static u8 par_px(const u8 *par, s32 y, s32 x)
 {
-    (void)unused;
-    s32 base = play_page(pagesel);
-    for (int ty = 0; ty < 13; ty++)
-        for (int tx = 0; tx < 22; tx++) {
-            const u8 *t = tileptrs[ids[ty * 24 + tx]];
+    if (vl.view_w != 320) x = (x % 320 + 320) % 320;
+    if (vl.view_h != 240) y = y < 0 ? 0 : y > 511 ? 511 : y;
+    return par_get(par, y * 320 + x);
+}
+
+/* 0x1040c Tiles_DrawColumnsParallax (+ 0x104f8 Tiles_ParallaxRow): 22 x 13 tiles (2 ids skipped per row),
+ * tile pixel 0x80 shows the backdrop byte (linear, no wrap at 320). ENH: vl.tile_cols - 2 x vl.tile_rows; arg 7
+ * (unused in the original) is px, so the backdrop line is (parofs - px) / 320 and the column px + c (par_px). */
+void Tiles_DrawColumnsParallax(const u8 *ids, u8 *const *tileptrs, int pagesel, int plane,
+                               const u8 *par, s32 parofs, s32 px)
+{
+    s32 base = play_page(pagesel), py = (parofs - px) / 320;
+    for (int ty = 0; ty < vl.tile_rows; ty++)
+        for (int tx = 0; tx < vl.tile_cols - 2; tx++) {
+            const u8 *t = tileptrs[ids[ty * vl.tile_cols + tx]];
             for (int r = 0; r < 16; r++)
                 for (int j = 0; j < 4; j++) {
                     int c = 16 * tx + 4 * j + plane, row = 16 * ty + r;
                     u8 v = tile_px(t, 4 * j + plane, r);
-                    if (v == 0x80) v = par_get(par, parofs + row * 320 + c);
+                    if (v == 0x80) v = par_px(par, py + row, px + c);
                     vput(VIDX(base, c, row), v);
                 }
         }
@@ -462,18 +477,19 @@ static double dbits(uint64_t u)
     return d;
 }
 
-/* 0x13842 Level_DrawBackground(col, row): 24x16 tile window from the map, backdrop origin, 4 planes. */
+/* 0x13842 Level_DrawBackground(col, row): 24x16 tile window from the map, backdrop origin, 4 planes. ENH: the
+ * window is vl.tile_cols x vl.tile_rows (rows 13..15 of the original were never drawn). */
 void Level_DrawBackground(s32 col, s32 row)
 {
     const u8 *grid = g_MapGrid + 4;
     if (row < 2) row = 2;
-    for (int j = 0; j < 16; j++)
-        for (int i = 0; i < 24; i++) {
+    for (int j = 0; j < vl.tile_rows; j++)
+        for (int i = 0; i < vl.tile_cols; i++) {
             s32 k = g_MapWidth * (row + j - 1) + imod_js(col + i, g_MapWidth, "Level_DrawBackground");
             /* PORT: at the bottom of the map (row 54) the window reaches rows 64..68, past the 0xfa04-byte grid
              * (heap bytes in the original); those rows lie under the HUD split (row 64 is the 13th tile row,
              * rows 65+ are never drawn), so they read as tile 0 here. */
-            g_TileWindow[j * 24 + i] = (k >= 0 && k < 0xfa00) ? grid[k] : 0;
+            tile_window[j * vl.tile_cols + i] = (k >= 0 && k < 0xfa00) ? grid[k] : 0;
         }
     s32 px = (s32)((double)g_CamX / dbits(0x4010AAAAAA9F36A3ull)) % 320 - g_ScrollFineX;
     s32 py = (s32)((double)(g_CamY + 0x7D8) / 9.25 - (double)g_ScrollFineY);
@@ -481,9 +497,9 @@ void Level_DrawBackground(s32 col, s32 row)
     for (int plane = 0; plane < 4; plane++) {
         Video_SelectPlane(plane);
         if (g_DetailParallax)
-            Tiles_DrawColumnsParallax(g_TileWindow, g_TilePtrs, pagesel, plane, g_ParallaxBuf, py * 320 + px, px);
+            Tiles_DrawColumnsParallax(tile_window, g_TilePtrs, pagesel, plane, g_ParallaxBuf, py * 320 + px, px);
         else
-            Tiles_DrawColumns(g_TileWindow, g_TilePtrs, pagesel, plane);
+            Tiles_DrawColumns(tile_window, g_TilePtrs, pagesel, plane);
     }
 }
 
