@@ -100,9 +100,9 @@ void Hud_DrawTargetArrow(int camX, int camY, int tx, int ty)
     if (abs(camX - tx) + abs(camY - ty) < 0x4b0 && tx != 0) {
         int x = tx - camX, y = ty - camY;
         if (x < 5) x = 5;
-        if (x > 0x138) x = 0x138;
+        if (x > 0x138 + VIEW_EXTRA_COLS) x = 0x138 + VIEW_EXTRA_COLS;    /* ENH: view: the screen edges */
         if (y < 5) y = 5;
-        if (y > 0xa4) y = 0xa4;
+        if (y > 0xa4 + VIEW_EXTRA_ROWS) y = 0xa4 + VIEW_EXTRA_ROWS;
         Sprite_Queue(x, y, 0xa7);
     }
 }

@@ -23,8 +23,9 @@ remove it when it is done.
 - **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
   E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240), E1.2 (integer-scale presentation, desktop-fit
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
-  parallax at any view; 76/76 at 320×240), camera bottom limit + player box centred in the view (E2.2 camera part), HUD centred (E4.1).
-- **Next:** E2.2 (rest: blitter clipping), Sonnet.
+  parallax at any view; 76/76 at 320×240), camera bottom limit + player box centred in the view (E2.2 camera part), HUD centred (E4.1), E3.1 (screen-value
+  sites: changed or tagged as kept; 76/76 at 320×240).
+- **Next:** E2.2 (rest: blitter clipping), Sonnet; E3.2 (ground collision), Opus; then U-play.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -210,7 +211,19 @@ E2 notes (from E2.1):
   2026-10-06): outside 320×240 the shell dot is drawn on the back page where the shell is, anywhere in the
   view (Q13 fixed; 320×240 keeps the HUD-page dot as the regression mode; Q14 hit test unchanged); the lightning
   bolt starts at `Rand(200 + extra cols) + 0x2c` and is clamped to the view width (Q6, no bolt on page B, kept).
-  E3.1 still has to walk the remaining `0x140`/`0xb0`/`0xaf` sites and confirm the player-relative ones.
+- E3.1 pass (2026-10-06), on top of the items above. Changed (screen edges, + extra cols/rows): off-screen tanker
+  arrow (support.c `0x134`/`0xa8`), target arrow (`Hud_DrawTargetArrow` `0x138`/`0xa4`), agent-drop smoke window
+  (`AgentDrop_Update`, target − `0x148`), runway-end vehicle home (`Runway_SetEndTargets`, base end − `0x154`),
+  base update windows (frame.c steps 32/39, base start − `0x140`; step 32's `0x330 − g_BaseYOff < g_CamY`
+  "ground in view" − extra rows), fire-engine spray (`g_CamY + 0xb0`: it never sprayed at the lower camera).
+  Camera-height values use the camera with the original bottom edge (`g_CamY + extra rows`): fog/night level
+  (frame.c ×2, `Pal_NightAltitude` `l2`), ground pickup (`0 < g_CamY`).
+  Kept and tagged `ENH: view: kept`: lock/AI/refuel ranges (enemies.c 274/591/606/831, weapons.c 750–771,
+  support.c 485), enemy base and target/aim windows (enemies.c 485, weapons.c 937/939), the Q2 map-seam fix-up
+  (enemies.c 459), the rearm truck's left edge (the view only grows to the right), frame.c 705 (only drives a
+  Rand), frame.c 122 (writes a value nothing reads). Not screen values: world y 200/700, text widths `0xa0`,
+  sprite ids, `g_ViewTarget == 200`. Everything else goes through `IsOnScreen` (particles, units, sprites).
+  Still to do: E3.2 replaces the page reads (`Video_ReadPixel`) for ground collision.
 - Messages (user, 2026-10-06): `Hud_DrawMessages` and `Hud_DrawBriefing` centre on `vl.view_w / 2` (same rows
   from the top). The other centred `0xa0` texts are 320×240 front-end screens or HUD-panel text.
 - The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from
@@ -224,7 +237,7 @@ E2 notes (from E2.1):
 ### Phase E3 — Gameplay edges (§4)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E3.1 | Tag every screen-value site (`/* ENH: view */`), confirm each against the spec; change `IsOnScreen`, culling and spawn edges | S | M |
+| E3.1 | Tag every screen-value site (`/* ENH: view */`), confirm each against the spec; change `IsOnScreen`, culling and spawn edges | S | done 2026-10-06 (see E2 notes) |
 | E3.2 | Ground collision: tile lookup instead of the page read; verify it matches the page read at 320×240 over whole missions | O | M |
 | U-play | Play-test every mission type (combat, city, jungle, bonus, training) at 480 and 640 wide; note difficulty | user | 45 min |
 

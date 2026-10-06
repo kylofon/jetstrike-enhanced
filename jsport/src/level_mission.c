@@ -483,7 +483,7 @@ void AgentDrop_Update(void)
 {
     g_TargetMarkX = ((s32)(g_MP_TargetX1 - g_MP_TargetX0) / 2 + g_MP_TargetX0) * 0x10 - 8;
     g_TargetMarkY = 0x3e0;
-    if ((s32)(g_MP_TargetX0 * 0x10 - 0x148) < g_CamX && g_CamX < (s32)(g_MP_TargetX0 * 0x10 + 0x1c0)
+    if ((s32)(g_MP_TargetX0 * 0x10 - 0x148 - VIEW_EXTRA_COLS) < g_CamX && g_CamX < (s32)(g_MP_TargetX0 * 0x10 + 0x1c0)   /* ENH: view */
         && g_SmokeCount < 6 && Rand(4) == 1) {
         g_SmokeX[g_SmokeCount] = ((s32)(g_MP_TargetX1 - g_MP_TargetX0) / 2 + g_MP_TargetX1) * 0x10 - 8;   /* p04 + half (quirk) */
         g_SmokeY[g_SmokeCount] = 0x3e0;
@@ -603,7 +603,7 @@ void BaseRadar_Update(void)
 /* 0x16dcd Runway_SetEndTargets */
 void Runway_SetEndTargets(void)
 {
-    DS32(0x8FF04) = (g_BaseEndX - 0x154 < g_CamX) ? g_BaseStartX : g_BaseEndX;
+    DS32(0x8FF04) = (g_BaseEndX - 0x154 - VIEW_EXTRA_COLS < g_CamX) ? g_BaseStartX : g_BaseEndX;   /* ENH: view: base end on screen */
     DS32(0x903D8) = DS32(0x8FF04);
     DS32(0x901FC) = DS32(0x8FF04);
     DS32(0x9082C) = DS32(0x8FF04);

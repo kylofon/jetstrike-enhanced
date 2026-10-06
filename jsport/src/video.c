@@ -644,7 +644,7 @@ void Pal_NightAltitude(void)
             v[comp] = (int)((double)p + t);
         }
         Pal_SetColor(0x80 + i, v[0], v[1], v[2]);
-        int l2 = Clamp((g_CamY + 150) / 33 + 1, 0, 31);
+        int l2 = Clamp((g_CamY + VIEW_EXTRA_ROWS + 150) / 33 + 1, 0, 31);       /* ENH: view (as g_NightLevel) */
         for (int comp = 0; comp < 3; comp++) {
             int p = g_PalSaved[0x240 + 3 * i + comp];
             double t = (double)(63 - p) * c31;

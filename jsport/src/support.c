@@ -433,7 +433,7 @@ void SupportAircraft_Update(void)
     if (g_ShipActive != 0) ship();
     if (g_BigActive != 0) big_bomber();
     SupportAircraft_Flares();                                            /* weapons.c (0x28e6d) */
-    if (g_MP_PickupCol != 0 && g_MP_PickupSprite < 1000 && 0 < g_CamY) ground_pickup();
+    if (g_MP_PickupCol != 0 && g_MP_PickupSprite < 1000 && 0 < g_CamY + VIEW_EXTRA_ROWS) ground_pickup();   /* ENH: view (camera height) */
 }
 
 /* 0x27008 Tanker_Update (was Player_Ejection): tanker 0x8ff64/0x8ff6c, hit 0x8ffbc, frame 0x8ffc8, drogue 0x8ffc0,
@@ -450,10 +450,10 @@ void Tanker_Update(void)
 #define DOOR DS32(0x8FF58)
     if (!IsOnScreen(g_CamX, g_CamY, TX - (u16)Sprite_GetX(g_TankerType + 0x131), TY)) {
         int x = TX - g_CamX;                                             /* arrow at the screen edge */
-        if (x > 0x134) x = 0x134;
+        if (x > 0x134 + VIEW_EXTRA_COLS) x = 0x134 + VIEW_EXTRA_COLS;    /* ENH: view */
         if (x < 8) x = 8;
         int y = TY - g_CamY;
-        if (y > 0xa8) y = 0xa8;
+        if (y > 0xa8 + VIEW_EXTRA_ROWS) y = 0xa8 + VIEW_EXTRA_ROWS;
         if (y < 8) y = 8;
         Sprite_Queue(x, y, 0x1e6);
     } else if (THIT == 0) {
@@ -482,6 +482,7 @@ void Tanker_Update(void)
     }
     TX += THIT * 4 - 8;
     TY += ((0x4b0 < TX && TY < -500) ? 2 : 0) + THIT * 0x10;
+    /* ENH: view: kept, player-relative */
     if (PX - 0x140 < TX && TX < PX + 0x140 && PY - 0xa0 < TY && TY < PY + 0xa0 && TFR == 0 && THIT == 0 && TY < 0
         && g_DirHalf == 0 && g_ProbeDX != 0) {                           /* refuelling */
         int ex = PX + g_ProbeDX - 0x60 - TX;

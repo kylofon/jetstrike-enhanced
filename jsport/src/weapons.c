@@ -747,6 +747,7 @@ void Player_Weapons(void)
     for (g_Flame62c = 0; g_Flame62c < g_GunType / 2; g_Flame62c++) {          /* hit rolls */
         int bonus = (g_GunHitBonus != 0 || g_GunPowerUp2 != 0);
 #define DMGN (g_GunPower + 1 + g_GunPowerUp + g_GunHitBonus + g_GunPowerUp2)
+        /* ENH: view: kept, player-relative */
         if (g_LockTarget == 2 && g_LockDist < 0x141 && Rand(8) < bonus * 4 + 2) {
             g_BigHp -= Rand(DMGN);
             int xx = g_BigX + Rand(0x20);
@@ -934,6 +935,7 @@ static void Projectile_Steer(void)
 /* LGB steering block shared by 0x425c2 and 0x182cb; inRangeAimX: 0x425c2 tests g_AimX > 0, 0x182cb g_TargetMarkX > 0 */
 static void lgb_steer(int useAimX)
 {
+    /* ENH: view: kept (target / aim windows, world) */
     if (g_MP_TargetX0 != 0 && (int)(g_MP_TargetX0 - 0x140) <= g_CurX && g_CurX <= (int)(g_MP_TargetX1 + 0x140) && g_MP_TargetX0 < 5000)
         g_AimX = mtcr();
     if (g_CurX < g_AimX + 0x140 && g_AimX - 0x140 < g_CurX && (useAimX ? g_AimX : g_TargetMarkX) > 0 && g_CurX > -999) {

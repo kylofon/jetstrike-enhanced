@@ -42,7 +42,7 @@ void Fog_Refresh(void)
 {
     DS32(0x90300) = DS32(0x90300) < 2 ? DS32(0x90300) : 1;
     if (g_FogActive != 0 && DS32(0x90300) == 1) {
-        g_NightLevel = Clamp((g_CamY + 0x96) / 0x43 + 1, 0, 0xf);
+        g_NightLevel = Clamp((g_CamY + VIEW_EXTRA_ROWS + 0x96) / 0x43 + 1, 0, 0xf);   /* ENH: view: the camera with the original bottom edge */
         Pal_NightAltitude();
     }
 }
@@ -119,7 +119,7 @@ static void lightning(void)                      /* GF step 48, video.md §7.1 *
 static void ground_probes(void)                  /* GF step 63 */
 {
     DS32(0x905E8) = g_ScrollFineY;
-    if (g_CamY > 0x33f) DS32(0x905E8) = 0x10;
+    if (g_CamY > 0x33f) DS32(0x905E8) = 0x10;  /* ENH: view: kept (0x905E8 is never read) */
     g_TrigCol = Div16(g_CamX + g_PlayerScrX) + 1;
     if (g_MapWidth <= g_TrigCol) g_TrigCol -= g_MapWidth;
     DS32(0x909AC) = g_CamY + g_PlayerScrY + g_GearHeight * g_GearDown;
@@ -538,7 +538,7 @@ void Mission_Run(void)
             DS32(0x907A8) = DS32(0x9076C);
         }
         /* 10 */ if (g_FogActive != 0) {
-            g_NightLevel = Clamp((g_CamY + 0x96) / 0x43 + 1, 0, 0xf);
+            g_NightLevel = Clamp((g_CamY + VIEW_EXTRA_ROWS + 0x96) / 0x43 + 1, 0, 0xf);   /* ENH: view */
             if (g_NightLevel != g_NightLevelShown) Pal_NightAltitude();
         }
         /* 11 */ if (g_LightningCooldown != 0) g_LightningCooldown--;
@@ -605,7 +605,8 @@ void Mission_Run(void)
         /* 31 */ if (g_LauncherCol != 0) Building_Update();
         if (DS32(0x905AC) != 0) Convoy_Update();
         if (DS32(0x900B4) > 0) TargetVehicles_Update();
-        /* 32 */ if (g_BaseStartX - 0x140 < g_CamX && g_CamX < g_BaseEndX + 0x260 && 0x330 - g_BaseYOff < g_CamY)
+        /* 32 */ if (g_BaseStartX - 0x140 - VIEW_EXTRA_COLS < g_CamX && g_CamX < g_BaseEndX + 0x260   /* ENH: view: base on screen */
+                     && 0x330 - g_BaseYOff - VIEW_EXTRA_ROWS < g_CamY)
             AirbaseCrew_Update();
         /* 33 */ if (g_FrameParity == 0) Weapons_FrameDispensers();
         /* 34 */ if (g_AlienAbduct > 0) Alien_Update();
@@ -615,7 +616,8 @@ void Mission_Run(void)
         if (DS32(0x90918) > 0) Pickup_Update();
         if (DS32(0x90498) != 0) BaseRepair_Update();
         /* 38 */ if (g_OnGround == 1 && DS32(0x8FF08) == 0 && DS32(0x90414) == 0) Runway_SetEndTargets();
-        /* 39 */ if (g_BaseStartX - 0x140 < g_CamX && g_CamX < g_BaseEndX + 0x260 && (g_OnGround == 1 || DS32(0x8FF08) == 1)) {
+        /* 39 */ if (g_BaseStartX - 0x140 - VIEW_EXTRA_COLS < g_CamX && g_CamX < g_BaseEndX + 0x260   /* ENH: view */
+                     && (g_OnGround == 1 || DS32(0x8FF08) == 1)) {
             Airbase_Update();
         }
         /* 40 */ if (DS32(0x904AC) == 1 && DS32(0x90498) == 0) {
@@ -702,6 +704,7 @@ void Mission_Run(void)
             g_WingVapour = 0;
         }
         if (g_RocketBoost != 0) Particle_Spawn(g_PlayerWX << 8, g_PlayerWY << 8, 0, -0x80, 0, 0x10, 0x18);
+        /* ENH: view: kept (only drives a Rand of an empty stub; the RNG sequence stays the original's) */
         if (DS32(0x907B0) > 0 && g_CamX < g_MapWidthPx - 0x140 && 0x140 < g_CamX && g_CamY + g_PlayerScrY < 0x3b6
             && g_OnGround == 0 && g_IsHeli == 0) {
             Rand(3);                             /* argument of the empty stub 0x1112a (Stub_FrameE) */

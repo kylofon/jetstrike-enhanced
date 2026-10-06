@@ -271,7 +271,7 @@ void Lock_Draw(int dist, int ldx, int ldy, int lockid, int xmax, int ymin, int u
         int t = t1 < t0 ? t0 : t1;
         int rng = t * 0x20 < 0x4b0 ? 0x4b0 : t << 5;
         if (g_LockDist < rng) { g_Reticle = 0x9b; g_LockTarget = lockid; }
-        if (upgrade && g_LockDist < 0x140) g_Reticle = 0x9c;
+        if (upgrade && g_LockDist < 0x140) g_Reticle = 0x9c;   /* ENH: view: kept, player-relative */
         if (g_Reticle > 0) {
             int y = min_i(g_PlayerScrY + g_LockDY, 0xa8 + VIEW_EXTRA_ROWS);     /* ENH: view: the screen edges */
             if (y < ymin) y = ymin;
@@ -456,7 +456,7 @@ static void air_move_all(void)
         DS32(0x90394) = g_MapWidth * 0x10;
         if (DS32(0x90394) <= g_ObjX) g_ObjX -= g_MapWidth * 0x10;
         if (g_ObjX < 0) g_ObjX += DS32(0x90394);
-        if (abs(PX + DS32(0x90394) - g_ObjX) < 0xa0 && g_CamX < 0xa0) g_ObjX += PX - DS32(0x90394);   /* Q2 */
+        if (abs(PX + DS32(0x90394) - g_ObjX) < 0xa0 && g_CamX < 0xa0) g_ObjX += PX - DS32(0x90394);   /* Q2. ENH: view: kept (map seam near the player) */
         if (abs(PX - DS32(0x90394) + g_ObjX) < 0xa0 && DS32(0x90394) - 0xa0 < g_CamX) g_ObjX = PX + DS32(0x90394) - g_ObjX;
         g_EnemyAirX[i] = g_ObjX;
         ASTATE[i] = g_ObjState;
@@ -482,7 +482,7 @@ static void air_ai(void)
     g_AimDirY = Sign(g_TargetY - g_ObjY);
     g_AimDirX = Sign(g_TargetX - g_ObjX);
     /* 1 take-off roll */
-    if ((g_ObjSpd > 4 || g_ObjX < g_EnemyBaseX * 0x10 - 0x1e0) && g_ObjX < g_EnemyBaseX * 0x10 - 0x140 && ASTATE[I] > 0) {
+    if ((g_ObjSpd > 4 || g_ObjX < g_EnemyBaseX * 0x10 - 0x1e0) && g_ObjX < g_EnemyBaseX * 0x10 - 0x140 && ASTATE[I] > 0) {   /* ENH: view: kept (world) */
         ASTATE[I] = 0;
         g_AimDirY = -1;
         g_AimDirX = 0;
@@ -588,7 +588,7 @@ static void air_ai(void)
     /* §2.7 guns and missiles at the player */
     if (-g_AimDirX == Sign(T_Dir16Xb[g_ObjDir]) && -g_AimDirY == Sign(T_Dir16Yb[g_ObjDir])) {
         g_EnemyDist = abs(g_ObjX - g_PXe) + abs(g_ObjY - g_PYg);
-        if (g_EnemyDist < 0x140 && Rand(4) < g_EnemySkill + 1 && ADM[I] < 2) {
+        if (g_EnemyDist < 0x140 && Rand(4) < g_EnemySkill + 1 && ADM[I] < 2) {   /* ENH: view: kept, player-relative */
             Sfx_RandomAmbient();
             /* tracer: arguments of the empty Tracer_Stub; the divisions fault when the aircraft is level or
              * vertically aligned with the player (Q4): the port stops there as the original does (idiv_js). */
@@ -603,7 +603,8 @@ static void air_ai(void)
                 Player_DamageSystems();
             }
         }
-        if (g_EnemyDist < 0x280 && g_EnemyDist >= 0x140 && g_EnemyMslCount < 4 && AMIS[I] > 0 && ADM[I] < 2
+        if (g_EnemyDist < 0x280 && g_EnemyDist >= 0x140 && g_EnemyMslCount < 4   /* ENH: view: kept, player-relative */
+            && AMIS[I] > 0 && ADM[I] < 2
             && Rand(6) > 4 - g_EnemySkill) {
             Sfx_RandomAmbient();
             AMIS[I]--;
@@ -828,7 +829,8 @@ void EnemyGround_Update(void)
                 DS32(0x90080) = 0;
                 GSHELL[i]--;
             }
-            if (-g_Spr98c == g_AimDirX && abs(GX[i] - g_CamX - g_PlayerScrX) < 0x140 && abs(GY[i] - g_CamY - g_PlayerScrY) < 0x80
+            if (-g_Spr98c == g_AimDirX && abs(GX[i] - g_CamX - g_PlayerScrX) < 0x140 && abs(GY[i] - g_CamY - g_PlayerScrY) < 0x80   /* ENH: view: kept, player-relative */
+               
                 && g_EnemyMslCount < 10 && GMIS[i] > 0 && Rand(0x32) < g_Mission / 3 + 1) {
                 GMIS[i]--;
                 missile_add(GX[i], GY[i], (3 < g_Spr98c) * -4, 3);       /* Q8: up to 10 entries, Q11: life 3 */
@@ -1387,7 +1389,7 @@ void Building_Update(void)
 static void FireEngine_Spray(void)
 {
     g_Scratch690 = 0;
-    if (DS32(0x905D4) <= PX + 0x3c && PX - 0x24 <= DS32(0x905D4) && g_CamY <= GROUND_Y && GROUND_Y <= g_CamY + 0xb0) {
+    if (DS32(0x905D4) <= PX + 0x3c && PX - 0x24 <= DS32(0x905D4) && g_CamY <= GROUND_Y && GROUND_Y <= g_CamY + 0xb0 + VIEW_EXTRA_ROWS) {   /* ENH: view */
         g_Scratch690 = 1;
         for (g_LoopI = 0; g_LoopI < 6; g_LoopI++)
             if (Rand(0x14) == 10) g_EngineFire = max_i(g_EngineFire - 1, 0);
@@ -1472,7 +1474,7 @@ void Airbase_Update(void)
     }
     if (g_EngineFire == 0 && g_SpeedBits == 0 && g_CatapultCount == 0 && DS32(0x90854) > 8) {
         int hi = min_i(g_CamX + 0x14a + VIEW_EXTRA_COLS, g_BaseEndX - 0x30);   /* ENH: view: off the right edge */
-        int lo = max_i(g_CamX - 0x154, g_BaseStartX);
+        int lo = max_i(g_CamX - 0x154, g_BaseStartX);                   /* ENH: view: kept (the left edge does not move) */
         int d = PX - DS32(0x9082C);
         int step = abs(d) < 5 ? abs(d) : 4;
         DS32(0x9082C) = Clamp(Sign(d) * step + DS32(0x9082C), lo, hi);
