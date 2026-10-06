@@ -19,3 +19,6 @@ __pycache__/
 
 # Game data dumped from the executables
 /port/spec/tables/
+
+# Generated plan page
+/site/
