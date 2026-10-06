@@ -291,7 +291,8 @@ void Bullets_Update(int camX, int camY)
         if (b[3] != 0) b[3] += Sign(b[3]) * 6;
         int sx = (b[0] >> 8) - camX + 0x14;
         int sy = (b[1] >> 8) - camY + 0x14;
-        if (sx < 0 || sx > 0x140 || sy < 0 || sy > 0xb0 || (int)(mapval_safe((b[0] >> 0xc) + 0xbd0) & 0xff) <= (b[1] >> 0xc)) {
+        /* ENH: view: the bullet lives while it is in the view (the gun reaches the right edge) */
+        if (sx < 0 || sx > 0x140 + VIEW_EXTRA_COLS || sy < 0 || sy > 0xb0 + VIEW_EXTRA_ROWS || (int)(mapval_safe((b[0] >> 0xc) + 0xbd0) & 0xff) <= (b[1] >> 0xc)) {
             g_BulletCount--;
             memmove(b, &g_Bullets[g_BulletCount * 4], 16);
             i--;
@@ -1512,7 +1513,8 @@ void Explosion_Damage(int x, int y, int vx, int vy, int a5, int a6)
             Map_CraterAt(g_ExplX, g_ExplY, g_ExplPower);
             if (g_BaseStartX <= g_ExplX && g_ExplX < g_BaseEndX && g_BaseYOff + 0x3e0 <= g_ExplY) g_BaseHit = 1;
         }
-        if (g_CamX - 0x40 < g_ExplX && g_ExplX < g_CamX + 0x160 && g_CamY - 0x40 < g_ExplY && g_ExplY < g_CamY + 0x100)
+        if (g_CamX - 0x40 < g_ExplX && g_ExplX < g_CamX + 0x160 + VIEW_EXTRA_COLS && g_CamY - 0x40 < g_ExplY
+            && g_ExplY < g_CamY + 0x100 + VIEW_EXTRA_ROWS)                 /* ENH: view */
             Explosion_Terrain();
         g_ExplI++;
     } while (g_ExplI < g_ExplCraters);
