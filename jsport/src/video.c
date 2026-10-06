@@ -143,6 +143,16 @@ int Video_WaitVSync(void)
     return 0;
 }
 
+/* ENH: sprite pixel store. On a play page (pageofs != 0) a pixel below the page is dropped (the original let
+ * it run into the neighbouring page), and in a wider view so is a pixel left or right of the row (the original
+ * wrapped it into the next row, which only the 64-px margin made harmless). At 320 wide the row wrap stays: the
+ * 320x240 snapshots show the original relies on it. Absolute drawing (HUD, menus, pageofs 0) is not clipped. */
+static inline void sput(s32 pageofs, s32 x, s32 y, u8 c)
+{
+    if (pageofs && ((u32)y >= (u32)vl.page_rows || (vl.view_w != 320 && (u32)x >= (u32)vl.stride))) return;
+    vput(VIDX(pageofs, x, y), c);
+}
+
 /* 0x10128 Sprite_Blit: hotspot guard (unsigned), 0x40 transparent, no clipping. */
 void Sprite_Blit(u32 x, u32 y, const u8 *s, s32 pageofs)
 {
@@ -156,7 +166,7 @@ void Sprite_Blit(u32 x, u32 y, const u8 *s, s32 pageofs)
         for (int r = 0; r < h; r++)
             for (int c = 0; c < w4; c++) {
                 u8 v = *src++;
-                if (v != 0x40) vput(VIDX(pageofs, dx + 4 * c + p, dy + r), v);
+                if (v != 0x40) sput(pageofs, dx + 4 * c + p, dy + r, v);
             }
 }
 
@@ -173,7 +183,7 @@ void Sprite_BlitShift(u32 x, u32 y, const u8 *s, s32 pageofs)
         for (int r = 0; r < h; r++)
             for (int c = 0; c < w4; c++) {
                 u8 v = *src++;
-                if (v != 0x40) vput(VIDX(pageofs, dx + 4 * c + p, dy + r), (u8)(v + 0x20));
+                if (v != 0x40) sput(pageofs, dx + 4 * c + p, dy + r, (u8)(v + 0x20));
             }
 }
 
@@ -190,7 +200,7 @@ void Sprite_BlitMirror(s32 x, s32 y, const u8 *s, s32 pageofs)
         for (int r = 0; r < h; r++)
             for (int c = 0; c < w4; c++) {
                 u8 v = planes[(3 - p) * h * w4 + r * w4 + (w4 - 1 - c)];
-                if (v != 0x40) vput(VIDX(pageofs, left + 4 * c + p, top + r), v);
+                if (v != 0x40) sput(pageofs, left + 4 * c + p, top + r, v);
             }
 }
 

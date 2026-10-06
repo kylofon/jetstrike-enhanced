@@ -16,16 +16,16 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Next is E2.2 (below). | | |
+| — | Nothing yet. Next is E2.3 (Haiku), then E3.2. | | |
 
 ## Status
 
 - **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic),
   E1.1 (run-time VRAM layout from `--view`; 76/76 at 320×240), E1.2 (integer-scale presentation, desktop-fit
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
-  parallax at any view; 76/76 at 320×240), camera bottom limit + player box centred in the view (E2.2 camera part), HUD centred (E4.1), E3.1 (screen-value
+  parallax at any view; 76/76 at 320×240), E2.2 (camera limit, player box centred, blitter clipping), HUD centred (E4.1), E3.1 (screen-value
   sites: changed or tagged as kept; 76/76 at 320×240).
-- **Next:** E2.2 (rest: blitter clipping), Sonnet; E3.2 (ground collision), Opus; then U-play.
+- **Next:** E2.3 (snapshot check + wide dumps), Haiku; E3.2 (ground collision), Opus; then U-play.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -174,7 +174,7 @@ E1 notes (from E1.1):
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E2.1 | Tile window, draw loops, parallax wrap and extension (sprite wrap `x + stride` already done in E1.1) | O | done 2026-10-06 (see E2 notes) |
-| E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, ~~camera box / lead margin~~ (done) | S | M |
+| E2.2 | ~~Map bottom fill~~ (not needed: the camera stops at the original bottom edge), blitter clipping, ~~camera box / lead margin~~ (done) | S | done 2026-10-06 (see E2 notes) |
 | E2.3 | Snapshot check at 320×240 + headless dumps at 480 and 640 wide | H | S |
 | U-wide | Look at the 640×360 dumps / play one mission: tiles, parallax, sprites at the edges | user | 10 min |
 
@@ -211,6 +211,9 @@ E2 notes (from E2.1):
   2026-10-06): outside 320×240 the shell dot is drawn on the back page where the shell is, anywhere in the
   view (Q13 fixed; 320×240 keeps the HUD-page dot as the regression mode; Q14 hit test unchanged); the lightning
   bolt starts at `Rand(200 + extra cols) + 0x2c` and is clamped to the view width (Q6, no bolt on page B, kept).
+- Blitter clipping (E2.2, `sput` in `video.c`): sprite pixels on a play page are dropped below the page; in a view
+  wider than 320 also left/right of the row (no wrap into the next row). At 320 wide the row wrap stays: with
+  full clipping `t_bombing/003` differed, so the original relies on it. 76/76 at 320×240.
 - E3.1 pass (2026-10-06), on top of the items above. Changed (screen edges, + extra cols/rows): off-screen tanker
   arrow (support.c `0x134`/`0xa8`), target arrow (`Hud_DrawTargetArrow` `0x138`/`0xa4`), agent-drop smoke window
   (`AgentDrop_Update`, target − `0x148`), runway-end vehicle home (`Runway_SetEndTargets`, base end − `0x154`),
