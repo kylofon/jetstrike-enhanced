@@ -1,0 +1,100 @@
+address,name,module,confidence,note,source
+00012710,_cstart_,rt,high,matches JS 000485d0 (identical bytes); program entry (DOS4GW startup),symbols_rt_config.csv
+0001278a,__cstart_body,rt,medium,matches JS 0004864a (identical bytes except relocated addresses/call displacements); startup continuation: INT21 30h DOS version; 4Ah resize; DGROUP/env setup; calls __InitRtns and __CMain,symbols_rt_config.csv
+00012982,__fatal_runtime_error,rt,high,matches JS 00048842 (identical bytes except relocated addresses/call displacements); writes message to CON (INT21 3Dh/40h) and terminates (INT21 4Ch),symbols_rt_config.csv
+000129b4,__GETDS,rt,high,matches JS 00048874 (identical bytes except relocated addresses/call displacements); loads DS from saved selector at cs:[0x48644],symbols_rt_config.csv
+000129bc,inp,rt,high,matches JS 0004887c (identical bytes); in al;dx (port=arg1),symbols_rt_config.csv
+000129c7,outp,rt,high,matches JS 00048887 (identical bytes); out dx;al - game uses for VGA DAC 0x3c8 and PIT 0x40/0x43,symbols_rt_config.csv
+000129d4,__save_SS,rt,low,matches JS 00048894 (identical bytes except relocated addresses/call displacements); stores SS to 0x8079c,symbols_rt_config.csv
+000129db,__CHK,rt,high,matches JS 0004889b (identical bytes); stack check,symbols_rt_config.csv
+000129ee,__STK,rt,high,matches JS 000488ae (identical bytes except relocated addresses/call displacements); stack overflow test; calls __fatal_runtime_error,symbols_rt_config.csv
+00012a0b,__STKOVERFLOW,rt,high,matches JS 000488cb (identical bytes except relocated addresses/call displacements); stack overflow -> fatal error,symbols_rt_config.csv
+00012a1a,strlen,rt,high,matches JS 00048ff3 (identical bytes),symbols_rt_config.csv
+00012a7d,__open_flags,rt,high,matches JS 00048a7d (identical bytes except relocated addresses/call displacements); parses fopen mode string r/w/a/+/b/t,symbols_rt_config.csv
+00012b2c,__doopen,rt,high,matches JS 00048b2c (identical bytes except relocated addresses/call displacements); opens fd for FILE (via sopen 0x4ae05),symbols_rt_config.csv
+00012c11,_fsopen,rt,high,matches JS 00048c11 (identical bytes except relocated addresses/call displacements); allocates FILE (__allocfp) then __doopen,symbols_rt_config.csv
+00012c3c,fopen,rt,high,matches JS 00048c3c (identical bytes); fopen(name;mode); game: data\jetsprit.pal and js.cfg,symbols_rt_config.csv
+00012c51,__chk_freopen_fp,rt,medium,matches JS 00048c51 (identical bytes except relocated addresses/call displacements); validates FILE for freopen,symbols_rt_config.csv
+00012cb6,freopen,rt,medium,matches JS 00048cb6 (identical bytes); freopen(name;mode;fp),symbols_rt_config.csv
+00012ce2,fread,rt,high,matches JS 00048ce2 (identical bytes except relocated addresses/call displacements); fread(buf;size;n;fp),symbols_rt_config.csv
+00012e3d,fclose,rt,high,matches JS 00048e3d (identical bytes except relocated addresses/call displacements); fclose(fp) (checks stream list),symbols_rt_config.csv
+00012e69,__doclose,rt,high,matches JS 00048e69 (identical bytes except relocated addresses/call displacements); close stream; free buffer; remove tmpfile,symbols_rt_config.csv
+00012e8d,__hexdigit,rt,medium,matches JS 00048e8d (identical bytes); 0-15 -> '0'..'f' (tmpfile name helper),symbols_rt_config.csv
+00012ea0,__MkTmpFile,rt,medium,matches JS 00048ea0 (identical bytes except relocated addresses/call displacements); builds tmp file name tXXXX_xx.tmp,symbols_rt_config.csv
+00012f1f,__shutdown_stream,rt,high,matches JS 00048f1f (identical bytes except relocated addresses/call displacements); flush; reposition; close handle; free buffer,symbols_rt_config.csv
+00012fbd,fwrite,rt,high,matches JS 0004a31a (identical bytes except relocated addresses/call displacements); fwrite(ptr;size;n;fp) - game saves config/scores,symbols_rt_config.csv
+00013124,printf,rt,high,matches JS 00048974 (identical bytes except relocated addresses/call displacements); vfprintf(stdout=0x8085e); game prints memory/exit messages,symbols_rt_config.csv
+00013146,_dos_getvect,rt,high,matches JS 000488da (identical bytes except relocated addresses/call displacements); INT21 35h (2502h under Phar Lap); game: vector 9 (keyboard) and timer vector,symbols_rt_config.csv
+00013180,_dos_setvect,rt,high,matches JS 00048914 (identical bytes except relocated addresses/call displacements; found by byte search); INT21 25h (2504h Phar Lap); game installs keyboard ISR 0x10760 on INT 9 and ISR 0x31a31 on timer vector (DAT_93380),symbols_rt_config.csv
+000131b8,__CMain,rt,high,matches JS 0004a4bb (identical bytes except relocated addresses/call displacements; found by byte search); sets up stack; calls main (0x000146f4) then exit,symbols_rt_config.csv
+00013208,__InitRtns,rt,high,matches JS 0004a50a (identical bytes except relocated addresses/call displacements); runs XI init table by priority,symbols_rt_config.csv
+0001324b,__FiniRtns,rt,high,matches JS 0004a54d (identical bytes except relocated addresses/call displacements); runs YI fini table by priority,symbols_rt_config.csv
+000132f7,__prtf,rt,high,matches JS 0004cf06 (identical bytes); printf engine,symbols_rt_config.csv
+00013517,__get_fmt_spec,rt,medium,matches JS 0004d126 (identical bytes); printf spec parser,symbols_rt_config.csv
+00013620,__get_fmt_number,rt,medium,matches JS 0004d22f (identical bytes); printf width/precision parse,symbols_rt_config.csv
+00013673,__prtf_set_str,rt,low,matches JS 0004d282 (identical bytes),symbols_rt_config.csv
+0001369c,__prtf_set_wstr,rt,low,matches JS 0004d2ab (identical bytes),symbols_rt_config.csv
+000136c3,__prtf_string,rt,low,matches JS 0004d2d2 (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00013716,__prtf_int,rt,low,matches JS 0004d325 (identical bytes except relocated addresses/call displacements); integer formatting,symbols_rt_config.csv
+000137e2,__EFG_printf_call,rt,medium,matches JS 0004d3f1 (identical bytes except relocated addresses/call displacements); calls [0x80b34] float formatter hook,symbols_rt_config.csv
+000137f9,__prtf_fmt,rt,medium,matches JS 0004d408 (identical bytes except relocated addresses/call displacements); formats one conversion,symbols_rt_config.csv
+00013c32,strupr,rt,medium,matches JS 0004d841 (identical bytes except relocated addresses/call displacements); uses toupper,symbols_rt_config.csv
+00013c52,tolower,rt,high,matches JS 0004adc5 (identical bytes),symbols_rt_config.csv
+00013c73,open,rt,high,matches JS 0004ade6 (identical bytes); open(path;mode;...) -> sopen with share 0,symbols_rt_config.csv
+00013c92,sopen,rt,high,matches JS 0004ae05 (identical bytes except relocated addresses/call displacements); INT21 3Ch/3Dh/3Eh/40h create/open file handle,symbols_rt_config.csv
+00013e54,setmode,rt,medium,matches JS 0004afc7 (identical bytes except relocated addresses/call displacements); INT21 4400h/4401h IOCTL get/set device info,symbols_rt_config.csv
+00013ebe,fseek,rt,high,matches JS 0004904a (identical bytes except relocated addresses/call displacements); fseek(fp;off;whence),symbols_rt_config.csv
+0001408f,__allocfp,rt,high,matches JS 0004b031 (identical bytes except relocated addresses/call displacements); allocates FILE struct,symbols_rt_config.csv
+0001412a,__freefp,rt,high,matches JS 0004b0cc (identical bytes except relocated addresses/call displacements); returns FILE to free list,symbols_rt_config.csv
+0001415d,__purgefp,rt,high,matches JS 0004b0ff (identical bytes except relocated addresses/call displacements); frees FILE free list at exit,symbols_rt_config.csv
+0001417f,__chktty,rt,high,matches JS 0004b121 (identical bytes except relocated addresses/call displacements); marks stream as tty (isatty),symbols_rt_config.csv
+000141ac,__ioalloc,rt,high,matches JS 0004b14e (identical bytes except relocated addresses/call displacements); allocates stream buffer (0x1000 default),symbols_rt_config.csv
+00014223,memcpy,rt,high,matches JS 0004b1c5 (identical bytes); dword+byte copy (used internally),symbols_rt_config.csv
+0001424d,__qread,rt,high,matches JS 0004b1ef (identical bytes except relocated addresses/call displacements; found by byte search); INT21 3Fh read,symbols_rt_config.csv
+0001427e,fgetc,rt,high,matches JS 0004b220 (identical bytes except relocated addresses/call displacements; found by byte search); text-mode CR / ^Z handling,symbols_rt_config.csv
+000142f7,__filbuf,rt,high,matches JS 0004b299 (identical bytes); refill and return char,symbols_rt_config.csv
+00014322,__fill_buffer,rt,high,matches JS 0004b2c4 (identical bytes except relocated addresses/call displacements); reads into stream buffer,symbols_rt_config.csv
+000143cd,__get_tmp_id,rt,low,matches JS 0004b36f (identical bytes except relocated addresses/call displacements); returns DAT_80814 (used for tmp file naming),symbols_rt_config.csv
+000143d3,__flush,rt,high,matches JS 0004b375 (identical bytes except relocated addresses/call displacements); flush stream buffer (write or seek back),symbols_rt_config.csv
+00014470,ftell,rt,high,matches JS 0004921b (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+000144a4,lseek,rt,high,matches JS 0004b412 (identical bytes except relocated addresses/call displacements); INT21 42h,symbols_rt_config.csv
+000144ef,close,rt,high,matches JS 0004b45d (identical bytes except relocated addresses/call displacements); INT21 3Eh,symbols_rt_config.csv
+00014539,_nfree,rt,high,matches JS 0004925f (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+0001456e,write,rt,high,matches JS 0004caac (identical bytes except relocated addresses/call displacements); INT21 40h with text-mode LF->CRLF; append via 42h,symbols_rt_config.csv
+00014747,fputc,rt,high,matches JS 0004cc85 (identical bytes except relocated addresses/call displacements; found by byte search),symbols_rt_config.csv
+000147f0,__fprtf_putc,rt,medium,matches JS 0004a5be (identical bytes except relocated addresses/call displacements); printf output callback (fputc),symbols_rt_config.csv
+00014809,vfprintf,rt,high,matches JS 0004a5d7 (identical bytes except relocated addresses/call displacements); vfprintf(fp;fmt;args) -> __prtf,symbols_rt_config.csv
+00014889,stackavail,rt,high,matches JS 0004cef2 (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00014892,__init_stklen,rt,low,matches JS 0004cefb (identical bytes except relocated addresses/call displacements); sets 0x80abc=0x8000,symbols_rt_config.csv
+0001489e,exit,rt,high,matches JS 00048997 (identical bytes except relocated addresses/call displacements; found by byte search); runs fini routines (ptrs 0x807b0..0x807b8) then __exit (INT21 4Ch),symbols_rt_config.csv
+000148ec,__utoa_body,rt,medium,matches JS 00049bf3 (identical bytes except relocated addresses/call displacements); unsigned to ascii with radix,symbols_rt_config.csv
+00014995,__ultoa_body,rt,medium,matches JS 0004e609 (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00014a22,isatty,rt,high,matches JS 0004d9bb (identical bytes); INT21 4400h,symbols_rt_config.csv
+00014a42,__set_errno_dos_alt,rt,low,matches JS 0004d9db (identical bytes),symbols_rt_config.csv
+00014a5a,__set_errno_dos2,rt,low,matches JS 0004d9f3 (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00014a82,__set_errno_dos,rt,high,matches JS 0004da1b (identical bytes except relocated addresses/call displacements); maps DOS error -> errno,symbols_rt_config.csv
+00014af2,__set_errno_EBADF,rt,low,matches JS 0004da8b (identical bytes except relocated addresses/call displacements); errno helper,symbols_rt_config.csv
+00014b44,__SetIOMode,rt,medium,matches JS 0004dadd (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00014b5c,tell,rt,high,matches JS 0004b4a7 (identical bytes except relocated addresses/call displacements); lseek(fd;0;SEEK_CUR),symbols_rt_config.csv
+00014b80,_nmalloc,rt,high,matches JS 00048a0b (identical bytes except relocated addresses/call displacements); near heap allocator (grows via __ExpandDGROUP),symbols_rt_config.csv
+00014bf2,__InitFiles,rt,high,matches JS 0004daf5 (identical bytes except relocated addresses/call displacements); links stdin/out/err/aux/prn into stream list,symbols_rt_config.csv
+00014c37,__full_io_exit,rt,high,matches JS 0004db3a (identical bytes except relocated addresses/call displacements); closes all streams; frees FILE list,symbols_rt_config.csv
+00014c51,__closeall,rt,medium,matches JS 0004db54 (identical bytes except relocated addresses/call displacements),symbols_rt_config.csv
+00014caa,flushall,rt,medium,matches JS 0004dbad (identical bytes except relocated addresses/call displacements); __flushall(mask),symbols_rt_config.csv
+00014ce2,__getche_stdin,rt,low,matches JS 0004dbe5 (identical bytes except relocated addresses/call displacements); INT21 01h read char with echo,symbols_rt_config.csv
+00014cfd,__qwrite,rt,high,matches JS 0004dc00 (identical bytes except relocated addresses/call displacements); INT21 40h raw write (seek end for append),symbols_rt_config.csv
+00014d7c,__MemAllocator,rt,high,matches JS 0004a658 (identical bytes); heap block allocator (free list search),symbols_rt_config.csv
+00014e2c,__MemFree,rt,high,matches JS 0004a708 (identical bytes); heap block free/coalesce,symbols_rt_config.csv
+00014f37,unlink,rt,high,matches JS 0004dc7d (identical bytes except relocated addresses/call displacements); INT21 41h,symbols_rt_config.csv
+00014f5b,__LinkUpNewMHeap,rt,medium,matches JS 0004a813 (identical bytes except relocated addresses/call displacements); inserts new heap segment into heap list,symbols_rt_config.csv
+00014fd5,__unlink_free,rt,medium,matches JS 0004a88d (identical bytes); doubly linked list unlink,symbols_rt_config.csv
+00014ff1,__UnlinkMHeap,rt,medium,matches JS 0004a8a9 (identical bytes except relocated addresses/call displacements); removes heap segment,symbols_rt_config.csv
+0001508b,__FreeDPMIBlocks,rt,medium,matches JS 0004a943 (identical bytes except relocated addresses/call displacements); DPMI 0502h free memory block / INT21 49h,symbols_rt_config.csv
+00015102,__ReAllocDPMIBlock,rt,medium,matches JS 0004a9ba (identical bytes except relocated addresses/call displacements); DPMI 0503h resize memory block,symbols_rt_config.csv
+00015234,__LastFree,rt,medium,matches JS 0004aaec (identical bytes except relocated addresses/call displacements); size of free block at end of DGROUP,symbols_rt_config.csv
+00015281,__CreateNewNHeap,rt,medium,matches JS 0004ab39 (identical bytes except relocated addresses/call displacements); DPMI 0501h alloc / INT21 48h; DPMI 0006h get segment base,symbols_rt_config.csv
+00015369,__ExpandDGROUP,rt,medium,matches JS 0004ac21 (identical bytes except relocated addresses/call displacements); grows near heap (sbrk / new DPMI block),symbols_rt_config.csv
+00015506,__ret0,rt,low,matches JS 0004adbe (identical bytes); returns 0,symbols_rt_config.csv
+0001550d,_set_amblksiz,rt,low,matches JS 0004d861 (identical bytes except relocated addresses/call displacements); setter returning old value (0x80ab8),symbols_rt_config.csv
+00015523,sbrk,rt,medium,matches JS 0004d877 (identical bytes except relocated addresses/call displacements); DPMI 0501h / INT21 4800h,symbols_rt_config.csv
+000155bd,__brk,rt,medium,matches JS 0004d911 (identical bytes except relocated addresses/call displacements); INT21 EDh/4Ah DOS4G memory resize,symbols_rt_config.csv

@@ -1,0 +1,1298 @@
+address,name,module,confidence,note,source
+00010010,Video_SetModeX,video,verified,INT10 13h; DAC black; unchain; CRTC 320x240 60Hz; offset 0x30 (384 px rows); attr mode 0x61; clears 256 KiB,video_symbols.csv
+000100c2,Video_SetTextMode,video,verified,INT 10h with caller AX,video_symbols.csv
+000100d0,Video_PutPixel,video,verified,(x;y;col) absolute VRAM; 96 B/row,video_symbols.csv
+00010108,Video_WaitVSync,video,verified,waits for start of next retrace,video_symbols.csv
+00010128,Sprite_Blit,video,verified,(x;y;spr;pageofs) skip if x<hotX||y<hotY (unsigned); 0x40 transparent,video_symbols.csv
+000101c8,Sprite_BlitShift,video,verified,as Sprite_Blit; stores pixel+0x20,video_symbols.csv
+0001026c,Sprite_BlitMirror,video,verified,horizontal flip; left=x-(4*w4-hotX); no guard,video_symbols.csv
+0001032c,Video_GrabRect_Unused,video,likely,write-mode-1 VRAM->mem copy; no callers,video_symbols.csv
+0001039c,Video_PutRect_Unused,video,likely,mem->VRAM write-mode-1 copy; no callers,video_symbols.csv
+0001040c,Tiles_DrawColumnsParallax,video,verified,22x13 tiles one plane; tile byte 0x80 -> backdrop byte (linear 320 stride),video_symbols.csv
+000104f8,Tiles_ParallaxRow,video,verified,inner helper: 4 bytes + backdrop stride 4,video_symbols.csv
+00010540,Tiles_DrawColumns,video,verified,24x13 tiles one plane into 0x18c0+pagesel*0xc00,video_symbols.csv
+000105d9,Video_SelectPlane,video,verified,map mask 1<<plane,video_symbols.csv
+000105ef,Video_SetSplitLine,video,verified,line compare = rows*2-1 (0x18/0x07 bit4/0x09 bit6),video_symbols.csv
+0001063a,Video_BlitLinearToPlanar,video,verified,(src;x;y;w;h) linear 8bpp -> VRAM absolute rows,video_symbols.csv
+000106b0,Video_SetStartAndPan,video,verified,(x;y;base) CRTC start=y*96+x/4+base; vsync; pel pan (x&3)*2,video_symbols.csv
+000106fa,Video_ReadPixel,video,verified,(x;y;base) returns v-0x80 if 0x80<=v<=0xC0 else 0; used as collision probe,video_symbols.csv
+00010739,Video_PixelAddr_Unused,video,guess,code fragment; no callers,video_symbols.csv
+00010760,Kbd_ISR,platform,verified,INT 9: g_KeyDown[sc&0x7f]=make (E0 ignored); recompute 21 remapped key words + Alt/Ctrl edge latches,platform_symbols.csv
+00010a16,Kbd_Install,platform,verified,clears g_KeyDown[256]; hooks INT 9,platform_symbols.csv
+00010a88,Kbd_Restore,platform,verified,restores INT 9,platform_symbols.csv
+00010abb,Timer_Install,platform,verified,DPMI 0x204/0x205 INT 8 -> 0x310ba; PIT divisor 0x5d37 = 50.00 Hz,platform_symbols.csv
+00010ba0,Timer_Restore,platform,verified,never called,platform_symbols.csv
+00010bad,Timer_Restore2,platform,verified,duplicate entry; never called,platform_symbols.csv
+00010c1d,FatalError,platform,verified,(a;b;code): CD_Stop; Sound_Shutdown if sfx; text mode; printf %s%s\n; exit(code),platform_symbols.csv
+00010c6b,Str_TrimRight,platform,verified,(s;i) trims spaces/NULs backwards; reads s[-1],platform_symbols.csv
+00010cb6,Map_GetTileAttr,level,verified,(x;y;t) g_MapVal[(t&3)*256+tile],level_symbols.csv
+00010d22,Map_SetTile,level,verified,,level_symbols.csv
+00010d65,Rand,platform,verified,n==0 -> 0 without rand(); else rand()%(n+1) signed; n==-1 divides by zero,platform_symbols.csv
+00010da7,SwapInt,platform,verified,,platform_symbols.csv
+00010ddc,SwapByte,platform,verified,,platform_symbols.csv
+00010e11,Clamp,platform,verified,(v;lo;hi) signed,platform_symbols.csv
+00010e70,Sprite_ClearQueue,video,verified,,video_symbols.csv
+00010e95,Video_NightStub,video,verified,empty function called each frame when !g_NightPalActive,video_symbols.csv
+00010eb0,IsOnScreen,play,high,(camx;camy;x;y),symbols_game.csv
+00010f11,Sprite_Queue,video,verified,(x;y;id) x+=fineX; y+=16+fineY; id>0x8000 mirrored; wrap flag if left<0,video_symbols.csv
+00011012,Stub_FrameF,game_flow,likely,empty; burning wreck particle stub (Rand args evaluated),game_flow_symbols.csv
+0001102d,Sprite_DrawNow,video,verified,(x;y;id) Sprite_Blit page 0,video_symbols.csv
+00011066,Sprite_DrawNowShift,video,verified,(x;y;id) Sprite_BlitShift page 0,video_symbols.csv
+000110a1,Stub_FrameA,game_flow,likely,empty stub in the frame loop,game_flow_symbols.csv
+000110bc,Stub_FrameB,game_flow,likely,returns 0; guards a dead Sfx+damage branch,game_flow_symbols.csv
+000110e1,Stub_FrameC,game_flow,likely,returns arg1; its Rand(9)/Rand(2) arguments are still evaluated every frame,game_flow_symbols.csv
+00011105,Stub_FrameD,game_flow,likely,returns 0; smoke emitter stub (Rand args evaluated),game_flow_symbols.csv
+0001112a,Stub_FrameE,game_flow,likely,empty; dust emitter stub (Rand arg evaluated),game_flow_symbols.csv
+00011145,Pal_SetColor,video,verified,(idx;r;g;b) store + upload 1 entry,video_symbols.csv
+0001119e,Pal_SetColorNoUpload,video,verified,,video_symbols.csv
+000111e6,Pal_SetColor12,video,verified,(idx;0xRGB) nibble<<2 + upload,video_symbols.csv
+0001125c,Pal_GetColor12,video,verified,packs 6-bit values as (r*16+g)*16+b (overlapping),video_symbols.csv
+000112e1,Stub_FrameG,game_flow,likely,returns 0,game_flow_symbols.csv
+00011306,Sprites_LoadSpx,files,high,data/jetstrike.spx -> g_SpriteTab (8-byte hdr x;y;w/4;h); on reload only data/jetsprit.pal colours 64-95,symbols_game.csv
+000114da,Fonts_Load,files,high,misc/smallfnt.raw; misc/bigfnt.raw,symbols_game.csv
+0001155e,Sprite_DrawQueue,video,verified,draws entries count-1..0 (first queued on top); wrap -> x+384,video_symbols.csv
+00011653,Stub_FrameH,game_flow,likely,returns 0; guards dead Rand(9) damage branch,game_flow_symbols.csv
+00011678,Stub_FrameI,game_flow,likely,returns 1 (ground probe multiplier),game_flow_symbols.csv
+0001169d,Input_GetKeyCode_Stub,platform,verified,returns 0 (empty Amiga key-code reader); result stored in g_KeyCode,platform_symbols.csv
+000116dd,Map_GetTile,level,verified,,level_symbols.csv
+0001172a,BoxOverlap,play,high,(x1;y1;x2;y2;dx;dy) collision,symbols_game.csv
+0001178a,Wrap,platform,verified,not a true wrap: v>lo ? v%(hi-lo+1) : (v+lo)%(hi-lo+1),platform_symbols.csv
+000117f8,Sprite_GetY,video,verified,hotY; 0 if id==0||id>0x212,video_symbols.csv
+00011847,Sprite_GetX,video,verified,hotX; 0 if id==0||id>0x212,video_symbols.csv
+00011895,Sprite_GetWidth,video,verified,w4*4,video_symbols.csv
+000118e7,Sprite_GetHeight,video,verified,h,video_symbols.csv
+0001195b,Pal_Black,video,verified,(first;last) DAC entries to 0; g_Palette unchanged,video_symbols.csv
+000119b6,Pal_Upload,video,verified,(first;last) DAC <- g_Palette,video_symbols.csv
+00011a1a,Pic_LoadPax,files,high,(name;page;applyPal): gfx/<name> LZW -> page (320x200 at row 20); gfx/<name>.pal 64 colours,symbols_game.csv
+00011bee,Video_CopyRect,video,verified,(srcpage;x1;y1;x2;y2;dstpage;dx;dy) latch copy; rows=(u8)(y2-y1); bytes x1/4..x2/4,video_symbols.csv
+00011d02,Zone_Add,game_flow,verified,(id;x1;y1;x2;y2) packed 5-int records; scan stride 1,game_flow_symbols.csv
+00011dbc,Zone_HitTest,game_flow,verified,first containing record; 0 if none,game_flow_symbols.csv
+00011e64,Zone_Clear,game_flow,verified,0x140 ints = -1,game_flow_symbols.csv
+00011eab,Input_GetBits,platform,verified,TurnR<<3|TurnL<<2|Pause<<1|g_Fire; no callers,platform_symbols.csv
+00011f20,Input_AnyKey,platform,verified,TurnR|TurnL|Pause or Left|Right|Up|Dn,platform_symbols.csv
+0001206e,Sprite_Mirror,video,verified,id+0x8000,video_symbols.csv
+000120ea,Pal_UploadAll,video,verified,,video_symbols.csv
+00012114,File_LoadWhole,platform,verified,(dir;name;&buf;size) size>0 fixed; -1 always malloc; 0 file size; malloc if *buf NULL; fatal 1/6,platform_symbols.csv
+00012288,File_LoadStub,platform,verified,empty; called with (jetsoundext.aaf;0;-1),platform_symbols.csv
+000122a3,Key_Up,platform,verified,returns g_KeyUp 0x84560,platform_symbols.csv
+000122cb,Key_Left,platform,verified,returns g_KeyLeft 0x84552,platform_symbols.csv
+000122f3,Key_Right,platform,verified,returns g_KeyRight 0x84564,platform_symbols.csv
+0001231b,Key_Down,platform,verified,returns g_KeyDn 0x8454e,platform_symbols.csv
+00012343,Font_DrawSmallGlyph,video,verified,returns rightmost column; colour 255 or 254 at night,video_symbols.csv
+000123fa,Font_DrawBigGlyph,video,verified,byte1->255 byte5->0,video_symbols.csv
+000124e0,Text_DrawSmall,video,verified,(x;y;str;onPage) y+=onPage*g_BackPage/96; advance maxc+2; unknown +2,video_symbols.csv
+000126e9,Text_DrawBig,video,verified,advance maxc; unknown +4; newline +12,video_symbols.csv
+00012831,Text_DrawDigit,video,verified,3x5 digit from 0x80019; colour 255,video_symbols.csv
+000128f1,Text_DrawNumber,video,verified,(x;y;val;n) right-aligned 4 px/digit; leading zeros,video_symbols.csv
+00012970,Font_GlyphWidth,video,verified,,video_symbols.csv
+000129ee,Text_FitWidth,video,verified,word-wrap break index or 0,video_symbols.csv
+00012bed,Text_WidthSmall,video,verified,,video_symbols.csv
+00012d8d,Text_WidthBig,video,verified,,video_symbols.csv
+00012e92,Video_ShowPage,video,verified,CRTC start=page*0x5a00,video_symbols.csv
+00012ef0,Video_GetPage,video,verified,,video_symbols.csv
+00012f18,Byte_Set,level,low,,symbols_game.csv
+00012f3e,Byte_Get,level,low,,symbols_game.csv
+00012f67,Sprites_ReplaceFromBank,files,high,(slot;n;bank) copy n-th sprite of a bank into slot,symbols_game.csv
+00013041,Video_DrawLineColor,video,verified,Video_DrawLine with g_LineColor,video_symbols.csv
+000130c8,Pic_LoadHudPanel,files,high,gfx/display.pax to VRAM top + .pal; split 0xaf; start 0x1ec0,symbols_game.csv
+0001334f,Video_FillRect,video,verified,inclusive; PutPixel,video_symbols.csv
+000133b3,Tileset_LoadTlx,level,verified,TLX LZW -> g_TileData; .pal 0xC0 bytes -> palette 128..191; name ext restored to .tlx,level_symbols.csv
+0001351e,Parallax_Load,level,verified,.dx0/.dx1 + .p0<Rand(1)>/.p10; leaves g_TilesetName ext rewritten (tileset reloaded every mission),level_symbols.csv
+00013773,Sprites_CountInBank,files,medium,,symbols_game.csv
+000137de,Div16,platform,verified,v/16 truncating toward zero,platform_symbols.csv
+00013842,Level_DrawBackground,level,verified,(col;row) 24x16 window; backdrop px=(int)(camX/4.166666666)%320-fineX py=(int)((camY+2008)/9.25-fineY),video_symbols.csv
+00013a25,Sign,platform,verified,,platform_symbols.csv
+00013a68,Video_FlipPage,video,verified,start=back+0x600+fine; 1+g_VSyncWaits vsyncs; Pal_CycleEffects if g_FlashCounter; swap pages,video_symbols.csv
+00013b01,Pal_Fade,video,verified,(first;last;type;steps) 0 out 1 in 2 half-out 3 half-in; ignored if type==last type; restores g_Palette,video_symbols.csv
+00014331,Bit_Test,platform,verified,(bit;v) (v&(1<<bit))==(1<<bit),platform_symbols.csv
+00014382,Bit_Clear,platform,verified,(bit;*p) *p&=~(1<<bit),platform_symbols.csv
+000143b0,Video_SetLineColor,video,verified,,video_symbols.csv
+000143d3,Video_BenchmarkSpeed,video,verified,frame-crossing count -> g_VSyncWaits 2/1/0,video_symbols.csv
+0001456d,Joystick_ReadDirs,platform,verified,bits 1 left 2 up 4 right 8 down vs calibration thresholds; *buttons,platform_symbols.csv
+000145f9,Video_Fill4x4,video,verified,debug overview cell,video_symbols.csv
+00014677,Level_DrawOverviewMap,level,verified,debug 80x44 tile overview at row 100,video_symbols.csv
+000146f4,main,platform,verified,2MB probe; buffers; Kbd_Install; spx; js.cfg; joystick; mode X; benchmark; Game_Run; shutdown + credits,platform_symbols.csv
+00014923,Sfx_MissionEvent,sound,high,Sfx_Play(33;4100;0x3a) with Rand(40)/Rand(10) gate (was FUN_00014923),sound_symbols.csv
+000149ae,Building_Update,enemies,verified,,enemies_symbols.csv
+00014abe,Map_SecondaryExplosions,level,verified,was FUN_00014abe: Explosion_Damage for queued table-3 bit 0x04 tiles,level_symbols.csv
+00014b4a,Commandos_Update,enemies,verified,renamed: was Flak_Update,enemies_symbols.csv
+00015194,Runway_Update,level,verified,night runway light sprite 0x192/0x193 running along the runway,level_symbols.csv
+000152a0,Player_AutoThrottle,player,verified,holds cruise speed +0.5..+1.0,player_symbols.csv
+0001536c,Stub_AeroCountdown,game_flow,likely,empty; called when the Aerolimits countdown digit changes,game_flow_symbols.csv
+00015387,AgentDrop_Update,level,verified,renamed from StealMission_Update: p03 form b is an agent drop; zone marker + smoke points,level_symbols.csv
+00015492,PrizePlane_Award,enemies,verified,,enemies_symbols.csv
+0001554b,Player_DrawReverseThrust,player,verified,reverse-thrust exhaust and tailhook sprites,player_symbols.csv
+000156a2,Player_AfterburnerFlame,player,verified,3 flame sprites (double math; twin engines stat 66),player_symbols.csv
+00015957,Carrier_Update,player,verified,was Player_LandingCheck: catapult countdown and taxi-to-catapult; called by Mission_CheckComplete,player_symbols.csv
+00015bb6,Player_Ditching,player,verified,g_OnGround==8: stop counter; OUCH; bumps,player_symbols.csv
+00015cb3,Player_FullPower,player,verified,FULL POWER STUPID; throttle 9 (backseat driver while stalling),player_symbols.csv
+00015ce6,Weapons_FrameDispensers,weapons,verified,per-frame: 0x177db if g_90100; JP233 / Porcupine dispensers,weapons_symbols.csv
+00015d2b,PlayerState_ResetA,play,low,,symbols_game.csv
+00015d38,PlayerState_ResetA_b,play,low,dup,symbols_game.csv
+000160f4,PlayerState_ResetB,play,low,,symbols_game.csv
+00016101,PlayerState_ResetB_b,play,low,dup,symbols_game.csv
+00016620,Player_PullUp,player,verified,PULL UP STUPID ground warning (0x901bc) with backseat driver,player_symbols.csv
+0001676a,Frame_DecCounter318,game_flow,likely,0x90318--,game_flow_symbols.csv
+0001679b,Stub_FrameM,game_flow,likely,empty,game_flow_symbols.csv
+000167b6,CheatKeys,platform,verified,dead code (no callers); compares g_KeyCode (always 0) with zero table 0x8456c..,platform_symbols.csv
+000167c3,CheatKeys_b,platform,verified,dead duplicate entry,platform_symbols.csv
+0001693b,Player_TakeoffAssist,player,verified,fire held with gear down: auto throttle to rotate speed; nose levelling,player_symbols.csv
+00016b82,Player_EngineFire,player,verified,engine shake; spiral at fire level 3; death at >3,player_symbols.csv
+00016d70,Player_GearCollapseRoll,player,verified,hard landing while stalling: Rand(5)==1 gear fails,player_symbols.csv
+00016dcd,Runway_SetEndTargets,game_flow,likely,sets 0x8ff04/0x903d8/0x901fc/0x9082c/0x905d4 to the far runway end,game_flow_symbols.csv
+00016e38,BaseRadar_Update,level,high,"conflict: level.md (verified, animated dish sprite 0x1e2-0x1e5) over game_flow Windsock_Update",symbols_overrides.csv
+00016f13,Bonus_Spawn,enemies,verified,,enemies_symbols.csv
+00017072,Bonus_Update,enemies,verified,,enemies_symbols.csv
+00017214,Bonus_Award,enemies,verified,,enemies_symbols.csv
+00017353,Bonus_FireExtinguisher,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017399,Bonus_AmmoPod,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+000173e3,Bonus_FuelPod,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017430,Bonus_Repair,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+000174db,Bonus_AutoEject,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+0001750b,Bonus_ECM,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017530,Bonus_Armour,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017597,Bonus_Saver,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+000175da,Bonus_FirePower,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+0001761d,Bonus_FirePower2,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017642,Bonus_ExtraLife,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017663,Bonus_ExtraEject,enemies,verified,bonus effect handler (section 14.3),enemies_symbols.csv
+00017684,Convoy_LaunchMissile,enemies,verified,,enemies_symbols.csv
+000177db,AgentSmoke_Update,enemies,verified,,enemies_symbols.csv
+00017944,Enemy_DropBomb,enemies,verified,,enemies_symbols.csv
+00017be5,AgentDrop_Release,level,verified,renamed from StealMission_Taken: at column p03+4 releases the agent (crate object; AGENT DROPPED),level_symbols.csv
+00017c56,Flamer_Update,enemies,verified,renamed: was Turrets_Update (weapons.md name kept as alias); player flamer shot chain,enemies_symbols.csv
+0001821c,Stub_Kind9,enemies,verified,,enemies_symbols.csv
+00018237,OldProj_CycleFrame,enemies,likely,dead code; do not port,enemies_symbols.csv
+00018274,OldProj_FrameFromVY,enemies,likely,dead code; do not port,enemies_symbols.csv
+000182cb,Projectile_LgbSteer,weapons,likely,LGB x-steering used by Projectile_Alarm (in-range test uses g_90574),weapons_symbols.csv
+0001844f,OldProj_Brake,enemies,likely,dead code; do not port,enemies_symbols.csv
+000184cf,Projectile_Alarm,weapons,likely,flight k3=3 (ALARM): climb while fuel then dive on target,weapons_symbols.csv
+00018663,OldProj_AimMarker,enemies,likely,dead code; do not port,enemies_symbols.csv
+00018720,OldProj_Combi,enemies,likely,dead code; do not port,enemies_symbols.csv
+00018771,OldProj_Cruise,enemies,likely,dead code; do not port,enemies_symbols.csv
+00018bc8,OldProj_SeaSkim,enemies,likely,dead code; do not port,enemies_symbols.csv
+00018fca,OldProj_Climb,enemies,likely,dead code; do not port,enemies_symbols.csv
+000190aa,OldProj_Proximity,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019153,OldProj_AimAndSplit,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019178,OldProj_AimMissionTarget,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019236,OldProj_Steer,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019574,OldProj_SpeedFromV,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019669,OldProj_Speed32,enemies,likely,dead code; do not port,enemies_symbols.csv
+0001968e,OldProj_Cluster,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019ab5,OldProj_HerculesDrop,enemies,likely,dead code; do not port wrapper,enemies_symbols.csv
+00019ac2,OldProj_HerculesDrop_Body,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019c6f,OldProj_Fall,enemies,likely,dead code; do not port,enemies_symbols.csv
+00019cc8,EnemyShells_Update,enemies,verified,renamed: was Targets_Update,enemies_symbols.csv
+00019fda,EnemyMissiles_Update,enemies,verified,renamed: was Helis_Update,enemies_symbols.csv
+0001a7cb,OldProj_HomeAir,enemies,likely,dead code; do not port,enemies_symbols.csv
+0001acf5,Input_PollMenu,platform,verified,ReadControls; g_FireOrConfirm; g_MenuDX/DY; 4 vsync waits (15 Hz),platform_symbols.csv
+0001adae,Stub_PlaneSelectOnce,game_flow,likely,empty; called once after the first plane selection,game_flow_symbols.csv
+0001aeaa,Mem_AllocMapBuffers,platform,verified,0x849f0=malloc(150000); g_MapGrid=malloc(0xfa04); *g_MapGrid=0,platform_symbols.csv
+0001af0f,Bertha_Update,level,verified,counts air/rubble cells of the stamp; < p07: muzzle blast + shell on the runway 20 frames later; else p19=0,level_symbols.csv
+0001b043,NameEntry_Init,game_flow,low,alphabet table for name entry,symbols_game.csv
+0001b3c5,UnusedMenu_Loop,game_flow,low,dead code (no callers),symbols_game.csv
+0001b752,NameEntry_Screen,game_flow,low,dead code (no callers),symbols_game.csv
+0001b919,NameEntry_ReadString,game_flow,low,text entry loop (key reader is a stub),symbols_game.csv
+0001ba0c,Game_Run,game_flow,verified,master loop: init tables/GENDAT3/GENDAT2/MISC; menu; attempt loop; frame loop; debrief; end game,game_flow_symbols.csv
+000212ac,Mission_Setup,game_flow,verified,briefing (if new mission) + PlaneSelect + map/tileset/parallax/HUD + flight tables,game_flow_symbols.csv
+00022223,Weapons_ReturnUnused,game_flow,verified,racks back to stock (rounds/per),game_flow_symbols.csv
+000222f0,Mission_ResetState,game_flow,verified,rack loads by weight/hardpoints/stock; load weight; fuel; gun ammo,game_flow_symbols.csv
+0002299a,Mission_LoadBriefing,game_flow,verified,data/M<mode> 0x1c2 record; story; jetlogo.pax briefing; Rand(20) fog; F1..F10 save; resupply,game_flow_symbols.csv
+00023f6b,Story_ShowAsc,game_flow,verified,data/<asc>: picture+x y + text on page 1; WaitKey_Release,game_flow_symbols.csv
+0002422d,Map_LoadMxp,level,verified,LZW grid; width; original+live ground rows; g_SkyTile=tile(0;0),level_symbols.csv
+00024377,Map_ResetCounters,level,verified,zeroes 0x90690 0x90638 0x90634,level_symbols.csv
+000243d6,Map_StampBertha,level,verified,data/bertha<A+p19/1000> at (p19%1000;p28); lowers live heights,level_symbols.csv
+000245a9,PlaneSelect_Screen,game_flow,verified,planech.pax 5x4 slots 20/page; limits L1L2; Aerolimits slots; copies MISC.Z stats 62..120,game_flow_symbols.csv
+000257c3,SelectScreen_LoadBg,game_flow,verified,(wep) planech.pax / wepch.pax; page=0,game_flow_symbols.csv
+00025869,Text_DrawCenteredAt,video,likely,(unused;x;y;str) x+29-w/2,video_symbols.csv
+000258b6,SelectScreen_DrawInfoBox,game_flow,verified,(right) clears box and word-wraps g_InfoText,game_flow_symbols.csv
+00025a5d,SelectScreen_ShowPlaneName,game_flow,verified,name or STOLEN AIRCRAFT,game_flow_symbols.csv
+00025add,PlaneRecord_Load,game_flow,high,conflict: game_flow over first-pass PilotRecord_Load,symbols_overrides.csv
+00025c13,Tileset_Load,level,verified,Tileset_LoadTlx + dead loop,level_symbols.csv
+00025c8b,Hud_DrawPanel,player,likely,display.pax; weapon icons; lives; damage lamps; terrain profile; counters; radar markers,player_symbols.csv
+00026174,Hud_DrawRadarLine,video,likely,4 DrawLineColor segments; x scale 0x3e0/(mapW*16)+0xdd,video_symbols.csv
+00026256,Plane_SetupSprites,files,medium,per-plane offsets from misc.z,symbols_game.csv
+00026473,Plane_LoadSpx,files,high,plane/<name>.spx into 0x849f0,symbols_game.csv
+000264eb,Plane_ReplaceSprite,files,medium,,symbols_game.csv
+00026520,Particles_Nop,enemies,verified,,enemies_symbols.csv
+0002653b,Particles_Clear,enemies,verified,,enemies_symbols.csv
+00026560,Particle_Spawn,enemies,verified,,enemies_symbols.csv
+0002661e,Particles_Update,enemies,verified,,enemies_symbols.csv
+000267da,Hud_DrawTargetArrow,player,verified,sprite 0xa7 clamped to the screen if target within 0x4b0,player_symbols.csv
+0002688f,Bullets_Clear,weapons,verified,count=0,weapons_symbols.csv
+000268be,Tracer_Stub,enemies,verified,,enemies_symbols.csv
+000268d9,Bullet_Add,weapons,verified,(x8;y8;vx;vy) max 32,weapons_symbols.csv
+0002694b,Bullets_Update,weapons,verified,(camx;camy) move/cull/plot tracer pixels,weapons_symbols.csv
+00026ae8,Stub_FrameJ,game_flow,likely,empty,game_flow_symbols.csv
+00026b03,Smoke_Stub,weapons,verified,returns its 4th arg; smoke trail disabled (caller still consumes Rand(2)),weapons_symbols.csv
+00026b27,Hud_DrawBriefing,player,likely,B key held >8 frames: briefing text overlay,player_symbols.csv
+00026cc6,Hud_Nop,player,verified,empty (Hud_PlaneMessage/WeaponMessage show nothing),player_symbols.csv
+00026ce1,Hud_PlaneMessage,player,verified,Hud_Nop(HUDTEXT[61+player]); 0x909b8=0,player_symbols.csv
+00026d24,Hud_WeaponMessage,player,verified,builds rack messages then Hud_Nop (nothing shown),player_symbols.csv
+00026e03,Hud_PushMessage,player,verified,queue of 10 x 100 chars; 40 frames,player_symbols.csv
+00026e5a,Hud_DrawMessages,player,verified,centred rows at y 0x2e+8*row; expiry shifts,player_symbols.csv
+00026f9c,Stub_LaunchCountdown,player,verified,empty; receives STANDBY TO LAUNCH n,player_symbols.csv
+00026fb7,Stub_FrameK,game_flow,likely,empty,game_flow_symbols.csv
+00026fd2,Stub_FrameL,game_flow,likely,empty,game_flow_symbols.csv
+00027008,Tanker_Update,player,likely,was Player_Ejection: air-to-air refuelling tanker; fuel transfer at the probe (stats 109/110),player_symbols.csv
+0002780b,SupportAircraft_Update,player,likely,was Player_DeathAndLanding: tow plane; Fat Albert; B52; ship; campaign bomber + lock-on; player flare shells; ground pickup/winch,player_symbols.csv
+00029b29,Player_DrawHeli,player,verified,was Player_Collide: queues body+rotor sprites from the .HD table (0x84a34); no collision; rotor offset always from record 0,player_symbols.csv
+00029d90,WeaponSelect_Screen,game_flow,verified,wepch.pax; called only from Airbase_Update in flight; DONE / NEW PLANE,game_flow_symbols.csv
+0002ba3c,WeaponSelect_DrawCounts,game_flow,verified,loads and weights of both racks (rack1 weight divides by rack0 per-rack: bug),game_flow_symbols.csv
+0002bb33,WeaponSelect_DrawInfo,game_flow,verified,renamed from WeaponSelect_DrawLine: description + stock + AVAILABLE/NOT LOADED into info box,game_flow_symbols.csv
+0002bc0b,Airbase_Update,enemies,verified,,enemies_symbols.csv
+0002c55b,AirbaseCrew_Update,enemies,verified,renamed: was Balloons_Update,enemies_symbols.csv
+0002c8a2,FireEngine_Spray,enemies,verified,,enemies_symbols.csv
+0002c9cb,Mission_Debrief,game_flow,verified,sarcasm/result text over the last frame; bonus x bravery; sets g_EndGameIndex and g_AbortFlag,game_flow_symbols.csv
+0002d2b8,Sarcasm_Load,game_flow,verified,data/sarcasm 28 lines x 0x50,game_flow_symbols.csv
+0002d34e,Player_Update,player,verified,keys only: tow start; autothrottle; briefing; pause; abort; look/follow; eject; gear; hover switch (flight model is inlined in Game_Run 0x1ea8c),player_symbols.csv
+0002ec74,Hud_UpdateRadar,player,verified,radar/Jammed; speed bar; fuel; dots; colour pulses; altimeter; score; kill medals; lamps,player_symbols.csv
+0002f7e6,CD_MSCDEX_Install,sound,high,INT 2Fh 1500h; returns CX (first CD drive letter),sound_symbols.csv
+0002f892,CD_MSCDEX_Version,sound,high,150Ch; BX > 0x209,sound_symbols.csv
+0002f951,CD_PlayTrackRaw,sound,high,(drive;track) cmd 0x84 Red Book start; length start[t+1]-start[t]; plays once,sound_symbols.csv
+0002fb5a,CD_StopRaw,sound,high,cmd 0x85,sound_symbols.csv
+0002fc91,CD_GetDiscInfo,sound,high,IOCTL 0Ah; returns last-first+1; start[0]=lead-out,sound_symbols.csv
+0002fe82,CD_ReadTrackTable,sound,high,IOCTL 0Bh per track; frames = F+S*75+M*4500,sound_symbols.csv
+000300b9,CD_Check,sound,high,0 ok 1 no MSCDEX 2 old 3 not 15 tracks,sound_symbols.csv
+00030136,CD_PlayTrack,sound,high,if g_CDMusicOn,sound_symbols.csv
+00030176,CD_Stop,sound,high,if g_CDMusicOn,sound_symbols.csv
+000301b2,EndGame_Screen,game_flow,verified,gamedone.pax / AeroScores / final score+credits / endgameN.pax + CD track N+7,game_flow_symbols.csv
+000304e0,TrainingCredits_Screen,game_flow,verified,traincrt.pax / practcrt.pax,game_flow_symbols.csv
+0003057c,SB_SpeakerOn,sound,high,D1; mixer 0x0e=0x31/0x33; 0x22/0x04=0xff; DSP 0x40 + g_SBTimeConst (still 0 -> 3906 Hz),sound_symbols.csv
+000305da,SB_ResetDSP,sound,high,CF=1 on failure,sound_symbols.csv
+0003060f,SB_WriteDSP,sound,high,,sound_symbols.csv
+00030624,SB_ReadDSP,sound,high,,sound_symbols.csv
+00030639,SB_MixerWrite,sound,high,AL=reg AH=value,sound_symbols.csv
+0003065a,SB_MixerRead,sound,high,unused,sound_symbols.csv
+00030670,SB_Detect,sound,high,ports 0x210-0x280; stores DSP minor version (bug),sound_symbols.csv
+00030712,SB_SetRate,sound,high,TC computed with wrong 64-bit divide; never sent,sound_symbols.csv
+000307ab,SB_Stop,sound,high,D3 if ver<=1; reset,sound_symbols.csv
+000307c5,SB_SetupDmaBuffer,sound,high,avoids 64K page crossing,sound_symbols.csv
+00030875,SB_AckIRQ,sound,high,re-arms 0x14 when ver<=1; EOI,sound_symbols.csv
+000308c3,SB_SetStopFlag,sound,high,,sound_symbols.csv
+000308d1,SB_IsStopped,sound,high,unused in JS,sound_symbols.csv
+000308de,SB_UnmaskIRQ,sound,high,,sound_symbols.csv
+000308fa,SB_RestoreIRQMask,sound,high,,sound_symbols.csv
+00030906,SB_StartDMA,sound,high,DMA ch1 mode 0x59 page 0x83; DSP 0x14 or 0x48+0x90,sound_symbols.csv
+000309ab,Mixer_SetChannel,sound,high,(ch;data;len;loop;shift;rateParam) step=40000/rateParam&15,sound_symbols.csv
+00030ac7,DMA_WaitPos,sound,high,returns play position in DX,sound_symbols.csv
+00030b06,Mixer_UpdatePolled,sound,high,unused near-copy of the timer ISR mixer (polled variant),sound_symbols.csv
+00030ffa,Mixer_SetRate,sound,high,(ch;rateParam) step only,sound_symbols.csv
+0003103b,Mixer_IsActive,sound,high,unused; channel mapping reversed,sound_symbols.csv
+00031092,SB_GetBase,sound,high,unused,sound_symbols.csv
+0003109c,SB_GetIrq,sound,high,unused,sound_symbols.csv
+000310a6,SB_GetDma,sound,high,unused,sound_symbols.csv
+000310b0,SB_GetDspVer,sound,high,unused,sound_symbols.csv
+000310ba,Timer_ISR_SBMixer,sound,high,INT 8 50 Hz; mixes 120 bytes when write pos < play+120; see spec 2.13,sound_symbols.csv
+000315bc,Sfx_Play,sound,high,(id;freq;vol;x) -> Sfx_PlayChannel(id-1;freq/2;vol;0) if g_SfxOn; x ignored,sound_symbols.csv
+00031604,Video_DrawLine,video,verified,asm DDA; steep lines degenerate to vertical (16-bit step in 32-bit acc),video_symbols.csv
+0003184c,Tiles_ParallaxBench,video,verified,benchmark copy of the parallax loop,video_symbols.csv
+00031934,Tiles_ParallaxBenchRow,video,verified,benchmark helper (copy of 0x104f8),video_symbols.csv
+0003197c,Tiles_ClearColumns,video,verified,benchmark: copies from linear address 0 into page B,video_symbols.csv
+00031a19,Video_CountVSync,video,verified,polls until next retrace start; returns poll count,video_symbols.csv
+00031a31,SB_IRQ_ISR,sound,high,,sound_symbols.csv
+00031a53,Sfx_PlayChannel,sound,high,(slice;f;vol;loop) SB ch round robin 2;3;1; GUS voices 2..13 window +0x50,sound_symbols.csv
+00031c51,Sfx_PlayVoice,sound,high,(ch;slice;f;vol;loop) fixed channel; GUS window +0x186 loop +2,sound_symbols.csv
+00031e24,Sound_Init,sound,high,GUS (>=0x200 port) else SB 19920 requested,sound_symbols.csv
+00032119,Sound_Shutdown,sound,high,does not restore INT 8,sound_symbols.csv
+000321e5,Sound_StopAll,sound,high,,sound_symbols.csv
+000322c4,Sound_SetFreq,sound,high,SB step 1/2 (div0 if f>20000); GUS fc=f/19,sound_symbols.csv
+0003235d,Sound_SetVolume,sound,high,GUS only,sound_symbols.csv
+000323b9,Player_RotateA,player,verified,Up: g_Dir -= turn rate; heli: collective up,player_symbols.csv
+00032476,Player_RotateB,player,verified,Down: g_Dir += turn rate; heli: collective down,player_symbols.csv
+000324ed,Player_PitchUp,player,verified,plane: ThrottleUp; heli: g_HeliVX += 2 clamped,player_symbols.csv
+00032585,Player_ThrottleUp,player,verified,throttle +2 (max 9); heli: tilt +2 (0..13),player_symbols.csv
+00032635,Player_PitchDown,player,verified,clears brake drag; plane: ThrottleDown; heli: g_HeliVX -= 2,player_symbols.csv
+000326d3,Player_ThrottleDown,player,verified,throttle -2; at 0 on the ground: brakes or reverse thrust,player_symbols.csv
+000327c0,Joystick_Poll,platform,verified,port 0x201 RC timing loop -> g_JoyX/g_JoyY (16-bit counts; no timeout),platform_symbols.csv
+000327fb,Joystick_GetX,platform,verified,,platform_symbols.csv
+00032805,Joystick_GetY,platform,verified,,platform_symbols.csv
+0003280f,Joystick_GetButtons,platform,verified,(~in 0x201)>>4,platform_symbols.csv
+00032824,Joystick_WaitButton,platform,verified,(mask) wait release then press; no callers,platform_symbols.csv
+00032846,Player_Weapons,weapons,verified,the gun: flamer or tracer + ray + hit rolls; heat/ammo,weapons_symbols.csv
+000332fb,Projectiles_UpdateOld,weapons,verified,renamed from Projectiles_Update: unreferenced older updater (also entered at +0xd 0x33308); do not port,weapons_symbols.csv
+00033308,Projectiles_UpdateOld_b,weapons,verified,+0xd entry of 0x332fb (same function),weapons_symbols.csv
+000341e9,Weapon_Fire,weapons,verified,rack launch dispatcher on k0 (jump table 0x34219),weapons_symbols.csv
+000346d3,Flares_Add,weapons,verified,pending++ then Flare_Release,weapons_symbols.csv
+000346f9,Weapon_FireGunPod,weapons,verified,renamed from Weapon_FireFromStock: k0=9 gun pod; swaps gun params and calls Player_Weapons,weapons_symbols.csv
+000348db,Weapon_TakePhoto,weapons,verified,renamed from Weapon_DropMarker: k0=4 camera pod photo (column into 0x91304),weapons_symbols.csv
+0003494e,Weapon_DispenseJP233,weapons,verified,renamed from Weapon_FireSpecialA: one JP233 submunition per frame,weapons_symbols.csv
+00034b94,Weapon_DispensePorcupine,weapons,verified,renamed from Weapon_FireSpecialB: one Porcupine missile per frame,weapons_symbols.csv
+00034dd0,Weapon_ArmPorcupine,weapons,verified,renamed from Weapon_ArmA: k0=11,weapons_symbols.csv
+00034e13,Weapon_ArmJP233,weapons,verified,renamed from Weapon_ArmB: k0=8,weapons_symbols.csv
+00034e56,Projectile_Init,weapons,verified,blast/pos/life of slot g_ProjCount,weapons_symbols.csv
+00034f0d,Weapon_DropTank,weapons,verified,renamed from Weapon_FireRepeat: k0=5 jettison after 10 held calls,weapons_symbols.csv
+000351e9,Weapon_DropCommando,weapons,verified,renamed from Weapon_FireBomb: k0=10,weapons_symbols.csv
+0003529c,Weapon_LaunchBallistic,weapons,verified,renamed from Weapon_FireMissile: k0 0/3/6/7 bombs etc; nuke + camera messages,weapons_symbols.csv
+00035532,Weapon_FireRocket,weapons,verified,renamed from Weapon_FireCamera: k0=1 rockets (vx +-32),weapons_symbols.csv
+000356fe,Weapon_FireGuided,weapons,verified,k0=2 guided missiles; AAM lock/range check,weapons_symbols.csv
+00035a33,EnemyPilots_Update,enemies,verified,renamed: was Mines_Update,enemies_symbols.csv
+00035e20,EnemyGround_Update,enemies,verified,,enemies_symbols.csv
+00036ae3,EnemyAir_Update,enemies,verified,,enemies_symbols.csv
+000389b0,Sfx_RandomAmbient,sound,high,random sfx 0x10/0x1a (Rand(20)/Rand(10)) not tied to an enemy (enemies called it EnemyFire_Sfx),symbols_overrides.csv
+00038a61,Flare_Release,weapons,verified,renamed from Flares_Update: releases one pending flare (max 2 active),weapons_symbols.csv
+00038ba8,EnemyBomber_Spawn,enemies,verified,,enemies_symbols.csv
+000391e3,Engine_Sfx,sound,high,engine loop on ch0 by plane class; crash loop slice 1 on ch1,sound_symbols.csv
+00039388,Engine_SoundUpdate,sound,high,per frame: rev smoothing; pitch every 2nd frame; warning queue; Engine_Sfx on change,sound_symbols.csv
+0003978d,Sfx_LaunchThump,sound,medium,Sfx_Play(8;15000;0x2b) (was FUN_0003978d),sound_symbols.csv
+000397c5,Engine_DeathWobble,sound,medium,0x8fef4 = clamp(0x8fef4+Rand(1);4;12) (was FUN_000397c5),sound_symbols.csv
+00039817,Engine_SetPitch,sound,high,classes 0/3: f=e*90+4000+max(0;e-80)*25,sound_symbols.csv
+00039976,Engine_Nop,sound,high,empty (was FUN_00039976),sound_symbols.csv
+00039991,Engine_Pitch1,sound,high,class 1: f=(max(0;e-80)*100+e*80+8000)/2 (was FUN_00039991),sound_symbols.csv
+00039a94,Engine_Pitch2,sound,high,class 2: f=e*40+6000 (was FUN_00039a94),sound_symbols.csv
+00039b69,Explosion_Damage,weapons,verified,(x;y;vx;vy;power;powerB) vx/vy unused; craters + damage to all object lists + scores,weapons_symbols.csv
+0003a99f,Explosion_Terrain,weapons,verified,debris mode select + debris velocity,weapons_symbols.csv
+0003adf9,Explosion_Particles,weapons,likely,water debris (mode 3),weapons_symbols.csv
+0003af32,Explosion_DebrisSmall,weapons,verified,mode 1 (power<30),weapons_symbols.csv
+0003afc0,Explosion_DebrisGround,weapons,verified,mode 0,weapons_symbols.csv
+0003b18d,Explosion_DebrisSolid,weapons,likely,mode 2 (solid tile),weapons_symbols.csv
+0003b261,Explosion_Nuke,weapons,verified,empty stub (power -40),weapons_symbols.csv
+0003b27c,Debris_Update,enemies,verified,,enemies_symbols.csv
+0003b5c0,Debris_Spawn,enemies,verified,,enemies_symbols.csv
+0003b6e6,Eject_SetPilotX,player,medium,uses player position and Sign(0x90328) (enemies called it Debrief_SignX),symbols_overrides.csv
+0003b743,Convoy_DeathStub,enemies,verified,,enemies_symbols.csv
+0003b777,Map_CraterAt,level,verified,(px;py;dmg) tile destruction; score; debris/smoke/secondary explosion; column collapse and spread,level_symbols.csv
+0003c0fb,SaveGame_LoadMenu,game_flow,verified,js_save.00N (F10 -> ':' bug); byte/word fields,game_flow_symbols.csv
+0003c367,SaveGame_Write,game_flow,verified,(slot) no NULL check,game_flow_symbols.csv
+0003c56c,SaveGame_DrawLoadPrompt,game_flow,verified,,game_flow_symbols.csv
+0003c5b0,Input_GetFKey,platform,verified,busy-waits for F1..F10; returns 1..10,platform_symbols.csv
+0003c600,Player_EjectUpdate,player,likely,ejected pilot / parachute state machine (g_EjectState),player_symbols.csv
+0003cd9e,Heading_TurnToward,enemies,verified,,enemies_symbols.csv
+0003cdec,Map_ScanAround,level,verified,min live ground row over x-10..x+9 (wrap bug at x==W),level_symbols.csv
+0003ceae,Input_ReadControls,platform,verified,keys+joystick -> g_Fire; g_CtrlRaw[11] 0/-1 copied to g_Ctrl via global 0x90ab8; g_AnyInput,platform_symbols.csv
+0003d105,Convoy_Update,enemies,verified,,enemies_symbols.csv
+0003dc4e,BaseRepair_Update,enemies,verified,,enemies_symbols.csv
+0003dd5e,BaseHit_Losses,enemies,verified,,enemies_symbols.csv
+0003dea2,Gun_Draw,enemies,verified,,enemies_symbols.csv
+0003dfaa,Flak_Draw,enemies,verified,,enemies_symbols.csv
+0003e0b2,SAM_Draw,enemies,verified,,enemies_symbols.csv
+0003e1a3,Map_TriggerColumn,level,verified,was FUN_0003e1a3: MP2 column trigger (classes 0x83-0x86/5; ground launcher spawn),level_symbols.csv
+0003e66b,Map_TriggerColumnAhead,level,verified,was FUN_0003e66b: MP2 trigger for column of camX+scrX+fineX+16 (projectile/weapon-cam path),level_symbols.csv
+0003e705,OldFlak_Shell,enemies,likely,dead code; do not port wrapper,enemies_symbols.csv
+0003e712,OldFlak_Shell_Body,enemies,likely,dead code; do not port,enemies_symbols.csv
+0003e8b3,Gun_Fire,enemies,verified,,enemies_symbols.csv
+0003ea8f,Convoy_FireShell,enemies,verified,,enemies_symbols.csv
+0003ec5b,Flak_Fire,enemies,verified,,enemies_symbols.csv
+0003ef72,SAM_Fire,enemies,verified,,enemies_symbols.csv
+0003f02e,Mission_CheckComplete,level,verified,per frame while on the ground: objectives when stopped on the runway,level_symbols.csv
+0003f195,Map_DamageColumn,level,verified,(x;y;tile;mode) clears column upward; armour sum in 0x933b0; uninitialised return (see spec 4.1),level_symbols.csv
+0003f2d8,Map_ColArmourSum,level,verified,was FUN_0003f2d8: returns 0x933b0,level_symbols.csv
+0003f2fe,Player_DamageSystems,player,verified,armour loss and random system failure (16 handlers below),player_symbols.csv
+0003f5c8,Damage_EngineFire,player,verified,g_EngineFire++ (fire extinguisher 0x906a8 may cancel),player_symbols.csv
+0003f645,Damage_EngineFail,player,verified,throttle 0,player_symbols.csv
+0003f688,Damage_ControlHit,player,verified,g_TurnRate = (g_TurnRate != 1),player_symbols.csv
+0003f6c2,Damage_Weapon1,player,verified,rack 0 rounds = 0,player_symbols.csv
+0003f6e7,Damage_Weapon2,player,verified,rack 1 rounds = 0,player_symbols.csv
+0003f70c,Damage_Display1,player,verified,empty,player_symbols.csv
+0003f727,Hud_LampBlinkA,player,likely,DISPLAY 2 FAIL: draws a shift-bank sprite at the panel position of sprite 0x8c,player_symbols.csv
+0003f777,Hud_LampBlinkB,player,likely,DISPLAY 3 FAIL: same with sprite 0xa8,player_symbols.csv
+0003f7c9,Damage_AllDisplays,player,verified,A+B; flags 5 6 7,player_symbols.csv
+0003f80c,Damage_FuelLeak,player,verified,g_FuelLeaks++,player_symbols.csv
+0003f82d,Damage_Undercarriage,player,verified,fixed-gear planes lose the gear,player_symbols.csv
+0003f85b,Damage_ThrottleJam,player,verified,Rand(10)==1 -> throttle = Rand(8),player_symbols.csv
+0003f894,Damage_GunFail,player,verified,Rand(10)==1 -> gun ammo 0,player_symbols.csv
+0003f8c8,Damage_WingHoled,player,verified,toggles stat 85 (0x907dc) 1<->0 (also ROTOR DAMAGED),player_symbols.csv
+0003f920,Damage_Explosion,player,verified,g_EngineFire = 3,player_symbols.csv
+0003f945,Sfx_WarningTone,sound,high,Sfx_Play(10;8000;0x3f); delay 24 (was FUN_0003f945),sound_symbols.csv
+0003f991,Enemy_LoadSpx,enemies,verified,,enemies_symbols.csv
+0003fa76,Enemy_ReplaceSprite,enemies,verified,,enemies_symbols.csv
+0003faab,Enemy_SetupSpriteIds,enemies,verified,,enemies_symbols.csv
+0003ff4d,Truck_LoadSpx,enemies,verified,,enemies_symbols.csv
+0004011f,Mission_CompleteScreen,play,low,,symbols_game.csv
+000403c1,Player_GliderUpdate,player,high,conflict: player.md authoritative (level called it Player_HoverUpdate),symbols_overrides.csv
+00040e8b,Map_FindTile,level,verified,(v;x0;y0;x1;y1;mode) first column whose tile (mode 0) or attr table mode-1 == v,level_symbols.csv
+00040f5a,OldEnemyMissiles_AtConvoy,enemies,likely,dead code; do not port wrapper,enemies_symbols.csv
+00040f67,OldEnemyMissiles_AtConvoy_Body,enemies,likely,dead code; do not port,enemies_symbols.csv
+000413a0,Projectile_HitGround,weapons,verified,solid tile hit in the sub-step loop,weapons_symbols.csv
+000415e4,Projectiles_Update,weapons,verified,renamed from Projectiles_UpdateGuided: the live updater of all player projectiles,weapons_symbols.csv
+00042509,Projectile_AimMissionTarget,weapons,verified,sets targetX/Y from mission target centre,weapons_symbols.csv
+000425c2,Projectile_LgbCluster,weapons,verified,LGB steering (k3 6) and cluster opening (k3 4/11),weapons_symbols.csv
+00042b70,Projectile_AlarmOld,weapons,likely,unreferenced ALARM variant,weapons_symbols.csv
+00042d0e,Projectile_AimMarker,weapons,likely,k3=2 aim at mission target when target marker set,weapons_symbols.csv
+00042dc6,Projectile_Climb,weapons,likely,k3=9 (no shipped weapon),weapons_symbols.csv
+00042ec9,Projectile_Steer,weapons,verified,steer to targetX/Y or g_90574/g_9052c,weapons_symbols.csv
+00043207,Projectile_Commando,weapons,verified,k0=10 commando sprite/parachute,weapons_symbols.csv
+000433c1,Projectile_Parachute,weapons,likely,k0=7 parachute drag,weapons_symbols.csv
+0004341a,Projectile_HomeAir,weapons,verified,k3=0 homing + proximity vs air/big/ground enemies,weapons_symbols.csv
+000438f2,Projectile_SeaSkim,weapons,verified,k3=7 anti-ship,weapons_symbols.csv
+00043d05,Projectile_Cruise,weapons,verified,k3=13/14 terrain following cruise,weapons_symbols.csv
+0004424d,TargetVehicle_Spawn,enemies,verified,renamed: was Enemy_InitPositions,enemies_symbols.csv
+00044478,TargetVehicles_Update,enemies,verified,renamed: was Ships_Update,enemies_symbols.csv
+000447f3,TV_LaunchSAM,enemies,verified,,enemies_symbols.csv
+000448d7,TV_FireShell,enemies,verified,,enemies_symbols.csv
+00044a5d,Mission_CheckObjectives,level,verified,target forms a/c; Aero pad score; p20; all-objectives test -> g_MissionResult,level_symbols.csv
+00045144,WaitKey_Release,platform,verified,wait confirm (timeout 500 retraces) then wait release; name kept,platform_symbols.csv
+00045233,WaitKey_Press,platform,verified,wait confirm (no timeout) then release unless F-key held,platform_symbols.csv
+00045352,AeroScores_Screen,game_flow,verified,aoscores.pax player N scored / wins,game_flow_symbols.csv
+00045584,Waypoint_Update,level,verified,Aerolimits gates,level_symbols.csv
+00045859,Pickup_Update,enemies,verified,,enemies_symbols.csv
+0004596f,Crate_Update,level,verified,Aerolimits crate and agent-drop parachute fall,level_symbols.csv
+00045c09,Pal_CycleEffects,video,verified,night: flash table on colour 64 (detail off) or sky ramp 192..207 (detail on),video_symbols.csv
+000460ba,Pal_NightAltitude,video,verified,night altitude lighting of 64..79 128..143 192..207 from g_PalSaved,video_symbols.csv
+00046617,Pal_SaveNight,video,verified,saves palette; colour 254 dark red; dead grey table; forces altitude refresh,video_symbols.csv
+0004699e,Pal_Restore,video,verified,g_Palette <- g_PalSaved (no upload),video_symbols.csv
+000469e7,MainMenu,game_flow,verified,CD check once; srand; loads JETS.N WEAPONS.DAT HUDTEXT L1L2 GENDATAD GENDATA; miscon.pax cursor menu,game_flow_symbols.csv
+00047ec2,MainMenu_Draw,game_flow,verified,miscon.pax + 16 zones; cursor tables,game_flow_symbols.csv
+00048111,AeroOptions_Menu,game_flow,verified,aoset.pax Games/Players/Done,game_flow_symbols.csv
+000485d0,_cstart_,rt,high,program entry (DOS4GW startup),symbols_rt.csv
+0004864a,__cstart_body,rt,medium,startup continuation: INT21 30h DOS version; 4Ah resize; DGROUP/env setup; calls __InitRtns and __CMain,symbols_rt.csv
+00048842,__fatal_runtime_error,rt,high,writes message to CON (INT21 3Dh/40h) and terminates (INT21 4Ch),symbols_rt.csv
+00048874,__GETDS,rt,high,loads DS from saved selector at cs:[0x48644],symbols_rt.csv
+0004887c,inp,rt,high,in al;dx (port=arg1),symbols_rt.csv
+00048887,outp,rt,high,out dx;al - game uses for VGA DAC 0x3c8 and PIT 0x40/0x43,symbols_rt.csv
+00048894,__save_SS,rt,low,stores SS to 0x8079c,symbols_rt.csv
+0004889b,__CHK,rt,high,stack check,symbols_rt.csv
+000488ae,__STK,rt,high,stack overflow test; calls __fatal_runtime_error,symbols_rt.csv
+000488cb,__STKOVERFLOW,rt,high,stack overflow -> fatal error,symbols_rt.csv
+000488da,_dos_getvect,rt,high,INT21 35h (2502h under Phar Lap); game: vector 9 (keyboard) and timer vector,symbols_rt.csv
+00048914,_dos_setvect,rt,high,INT21 25h (2504h Phar Lap); game installs keyboard ISR 0x10760 on INT 9 and ISR 0x31a31 on timer vector (DAT_93380),symbols_rt.csv
+0004894b,int386,rt,high,int386(intno;in;out) -> segread + int386x; game uses INT 31h (DPMI),symbols_rt.csv
+00048974,printf,rt,high,vfprintf(stdout=0x8085e); game prints memory/exit messages,symbols_rt.csv
+00048996,__null_rtn,rt,low,empty ret,symbols_rt.csv
+00048997,exit,rt,high,runs fini routines (ptrs 0x807b0..0x807b8) then __exit (INT21 4Ch),symbols_rt.csv
+000489c0,__get_rand_seed_ptr,platform,verified,returns 0x807bc,platform_symbols.csv
+000489c6,rand,platform,verified,Watcom LCG seed*0x41C64E6D+0x3039; (seed>>16)&0x7FFF,platform_symbols.csv
+000489e8,srand,platform,verified,only caller MainMenu: srand(time(NULL)) on every entry,platform_symbols.csv
+000489fb,malloc,rt,high,wrapper to _nmalloc,symbols_rt.csv
+00048a0b,_nmalloc,rt,high,near heap allocator (grows via __ExpandDGROUP),symbols_rt.csv
+00048a7d,__open_flags,rt,high,parses fopen mode string r/w/a/+/b/t,symbols_rt.csv
+00048b2c,__doopen,rt,high,opens fd for FILE (via sopen 0x4ae05),symbols_rt.csv
+00048c11,_fsopen,rt,high,allocates FILE (__allocfp) then __doopen,symbols_rt.csv
+00048c3c,fopen,rt,high,fopen(name;mode); game: data\jetsprit.pal and js.cfg,symbols_rt.csv
+00048c51,__chk_freopen_fp,rt,medium,validates FILE for freopen,symbols_rt.csv
+00048cb6,freopen,rt,medium,freopen(name;mode;fp),symbols_rt.csv
+00048ce2,fread,rt,high,fread(buf;size;n;fp),symbols_rt.csv
+00048e3d,fclose,rt,high,fclose(fp) (checks stream list),symbols_rt.csv
+00048e69,__doclose,rt,high,close stream; free buffer; remove tmpfile,symbols_rt.csv
+00048e8d,__hexdigit,rt,medium,0-15 -> '0'..'f' (tmpfile name helper),symbols_rt.csv
+00048ea0,__MkTmpFile,rt,medium,builds tmp file name tXXXX_xx.tmp,symbols_rt.csv
+00048f1f,__shutdown_stream,rt,high,flush; reposition; close handle; free buffer,symbols_rt.csv
+00048fbd,outpw,rt,high,out dx;ax - game: VGA seq/GC/CRTC regs 0x3c4/0x3ce/0x3d4,symbols_rt.csv
+00048fca,strcpy,rt,high,,symbols_rt.csv
+00048ff3,strlen,rt,high,,symbols_rt.csv
+0004900f,strcat,rt,high,,symbols_rt.csv
+0004904a,fseek,rt,high,fseek(fp;off;whence),symbols_rt.csv
+0004921b,ftell,rt,high,,symbols_rt.csv
+0004924f,free,rt,high,wrapper to _nfree,symbols_rt.csv
+0004925f,_nfree,rt,high,,symbols_rt.csv
+00049284,__I4D,rt,high,soft-float int32 -> double (EAX -> EDX:EAX),symbols_rt.csv
+00049291,__U4D,rt,high,soft-float uint32 -> double,symbols_rt.csv
+000492c4,__FDD,rt,high,soft-float double divide (div-by-zero -> 0x4b4c1),symbols_rt.csv
+000494c8,__FDI4,rt,high,double -> int32,symbols_rt.csv
+000494cc,__FDU4,rt,high,double -> uint32,symbols_rt.csv
+00049544,__FDS,rt,high,double subtract (negates and falls into __FDA),symbols_rt.csv
+0004954a,__FDA,rt,high,double add,symbols_rt.csv
+00049714,__FDM,rt,high,double multiply,symbols_rt.csv
+000498c0,__FSFD,rt,high,float -> double,symbols_rt.csv
+00049918,__FDC,rt,high,double compare,symbols_rt.csv
+00049950,__FSS,rt,high,float subtract,symbols_rt.csv
+0004995a,__FSA,rt,high,float add (dispatch via [0x807f8]: x87 or emulated),symbols_rt.csv
+00049a2b,__FSM,rt,high,float multiply (dispatch via [0x807fc]),symbols_rt.csv
+00049ab2,__FSD_thunk,rt,medium,thunk to __FSD,symbols_rt.csv
+00049b5e,__FSD,rt,high,float divide (dispatch via [0x80800]),symbols_rt.csv
+00049b69,__init_float_dispatch,rt,medium,selects x87 or emulated float add/mul/div based on 8087 flag 0x80a59,symbols_rt.csv
+00049bb4,__FSC,rt,high,float compare,symbols_rt.csv
+00049bf3,__utoa_body,rt,medium,unsigned to ascii with radix,symbols_rt.csv
+00049c3b,itoa,rt,high,itoa(val;buf;radix) - game uses radix 10,symbols_rt.csv
+00049c6c,__FDFS,rt,high,double -> float,symbols_rt.csv
+00049cc4,__sin_cos_emu,rt,medium,emulated sin/cos/tan core (selector 0/2/1),symbols_rt.csv
+00049f10,sin,rt,medium,sin(double) - x87 (0x4b993) or emulated,symbols_rt.csv
+00049f2a,__sin_reg,rt,medium,register-arg sin,symbols_rt.csv
+00049f56,cos,rt,medium,cos(double),symbols_rt.csv
+00049f6b,__cos_reg,rt,medium,register-arg cos,symbols_rt.csv
+00049f9f,tan,rt,medium,tan(double),symbols_rt.csv
+00049fb2,__tan_reg,rt,medium,register-arg tan,symbols_rt.csv
+00049fd4,__FDN,rt,medium,double negate (flip sign bit),symbols_rt.csv
+00049fdf,abs,rt,high,,symbols_rt.csv
+00049fed,strncpy,rt,high,,symbols_rt.csv
+0004a020,strcmp,rt,high,,symbols_rt.csv
+0004a0cd,__scanf_getc_file,rt,medium,fscanf char-input callback,symbols_rt.csv
+0004a114,__scanf_ungetc_file,rt,medium,fscanf unget callback (ungetc),symbols_rt.csv
+0004a12a,vfscanf,rt,high,sets up callbacks; calls __scnf,symbols_rt.csv
+0004a158,fscanf,rt,high,game reads text data,symbols_rt.csv
+0004a178,fgets,rt,high,fgets(buf;n;fp),symbols_rt.csv
+0004a1e4,__U4FS,rt,high,uint32 -> float,symbols_rt.csv
+0004a20f,__I4FS,rt,high,int32 -> float,symbols_rt.csv
+0004a220,__FSI4,rt,high,float -> int32 (table of float->int entry points follows),symbols_rt.csv
+0004a25c,__FSI_signed,rt,medium,float -> int core (signed),symbols_rt.csv
+0004a268,__FSU_core,rt,medium,float -> int core,symbols_rt.csv
+0004a2b0,memset,rt,high,memset(dst;val;n) -> __memset_body,symbols_rt.csv
+0004a2d2,int386x,rt,high,int386x(intno;in;out;sregs) - game uses INT 31h DPMI,symbols_rt.csv
+0004a2f3,_fmemset,rt,high,far memset (offset;selector;val;n),symbols_rt.csv
+0004a31a,fwrite,rt,high,fwrite(ptr;size;n;fp) - game saves config/scores,symbols_rt.csv
+0004a481,time,rt,high,time(NULL): DOS date/time -> mktime,symbols_rt.csv
+0004a4ba,__null_rtn2,rt,low,empty ret,symbols_rt.csv
+0004a4bb,__CMain,rt,high,sets up stack; calls main (0x000146f4) then exit,symbols_rt.csv
+0004a50a,__InitRtns,rt,high,runs XI init table by priority,symbols_rt.csv
+0004a54d,__FiniRtns,rt,high,runs YI fini table by priority,symbols_rt.csv
+0004a590,segread,rt,high,,symbols_rt.csv
+0004a5be,__fprtf_putc,rt,medium,printf output callback (fputc),symbols_rt.csv
+0004a5d7,vfprintf,rt,high,vfprintf(fp;fmt;args) -> __prtf,symbols_rt.csv
+0004a658,__MemAllocator,rt,high,heap block allocator (free list search),symbols_rt.csv
+0004a708,__MemFree,rt,high,heap block free/coalesce,symbols_rt.csv
+0004a813,__LinkUpNewMHeap,rt,medium,inserts new heap segment into heap list,symbols_rt.csv
+0004a88d,__unlink_free,rt,medium,doubly linked list unlink,symbols_rt.csv
+0004a8a9,__UnlinkMHeap,rt,medium,removes heap segment,symbols_rt.csv
+0004a943,__FreeDPMIBlocks,rt,medium,DPMI 0502h free memory block / INT21 49h,symbols_rt.csv
+0004a9ba,__ReAllocDPMIBlock,rt,medium,DPMI 0503h resize memory block,symbols_rt.csv
+0004aaec,__LastFree,rt,medium,size of free block at end of DGROUP,symbols_rt.csv
+0004ab39,__CreateNewNHeap,rt,medium,DPMI 0501h alloc / INT21 48h; DPMI 0006h get segment base,symbols_rt.csv
+0004ac21,__ExpandDGROUP,rt,medium,grows near heap (sbrk / new DPMI block),symbols_rt.csv
+0004adbe,__ret0,rt,low,returns 0,symbols_rt.csv
+0004adc5,tolower,rt,high,,symbols_rt.csv
+0004adda,__get_errno_ptr,rt,high,returns &errno,symbols_rt.csv
+0004ade0,__get_doserrno_ptr,rt,high,returns &_doserrno,symbols_rt.csv
+0004ade6,open,rt,high,open(path;mode;...) -> sopen with share 0,symbols_rt.csv
+0004ae05,sopen,rt,high,INT21 3Ch/3Dh/3Eh/40h create/open file handle,symbols_rt.csv
+0004afc7,setmode,rt,medium,INT21 4400h/4401h IOCTL get/set device info,symbols_rt.csv
+0004b031,__allocfp,rt,high,allocates FILE struct,symbols_rt.csv
+0004b0cc,__freefp,rt,high,returns FILE to free list,symbols_rt.csv
+0004b0ff,__purgefp,rt,high,frees FILE free list at exit,symbols_rt.csv
+0004b121,__chktty,rt,high,marks stream as tty (isatty),symbols_rt.csv
+0004b14e,__ioalloc,rt,high,allocates stream buffer (0x1000 default),symbols_rt.csv
+0004b1c5,memcpy,rt,high,dword+byte copy (used internally),symbols_rt.csv
+0004b1ef,__qread,rt,high,INT21 3Fh read,symbols_rt.csv
+0004b220,fgetc,rt,high,text-mode CR / ^Z handling,symbols_rt.csv
+0004b299,__filbuf,rt,high,refill and return char,symbols_rt.csv
+0004b2c4,__fill_buffer,rt,high,reads into stream buffer,symbols_rt.csv
+0004b36f,__get_tmp_id,rt,low,returns DAT_80814 (used for tmp file naming),symbols_rt.csv
+0004b375,__flush,rt,high,flush stream buffer (write or seek back),symbols_rt.csv
+0004b412,lseek,rt,high,INT21 42h,symbols_rt.csv
+0004b45d,close,rt,high,INT21 3Eh,symbols_rt.csv
+0004b497,remove,rt,high,-> unlink (INT21 41h),symbols_rt.csv
+0004b4a7,tell,rt,high,lseek(fd;0;SEEK_CUR),symbols_rt.csv
+0004b4bc,__FPE_underflow_zero,rt,medium,returns 0.0,symbols_rt.csv
+0004b4c1,__FPE_divzero,rt,medium,FP error 0x83 -> +/-inf,symbols_rt.csv
+0004b4cd,__FPE_overflow,rt,medium,FP error 0x84; ERANGE -> +/-inf,symbols_rt.csv
+0004b515,__Init_Argv_alt,rt,low,builds argv (alternate entry 3 bytes earlier),symbols_rt.csv
+0004b518,__Init_Argv,rt,medium,builds argc/argv from command line,symbols_rt.csv
+0004b5c8,__parse_args,rt,medium,splits command line (quotes; backslashes),symbols_rt.csv
+0004b6a3,frexp,rt,low,FP helper used by trig and printf,symbols_rt.csv
+0004b6e9,modf,rt,low,,symbols_rt.csv
+0004b6fe,__modf_body,rt,low,,symbols_rt.csv
+0004b7ec,__mul64_helper,rt,low,64-bit arithmetic helper for trig range reduction,symbols_rt.csv
+0004b8ed,__EvalPoly,rt,low,polynomial evaluation (FDA/FDM loop),symbols_rt.csv
+0004b923,__OddPoly,rt,low,odd polynomial evaluation,symbols_rt.csv
+0004b95a,__set_EDOM,rt,medium,errno=EDOM,symbols_rt.csv
+0004b961,__set_ERANGE,rt,medium,errno=ERANGE,symbols_rt.csv
+0004b972,__FPE_handler_call,rt,medium,calls FP exception handler ptr [0x80840],symbols_rt.csv
+0004b98a,__x87_cos,rt,medium,x87 path (selector 2),symbols_rt.csv
+0004b993,__x87_sin,rt,medium,x87 path (selector 0) with range reduction,symbols_rt.csv
+0004ba30,__x87_tan,rt,medium,x87 tan path,symbols_rt.csv
+0004baaf,ungetc,rt,high,,symbols_rt.csv
+0004bb2a,__scnf,rt,high,scanf engine,symbols_rt.csv
+0004bd31,__scan_fmt_width,rt,low,scanf helper,symbols_rt.csv
+0004bdfe,__scan_skipws,rt,low,scanf helper,symbols_rt.csv
+0004be35,__scan_char,rt,low,scanf %c,symbols_rt.csv
+0004beae,__scan_ret0,rt,low,,symbols_rt.csv
+0004beb6,__scan_string,rt,low,scanf %s,symbols_rt.csv
+0004bfa6,__scan_report,rt,low,scanf %n,symbols_rt.csv
+0004bff1,__scan_charset_init,rt,low,scanf %[ set builder,symbols_rt.csv
+0004c035,__scan_charset,rt,low,scanf %[,symbols_rt.csv
+0004c114,__scan_float,rt,low,scanf %e/%f/%g (uses __FDFS and [0x80b38] cnvs2d hook),symbols_rt.csv
+0004c3d4,__scan_int,rt,low,scanf %d/%x/%o,symbols_rt.csv
+0004c5d1,__scan_hexval,rt,low,,symbols_rt.csv
+0004c605,__scan_getc,rt,low,,symbols_rt.csv
+0004c630,__memset_body,rt,medium,register-arg memset core,symbols_rt.csv
+0004c667,__memset_dwords,rt,medium,,symbols_rt.csv
+0004c6d4,__int386x_body,rt,medium,loads regs; executes INT via stub table,symbols_rt.csv
+0004c70b,__int_table,rt,medium,table of 'int N' stubs for all 256 vectors,symbols_rt.csv
+0004caac,write,rt,high,INT21 40h with text-mode LF->CRLF; append via 42h,symbols_rt.csv
+0004cc85,fputc,rt,high,,symbols_rt.csv
+0004cd2d,__getdatetime,rt,medium,INT21 2Ah/2Ch date+time,symbols_rt.csv
+0004cdcf,mktime,rt,medium,,symbols_rt.csv
+0004cef2,stackavail,rt,high,,symbols_rt.csv
+0004cefb,__init_stklen,rt,low,sets 0x80abc=0x8000,symbols_rt.csv
+0004cf06,__prtf,rt,high,printf engine,symbols_rt.csv
+0004d126,__get_fmt_spec,rt,medium,printf spec parser,symbols_rt.csv
+0004d22f,__get_fmt_number,rt,medium,printf width/precision parse,symbols_rt.csv
+0004d282,__prtf_set_str,rt,low,,symbols_rt.csv
+0004d2ab,__prtf_set_wstr,rt,low,,symbols_rt.csv
+0004d2d2,__prtf_string,rt,low,,symbols_rt.csv
+0004d325,__prtf_int,rt,low,integer formatting,symbols_rt.csv
+0004d3f1,__EFG_printf_call,rt,medium,calls [0x80b34] float formatter hook,symbols_rt.csv
+0004d408,__prtf_fmt,rt,medium,formats one conversion,symbols_rt.csv
+0004d841,strupr,rt,medium,uses toupper,symbols_rt.csv
+0004d861,_set_amblksiz,rt,low,setter returning old value (0x80ab8),symbols_rt.csv
+0004d877,sbrk,rt,medium,DPMI 0501h / INT21 4800h,symbols_rt.csv
+0004d911,__brk,rt,medium,INT21 EDh/4Ah DOS4G memory resize,symbols_rt.csv
+0004d9bb,isatty,rt,high,INT21 4400h,symbols_rt.csv
+0004d9db,__set_errno_dos_alt,rt,low,,symbols_rt.csv
+0004d9f3,__set_errno_dos2,rt,low,,symbols_rt.csv
+0004da1b,__set_errno_dos,rt,high,maps DOS error -> errno,symbols_rt.csv
+0004da8b,__set_errno_EBADF,rt,low,errno helper,symbols_rt.csv
+0004dadd,__SetIOMode,rt,medium,,symbols_rt.csv
+0004daf5,__InitFiles,rt,high,links stdin/out/err/aux/prn into stream list,symbols_rt.csv
+0004db3a,__full_io_exit,rt,high,closes all streams; frees FILE list,symbols_rt.csv
+0004db54,__closeall,rt,medium,,symbols_rt.csv
+0004dbad,flushall,rt,medium,__flushall(mask),symbols_rt.csv
+0004dbe5,__getche_stdin,rt,low,INT21 01h read char with echo,symbols_rt.csv
+0004dc00,__qwrite,rt,high,INT21 40h raw write (seek end for append),symbols_rt.csv
+0004dc7d,unlink,rt,high,INT21 41h,symbols_rt.csv
+0004dca1,__fsave,rt,low,saves FPU state,symbols_rt.csv
+0004dcad,__fld_tbyte,rt,low,,symbols_rt.csv
+0004dceb,__chk8087,rt,medium,detects 8087 (sets 0x80a58/0x80a59),symbols_rt.csv
+0004dd2a,__set_matherr,rt,low,sets matherr hook,symbols_rt.csv
+0004dd37,__math_error,rt,medium,calls matherr; prints func: DOMAIN error to stderr,symbols_rt.csv
+0004ddad,__stack_overflow_exit,rt,low,__fatal_runtime_error(1),symbols_rt.csv
+0004ddbc,_EFG_Format,rt,medium,printf %e/%f/%g formatter,symbols_rt.csv
+0004de98,__strip_zeros,rt,medium,%g trailing zero removal,symbols_rt.csv
+0004dee5,__cnvs2d,rt,medium,string -> double (scanf hook),symbols_rt.csv
+0004df00,__leapyear,rt,low,time helper,symbols_rt.csv
+0004df34,__brktime,rt,low,time helper,symbols_rt.csv
+0004e195,__isindst_cmp,rt,low,,symbols_rt.csv
+0004e1c5,__mkday,rt,low,time helper,symbols_rt.csv
+0004e2f4,_localtime_body,rt,low,,symbols_rt.csv
+0004e318,localtime,rt,low,,symbols_rt.csv
+0004e32e,tzset,rt,medium,,symbols_rt.csv
+0004e349,__tz_parse_num,rt,low,,symbols_rt.csv
+0004e372,__tz_parse_time,rt,low,,symbols_rt.csv
+0004e455,__tz_parse_rule,rt,low,,symbols_rt.csv
+0004e547,__parse_tz,rt,low,parses TZ env var,symbols_rt.csv
+0004e609,__ultoa_body,rt,medium,,symbols_rt.csv
+0004e651,ultoa,rt,medium,,symbols_rt.csv
+0004e681,toupper,rt,high,,symbols_rt.csv
+0004e6c8,__matherr_thunk,rt,low,,symbols_rt.csv
+0004e6cd,fputs,rt,high,,symbols_rt.csv
+0004e746,__set_tz_ptr,rt,low,,symbols_rt.csv
+0004e753,__fmt_exponent,rt,low,e+XX formatting,symbols_rt.csv
+0004e7f7,__fmt_fixed,rt,low,,symbols_rt.csv
+0004e873,__fmt_round,rt,low,,symbols_rt.csv
+0004e8de,__cvt,rt,medium,float to string (ecvt/fcvt core),symbols_rt.csv
+0004ead2,__strtod_body,rt,medium,,symbols_rt.csv
+0004ec99,getenv,rt,high,case-insensitive environment search,symbols_rt.csv
+0004ecee,__ret0_matherr,rt,low,default matherr returns 0,symbols_rt.csv
+0004ecf5,__fmt_infnan,rt,medium,INF/NAN formatting,symbols_rt.csv
+0004ed6c,__fp_helper1,rt,low,,symbols_rt.csv
+0004ed86,__fp_helper2,rt,low,,symbols_rt.csv
+0004eda1,__fp_helper3,rt,low,,symbols_rt.csv
+0004edbb,__fp_pow10,rt,low,,symbols_rt.csv
+0004edeb,__fp_helper4,rt,low,,symbols_rt.csv
+0004ee29,__fp_helper5,rt,low,,symbols_rt.csv
+0004ee6b,__fp_scale,rt,low,,symbols_rt.csv
+0004ef7c,__fp_to_digits,rt,low,,symbols_rt.csv
+0004f118,__fp_split,rt,low,integer/fraction split of double,symbols_rt.csv
+0004f1a8,__fp_norm_alt,rt,low,,symbols_rt.csv
+0004f1f3,__fp_normalize,rt,low,,symbols_rt.csv
+0004f246,strnicmp,rt,high,,symbols_rt.csv
+0004f29e,__fp_helper6,rt,low,,symbols_rt.csv
+0004f2dd,__fp_helper7,rt,low,,symbols_rt.csv
+0004f2f7,__fp_log10ish,rt,low,,symbols_rt.csv
+0004f494,__fp_helper8,rt,low,,symbols_rt.csv
+0004f4cc,__fp_table_lookup,rt,low,,symbols_rt.csv
+0004f506,__fp_u64,rt,low,,symbols_rt.csv
+0004f571,__fp_digits10000,rt,low,,symbols_rt.csv
+0004f5e3,__fp_data_or_code,rt,low,decompiles as garbage (likely data table),symbols_rt.csv
+0004f698,__fp_tbl_ptr,rt,low,,symbols_rt.csv
+0004f69a,__setenvp_alt,rt,low,,symbols_rt.csv
+0004f6a0,__setenvp,rt,medium,copies environment block into heap,symbols_rt.csv
+0004f780,log,rt,low,x87 log via log2*ln2,symbols_rt.csv
+00050000,LZW_Unpack,asm,high,obj2 LZW unpacker entry (rt asm_unpack),symbols_overrides.csv
+00050020,LZW_Init,asm,high,,symbols_overrides.csv
+0005007c,asm_unpack_getbits,asm,low,obj2 asm helper (bit reader),symbols_rt.csv
+00050090,LZW_ReadCode,asm,high,,symbols_overrides.csv
+0005017c,asm_unpack_copy,asm,low,obj2 asm helper,symbols_rt.csv
+000501e0,LZW_Decode,asm,high,,symbols_overrides.csv
+00070000,GUS_Detect,sound,high,returns (ram<<16)|port,sound_symbols.csv
+0007004c,GUS_Upload,sound,high,(len;src;dram) copies len+1 bytes,sound_symbols.csv
+000700a6,GUS_SelectVoice,sound,high,,sound_symbols.csv
+000700d1,GUS_Start,sound,high,out base=1 (was gus_read_port),sound_symbols.csv
+000700df,GUS_Shutdown,sound,high,,sound_symbols.csv
+000700f2,GUS_SetFreq,sound,high,reg 1,sound_symbols.csv
+0007012b,GUS_SetVolume,sound,high,reg 9,sound_symbols.csv
+000701fe,gus_delay,asm,low,,symbols_rt.csv
+0007020f,gus_probe_dram,asm,low,,symbols_rt.csv
+0007022e,gus_probe,asm,low,,symbols_rt.csv
+00070256,gus_ram_size,asm,low,,symbols_rt.csv
+00070282,gus_dram_test,asm,low,,symbols_rt.csv
+00070297,gus_reset,asm,low,GF1 reg 0x4C reset,symbols_rt.csv
+000702ad,gus_set_dram_addr,asm,low,,symbols_rt.csv
+000702d6,GUS_Reset,sound,high,15 active voices,sound_symbols.csv
+0007034d,GUS_PlayVoice,sound,high,struct {voice;mode;pan;pad;fc;vol;start;loopStart;end},sound_symbols.csv
+00080008,g_SpriteColorOfs,global,verified,0x40 added to SPX pixels,video_symbols.csv
+00080009,g_SmallFont,global,verified,unaligned pointer,video_symbols.csv
+0008000d,g_BigFont,global,verified,unaligned pointer,video_symbols.csv
+00080011,g_SmallCharset,global,verified,-> 0x80bf0,video_symbols.csv
+00080015,g_BigCharset,global,verified,-> 0x80c1c,video_symbols.csv
+00080019,g_DigitFont,global,verified,50 bytes 3x5 digits,video_symbols.csv
+0008004b,g_PicFullLoad,global,verified,Pic_LoadPax clears page + loads pal when 1,video_symbols.csv
+0008004f,g_FadeTargetColor,global,verified,byte; Pal_Fade target entry (0 = black),video_symbols.csv
+00080050,g_ParallaxBuf,global,high,= level g_Backdrop,symbols_overrides.csv
+00080054,g_VSyncWaits,global,verified,extra vsyncs per flip,video_symbols.csv
+00080058,g_TileData,global,verified,256 tiles x 256 B,video_symbols.csv
+0008005c,g_BackPage,global,verified,0x18c0 or 0x78c0,video_symbols.csv
+00080060,g_AltHeld,global,verified,ISR held-state for fire-left latch,platform_symbols.csv
+00080064,g_CtrlHeld,global,verified,ISR held-state for fire-right latch,platform_symbols.csv
+0008006c,g_LastFadeType,global,verified,,video_symbols.csv
+00080070,g_FogActive,global,high,fog switch (level.md); video.md's g_NightPalActive is wrong,symbols_overrides.csv
+00080074,g_MapLoaded,global,verified,was DAT_00080074: name of the map in memory,level_symbols.csv
+00080174,g_QuitGame,global,verified,set by main-menu Quit; Game_Run returns,platform_symbols.csv
+00080178,g_EngineWarnDir,global,verified,,player_symbols.csv
+0008031c,g_HudMsgTime,global,verified,int[10],player_symbols.csv
+00080344,g_HeliFrameBase,global,verified,int[8],player_symbols.csv
+00080364,g_HeliFrameKind,global,verified,int[8],player_symbols.csv
+00080394,g_SBBase,global,high,,sound_symbols.csv
+00080398,g_SBIrqNum,global,high,,sound_symbols.csv
+0008039c,g_SBDmaChan,global,high,always 1,sound_symbols.csv
+000803a0,g_SBDspVer,global,high,holds DSP minor version (bug),sound_symbols.csv
+000803a4,g_SBRate,global,high,,sound_symbols.csv
+000803ae,g_MixChunk,global,high,constant 120,sound_symbols.csv
+000803b0,g_SBTimeConst,global,high,,sound_symbols.csv
+000803bb,g_DmaBufSeg,global,high,,sound_symbols.csv
+000803c5,g_MixWritePos,global,high,,sound_symbols.csv
+000803c7,g_MixNextPos,global,high,,sound_symbols.csv
+000803c9,g_DmaBufLen,global,high,0x4000,sound_symbols.csv
+000803cd,g_MixWrapFlag,global,high,,sound_symbols.csv
+000803cf,g_SBStopFlag,global,high,,sound_symbols.csv
+000803d1,g_SBStopped,global,high,,sound_symbols.csv
+000803d4,g_MixChan,global,high,4 x 21-byte channels {data;len;pos;loop;shift(u8);step},sound_symbols.csv
+00080428,g_LineMaskL,global,verified,0f 0e 0c 08,video_symbols.csv
+0008042c,g_LineMaskR,global,verified,01 03 07 0f,video_symbols.csv
+00080430,g_SoundDevice,global,high,0 none 1 SB 2 GUS,sound_symbols.csv
+00080434,g_SfxLens,global,high,35 x u32,sound_symbols.csv
+000804c0,g_GusVolTable,global,high,64 x u16,sound_symbols.csv
+00080542,g_GusVoiceRR,global,high,init 2,sound_symbols.csv
+00080546,g_SfxChanRR,global,high,init 1,sound_symbols.csv
+0008054c,g_JoyX,global,verified,,platform_symbols.csv
+00080550,g_JoyY,global,verified,,platform_symbols.csv
+0008078c,g_SoundInitDone,global,high,= platform g_SoundInited,symbols_overrides.csv
+0008078e,g_CDCheckDone,global,high,= platform g_CDChecked,symbols_overrides.csv
+000807bc,g_RandSeed,global,verified,uint32 initial 1,platform_symbols.csv
+00081ad8,g_SpriteQueue,global,high,20-byte entries,symbols_game.csv
+00082ed8,g_Palette,global,high,768 bytes 6-bit,symbols_game.csv
+000831d8,g_TileWindow,global,verified,24x16 tile ids,video_symbols.csv
+00083958,g_KeyDown,global,verified,uint8[256] by set-1 scancode (0..0x7f written),platform_symbols.csv
+00083a54,g_SpriteTab,global,high,1-based ptrs; max 0x212,symbols_game.csv
+00084480,g_OldTimerOff,global,verified,saved INT 8 offset,platform_symbols.csv
+00084490,g_OldTimerSel,global,verified,saved INT 8 selector (DPMI 0x204),platform_symbols.csv
+00084500,g_SpriteQueueCount,global,high,,symbols_game.csv
+00084504,g_LineColor,global,verified,,video_symbols.csv
+00084508,g_PicBuf,global,verified,malloc(82000) picture buffer,platform_symbols.csv
+00084510,g_PackBuf,global,verified,malloc(85000) packed file buffer,platform_symbols.csv
+00084526,g_OldKbdVecOff,global,verified,saved INT 9 offset (selector at 0x8452a),platform_symbols.csv
+0008452c,g_JoyDownThr,global,verified,uint16 cfg+0x2c,platform_symbols.csv
+0008452e,g_ShownPage,global,verified,int16,video_symbols.csv
+00084530,g_JoyLeftThr,global,verified,uint16 cfg+0x26,platform_symbols.csv
+00084532,g_JoyUpThr,global,verified,uint16 cfg+0x28,platform_symbols.csv
+00084534,g_JoyRightThr,global,verified,uint16 cfg+0x2a,platform_symbols.csv
+00084536,g_DetailParallax,global,verified,word from cfg+0x2e,platform_symbols.csv
+00084538,g_JoyEnabled,global,verified,word from cfg+0x24,platform_symbols.csv
+0008453a,g_KeyTarget,global,verified,slot cfg+0x38 (Backspace) change target; renamed from g_KeySlots (it is a single slot),platform_symbols.csv
+0008453c,g_FireKey1,global,high,= platform g_FireLeftReq (edge latch),symbols_overrides.csv
+0008453e,g_KeyLook,global,verified,slot cfg+0x36 (KP*),platform_symbols.csv
+00084540,g_FireKey2,global,high,= platform g_FireRightReq (edge latch),symbols_overrides.csv
+00084542,g_KeyAbort,global,verified,slot cfg+0x16 (Esc) self-destruct/abort,platform_symbols.csv
+00084544,g_KeyBriefing,global,verified,slot cfg+0x14 (B) held >8 frames,platform_symbols.csv
+00084546,g_KeyUnusedA,global,verified,slot cfg+0x08 (A) never read,platform_symbols.csv
+00084548,g_KeyEject,global,verified,slot cfg+0x04 (E),platform_symbols.csv
+0008454a,g_KeyPause,global,verified,slot cfg+0x10 (P),platform_symbols.csv
+0008454c,g_KeyAutoThrottle,global,verified,slot cfg+0x12 (Tab),platform_symbols.csv
+0008454e,g_KeyDn,global,verified,slot cfg+0x1a (named Dn to avoid clash with g_KeyDown),platform_symbols.csv
+00084550,g_KeyTurnL,global,likely,slot cfg+0x20 (LShift) heli turn left,platform_symbols.csv
+00084552,g_KeyLeft,global,verified,slot cfg+0x1c,platform_symbols.csv
+00084554,g_KeyUnusedD,global,verified,slot cfg+0x0e (D) never read,platform_symbols.csv
+00084556,g_KeyHover,global,verified,slot cfg+0x06 (Enter) agile/hover,platform_symbols.csv
+00084558,g_KeyGear,global,verified,slot cfg+0x0a (U) undercarriage,platform_symbols.csv
+0008455a,g_KeyGuns,global,verified,slot cfg+0x30 (Space),platform_symbols.csv
+0008455c,g_Fire,global,verified,word: guns key or joystick button 1,platform_symbols.csv
+0008455e,g_KeyUnusedL,global,verified,slot cfg+0x0c (L) never read,platform_symbols.csv
+00084560,g_KeyUp,global,verified,slot cfg+0x18,platform_symbols.csv
+00084562,g_KeyTurnR,global,likely,slot cfg+0x22 (RShift) heli turn right,platform_symbols.csv
+00084564,g_KeyRight,global,verified,slot cfg+0x1e,platform_symbols.csv
+000845b8,g_TilePtrs,global,high,,symbols_game.csv
+000849d0,g_MapGrid,global,verified,4-byte header + W*64 tiles (0xFA04 buffer; W<=1000),level_symbols.csv
+000849d8,g_MapVal,global,verified,VAL 4x256 + live heights +0x400 + original heights +0xBD0,level_symbols.csv
+000849ec,g_MapMp2,global,verified,was DAT_000849ec: MP2 column trigger table,level_symbols.csv
+000849f0,g_MapBuf,global,likely,malloc(150000) in Mem_AllocMapBuffers,platform_symbols.csv
+00084a34,g_HeliHD,global,verified,.HD table pointer (100 x 16 bytes),player_symbols.csv
+00084b48,g_TilesetName,global,high,,symbols_game.csv
+00084c48,g_InfoText,global,verified,info box / briefing scratch string,game_flow_symbols.csv
+00084e48,g_TilesetPending,global,high,record tileset name with .tlx; compared to g_TilesetName,symbols_data.csv
+00084f48,g_DebriefText,global,verified,,game_flow_symbols.csv
+00085148,g_MapName,global,high,,symbols_game.csv
+00085648,g_StoryName,global,high,.asc name then picture name,symbols_data.csv
+00085c48,g_DamageMsgs,global,high,gendatad.dax,symbols_game.csv
+00086148,g_MusicTitles,global,high,GENDAT3 7 x 0x50 (artist at +0x28),symbols_data.csv
+000863c8,g_MaxSpeedTab,global,verified,10 floats per throttle,game_flow_symbols.csv
+000863f0,g_SarcasmLines,global,high,28 x 0x50,symbols_data.csv
+00086cb0,g_PlaneNames,global,high,jets.n,symbols_game.csv
+000877c8,g_WeaponDesc,global,high,0xa0 per weapon,symbols_data.csv
+0008a428,g_HudText,global,high,hudtext.dat 0x50-byte lines,symbols_game.csv
+0008c3b8,g_AeroUsedRacks,global,likely,8 ints per player; zeroed by MainMenu; read by PlaneSelect slot 4,game_flow_symbols.csv
+0008c8d8,g_WeaponNames,global,high,weapons.dat,symbols_game.csv
+0008d3f0,g_HudMsgs,global,verified,10 x 100 chars,player_symbols.csv
+0008d9f8,g_AeroRoundsOptions,global,high,GENDAT3 3/5/10/15,symbols_data.csv
+0008de38,g_VehicleSprites,global,high,GENDAT2 (sprite a/b pairs stride 8),symbols_data.csv
+0008deb8,g_HeliMaxLeft,global,verified,int[8] from GENDAT3,player_symbols.csv
+0008dfd0,g_SecExpX,global,verified,secondary explosions (0x8e050 y; 0x8df50 dmg; count 0x902fc),level_symbols.csv
+0008e0d0,g_DirVX,global,verified,int[32] (int)(-cos*8),player_symbols.csv
+0008e150,g_DirGunX,global,verified,int[32] (int)-(cos*16+0.5); [16] forced 16,player_symbols.csv
+0008e1d0,g_VehicleHP,global,high,GENDAT2 base hp per vehicle type,symbols_data.csv
+0008e210,g_DirLift,global,verified,int[32] (int)(-sin*5.2),player_symbols.csv
+0008e290,g_DirGunY,global,verified,int[32] (int)(-sin*16),player_symbols.csv
+0008e310,g_HeliMaxRight,global,verified,int[8] from GENDAT3,player_symbols.csv
+0008e330,g_Score,global,high,per player (saved),symbols_data.csv
+0008e378,g_MissionDefWeapons,global,high,4 weapon idx from record +0x1b8 (default rack1/rack2 + fallbacks),symbols_data.csv
+0008ec48,g_SmokeX,global,verified,6 smoke points (with 0x8ec60 y; 0x8ec30 timer; count 0x90100),level_symbols.csv
+0008ec88,g_NightGreyTab,global,verified,16x16 ints written by Pal_SaveNight; never read,video_symbols.csv
+0008f088,g_ParamNotObjective,global,high,GENDATA 26 x (campaign aero) shorts,symbols_data.csv
+0008f168,g_WeaponType,global,medium,6 ints per weapon,symbols_game.csv
+0008fa20,g_DamageFlags,global,verified,int[14],player_symbols.csv
+0008fad8,g_FlareLife,global,verified,int[2],weapons_symbols.csv
+0008fae0,g_FlareX,global,verified,int[2],weapons_symbols.csv
+0008fae8,g_FlareY,global,verified,int[2],weapons_symbols.csv
+0008faf0,g_LaunchDirTabX,global,verified,int[16],weapons_symbols.csv
+0008fb30,g_LaunchDirTabY,global,verified,int[16][2],weapons_symbols.csv
+0008fbb0,g_FlareVX,global,verified,int[2],weapons_symbols.csv
+0008fbb8,g_FlareVY,global,verified,int[2],weapons_symbols.csv
+0008fbc0,g_RackMaxLoad,global,verified,[2] stat104/105,game_flow_symbols.csv
+0008fbc8,g_RackWeapon,global,verified,int[2],weapons_symbols.csv
+0008fc10,g_RackPoints,global,verified,[2] stat101/102,game_flow_symbols.csv
+0008fc30,g_Dir16X,global,verified,int[16] read as [2f],weapons_symbols.csv
+0008fc70,g_Dir16Y,global,verified,int[16] read as [2f],weapons_symbols.csv
+0008fcb0,g_RackCount,global,high,= game_flow g_RackRounds,symbols_overrides.csv
+0008fcb8,g_PlayerDirSprite,global,verified,32 pairs (normal; gear down),player_symbols.csv
+0008fe10,g_Dir16X,global,verified,int[16] (int)(-cos*8),player_symbols.csv
+0008fe50,g_Dir16Y,global,verified,int[16] (int)(-sin*3); heli -3,player_symbols.csv
+0008fe90,g_MapWidth,global,high,tiles,symbols_game.csv
+0008fe94,g_CfgFile,global,verified,FILE* temp (js.cfg; gendat3.dax),platform_symbols.csv
+0008fe9c,g_RotateSpeed,global,verified,,player_symbols.csv
+0008fea4,g_Shared_8fea4,global,medium,reused: menu zone hit (game_flow) and explosion debris mode (weapons),symbols_overrides.csv
+0008feb8,g_LoadWeight,global,verified,,weapons_symbols.csv
+0008fec4,g_ExplCX,global,verified,,weapons_symbols.csv
+0008fecc,g_ExplCY,global,verified,,weapons_symbols.csv
+0008fed8,g_SelPage,global,verified,,game_flow_symbols.csv
+0008fee0,g_HasWinch,global,likely,stat 76,player_symbols.csv
+0008fee4,g_TrigOff,global,verified,,level_symbols.csv
+0008feec,g_TrigRow,global,verified,,level_symbols.csv
+0008ff00,g_FirePairFirst,global,verified,,weapons_symbols.csv
+0008ff0c,g_GearHeight,global,verified,stat 100,player_symbols.csv
+0008ff10,g_ViewTarget,global,verified,follow view: -1 none; projectile slot; 50 B52; 100 Fat Albert; 150 ground force; 200 enemy; < -1 hold,level_symbols.csv
+0008ff14,g_GearDown,global,verified,1 = undercarriage down,player_symbols.csv
+0008ff18,g_TrigCol,global,likely,MP2 trigger column / player column (shared),level_symbols.csv
+0008ff20,g_ParkAttitude,global,verified,stat 113,player_symbols.csv
+0008ff28,g_ChuteSwing,global,likely,,player_symbols.csv
+0008ff38,g_VXError,global,verified,(int)(e0d0*speed - vx); stall slip test,player_symbols.csv
+0008ff3c,g_LiftVY,global,verified,,player_symbols.csv
+0008ff68,g_ViewX,global,verified,alternative view camera x (swapped with g_CamX for drawing),level_symbols.csv
+0008ff70,g_ViewY,global,verified,,level_symbols.csv
+0008ff74,g_TowRope,global,verified,0..0x60,player_symbols.csv
+0008ff78,g_TowVY,global,verified,,player_symbols.csv
+0008ff7c,g_GameMode,global,high,0 campaign M0; 1 training M1; 2 practice M2; 3 Aerolimits M3,symbols_game.csv
+0008ff88,g_TowFrame,global,verified,,player_symbols.csv
+0008ff8c,g_TowState,global,verified,>=0 towing; -17 released,player_symbols.csv
+0008ff90,g_TowTime,global,verified,,player_symbols.csv
+0008ff94,g_TowX,global,verified,,player_symbols.csv
+0008ff98,g_TowY,global,verified,,player_symbols.csv
+0008ffa0,g_ShellCount,global,verified,,enemies_symbols.csv
+0008ffb0,g_LightningCooldown,global,likely,50 frames after a bolt,video_symbols.csv
+0008ffb8,g_TankerType,global,likely,,player_symbols.csv
+0008ffd4,g_Throttle,global,verified,0..9,player_symbols.csv
+0008ffd8,g_BoltX,global,likely,lightning segment x,video_symbols.csv
+0008ffdc,g_BoltY,global,likely,lightning segment y (absolute VRAM row),video_symbols.csv
+0008ffe0,g_ConvoyTrain,global,verified,,enemies_symbols.csv
+0008ffe4,g_HookDX,global,likely,stat 116 (tailhook present),player_symbols.csv
+0008ffe8,g_HookDY,global,likely,stat 117,player_symbols.csv
+0008fffc,g_MapVariant,global,high,trailing digit of the map name (NN in .mp2/.mxp),symbols_data.csv
+0009002c,g_Shared_9002c,global,medium,reused: plane candidate (select screens) and fire kind P1 (weapons),symbols_overrides.csv
+00090058,g_InfoBoxW,global,verified,,game_flow_symbols.csv
+00090060,g_GearSilent,global,likely,stat 62,player_symbols.csv
+00090068,g_StallSink,global,verified,stall counter added to the wanted vy,player_symbols.csv
+0009006c,g_BurnerFrames,global,verified,stat 115,player_symbols.csv
+00090070,g_Conspicuity,global,likely,stat 120 enemy attack chance factor,player_symbols.csv
+00090078,g_AutoEjectOn,global,verified,,game_flow_symbols.csv
+0009007c,g_PracticeEjects,global,verified,3 in practice,game_flow_symbols.csv
+0009008c,g_NeedsTow,global,verified,stat 67,player_symbols.csv
+00090090,g_StallSpeed,global,verified,float stat80/100,game_flow_symbols.csv
+00090094,g_Speed,global,verified,float airspeed 0..6,player_symbols.csv
+00090098,g_StallLimit,global,verified,16x max sink 0x40..0xc0,player_symbols.csv
+000900a4,g_EngineSfxRequest,global,high,,sound_symbols.csv
+000900a8,g_StallTopY,global,verified,highest PY since the stall (9999 none),player_symbols.csv
+000900b4,g_TVCount,global,verified,,enemies_symbols.csv
+000900c4,g_SkyTile,global,verified,tile id used to erase (tile(1;0) after Mission_Setup),level_symbols.csv
+000900d8,g_EngineFire,global,medium,player.md: 1..2 smoke / 3 out of control / >3 dead (enemies: g_DamageLevel),symbols_overrides.csv
+000900f0,g_Shared_900f0,global,medium,reused: sfx busy timer (sound) / explosion sfx hold (weapons): check if one meaning,symbols_overrides.csv
+00090130,g_StallNoseDrop,global,verified,stat 118,player_symbols.csv
+00090134,g_PingPongStep,global,verified,,weapons_symbols.csv
+00090138,g_PingPong,global,verified,0..4 triangle per frame,weapons_symbols.csv
+00090154,g_MissionActive,global,verified,1 while a mission is set up; 0 = NEW PLANE / reselect,game_flow_symbols.csv
+0009015c,g_OverRunway,global,verified,-1 inside the base rectangle,player_symbols.csv
+00090168,g_TurnRate,global,verified,stat 88,player_symbols.csv
+0009017c,g_RunwayLightX,global,verified,,level_symbols.csv
+00090180,g_BaseStartX,global,verified,runway left boundary px,level_symbols.csv
+00090184,g_MenuChoice,global,verified,0..9 training mission; 10 practice; 11 campaign; 12 Aerolimits,game_flow_symbols.csv
+00090188,g_BrakeStrength,global,verified,stat 73,player_symbols.csv
+00090198,g_BigBombSfxDone,global,verified,,weapons_symbols.csv
+000901a8,g_BaseEndX,global,verified,runway right end px,level_symbols.csv
+000901ac,g_BaseYOff,global,verified,(63-runway row)*16,level_symbols.csv
+000901dc,g_ProbeDX,global,verified,stat 109: refuelling probe (not ejection seat),player_symbols.csv
+000901e0,g_ProbeDY,global,verified,stat 110,player_symbols.csv
+000901ec,g_PorcupineArmed,global,verified,rack+1,weapons_symbols.csv
+000901f0,g_DirHalf,global,verified,g_Dir/2,player_symbols.csv
+000901f4,g_JP233Armed,global,verified,rack+1,weapons_symbols.csv
+000901f8,g_GunType,global,verified,w94/10,weapons_symbols.csv
+00090200,g_Dir,global,verified,0..63 heading; heli tilt 0..13,player_symbols.csv
+00090210,g_ExplSfxPower,global,verified,,weapons_symbols.csv
+00090214,g_PlayerScrX,global,medium,,symbols_game.csv
+00090218,g_PlayerScrY,global,medium,,symbols_game.csv
+0009021c,g_TrainingPicked,global,verified,MainMenu internal,game_flow_symbols.csv
+00090224,g_SelPageSize,global,verified,20 planes / 16 weapons,game_flow_symbols.csv
+0009024c,g_EjectCamX,global,likely,,player_symbols.csv
+00090250,g_EjectCamY,global,likely,,player_symbols.csv
+00090254,g_AeroPlayer,global,verified,,game_flow_symbols.csv
+00090258,g_NavLightBlink,global,likely,stat 63,player_symbols.csv
+00090264,g_JoyDirs,global,verified,direction bits from Joystick_ReadDirs,platform_symbols.csv
+00090270,g_EjectScrX,global,likely,,player_symbols.csv
+00090274,g_EjectScrY,global,likely,,player_symbols.csv
+00090278,g_ExplDX8,global,verified,,weapons_symbols.csv
+0009027c,g_ExplSpread,global,verified,,weapons_symbols.csv
+00090280,g_AgentDropPending,global,verified,p03 form b active,level_symbols.csv
+00090284,g_PrevSpeed,global,verified,,player_symbols.csv
+00090294,g_ExplSolid,global,verified,,weapons_symbols.csv
+00090298,g_ChuteFail,global,likely,,player_symbols.csv
+0009029c,g_ExplCraters,global,verified,,weapons_symbols.csv
+000902b4,g_Overloaded,global,verified,,player_symbols.csv
+000902c0,g_LauncherCol,global,verified,ground launcher spawned by MP2 trigger (Building_Update),level_symbols.csv
+000902c8,g_AeroPlayers,global,verified,,game_flow_symbols.csv
+000902cc,g_PhotoCount,global,verified,,weapons_symbols.csv
+000902d4,g_FireLatch,global,verified,,weapons_symbols.csv
+000902d8,g_NextBonusScore,global,medium,bonus crate threshold,symbols_data.csv
+000902e4,g_BonusScoreStep,global,medium,,symbols_data.csv
+000902e8,g_WeaponCount,global,high,WEAPONS.DAT count (69),symbols_data.csv
+000902f0,g_Lives,global,high,7 at start; -10 = game finished,symbols_game.csv
+000902f4,g_TargetTilesInit,global,verified,form c initial count,level_symbols.csv
+00090304,g_ExtraAircraftScore,global,medium,250000 doubling,symbols_data.csv
+0009030c,g_MenuDone,global,verified,menu loop exit; 2 = non-campaign game ended,game_flow_symbols.csv
+00090310,g_FlareCount,global,verified,max 2,weapons_symbols.csv
+00090314,g_RocketCount,global,likely,,player_symbols.csv
+0009031c,g_FlashCounter,global,verified,night flash state,video_symbols.csv
+00090324,g_MiscData,global,high,DATA/MISC buffer (60 x 0xdc),symbols_data.csv
+00090328,g_PilotX,global,likely,,player_symbols.csv
+0009032c,g_MiscZData,global,high,DATA/MISC.Z buffer (60 x 300),symbols_data.csv
+00090330,g_PlaneCount,global,high,JETS.N count (59),symbols_data.csv
+00090334,g_AeroGateIdx,global,verified,,level_symbols.csv
+00090338,g_FireRack,global,high,= game_flow g_RackSel,symbols_overrides.csv
+0009033c,g_AeroRoundsSel,global,verified,,game_flow_symbols.csv
+00090348,g_EnemyGroundCount,global,verified,,enemies_symbols.csv
+00090358,g_TwinEngine,global,likely,stat 66,player_symbols.csv
+0009035c,g_NightMission,global,high,p25==1,symbols_data.csv
+00090374,g_PrevCamY,global,verified,,level_symbols.csv
+00090378,g_FuelBase,global,verified,,game_flow_symbols.csv
+0009037c,g_MarkerX,global,verified,,weapons_symbols.csv
+00090380,g_MarkerY,global,verified,,weapons_symbols.csv
+00090384,g_PrevCamX,global,verified,,level_symbols.csv
+00090388,g_PlaneFuel,global,verified,stat106,game_flow_symbols.csv
+00090390,g_AeroMissionMask,global,verified,0xffffe at menu,game_flow_symbols.csv
+00090398,g_DropZoneX,global,verified,,weapons_symbols.csv
+000903a0,g_DropZoneY,global,verified,,weapons_symbols.csv
+000903a4,g_StartMission,global,verified,,game_flow_symbols.csv
+000903a8,g_CamX,global,high,,symbols_game.csv
+000903ac,g_CamY,global,high,,symbols_game.csv
+000903b0,g_TopSpeed,global,verified,stat 82,player_symbols.csv
+000903b4,g_MapWidthPx,global,verified,W*16 camera wrap limit,level_symbols.csv
+000903b8,g_AeroPadScore,global,verified,(4-|i-5|)*2500,level_symbols.csv
+000903cc,g_AeroRound,global,verified,,game_flow_symbols.csv
+000903d4,g_AirframeType,global,verified,stat 93 (2 = VTOL),player_symbols.csv
+000903e0,g_Mission,global,high,,symbols_game.csv
+000903e8,g_MissionResult,global,medium,2 = success,symbols_game.csv
+000903ec,g_MenuRepeat,global,verified,,game_flow_symbols.csv
+000903f4,g_BriefedMission,global,verified,,game_flow_symbols.csv
+000903fc,g_PendingWarnSfx,global,high,0xb/0xc/0xd,sound_symbols.csv
+00090400,g_FinalMission,global,verified,param0/100,game_flow_symbols.csv
+00090404,g_WarnSfxDelay,global,high,,sound_symbols.csv
+00090408,g_MissionBonus,global,high,(mission+1)*1000; 32000 in Aerolimits,symbols_data.csv
+00090418,g_WaitCountInit,global,verified,start value for g_WaitCount; reset to 0,platform_symbols.csv
+00090420,g_LockDist,global,verified,,weapons_symbols.csv
+00090424,g_PlayerScrX,global,verified,,enemies_symbols.csv
+00090428,g_PlayerScrY,global,verified,,enemies_symbols.csv
+00090430,g_ActionThisFrame,global,verified,,player_symbols.csv
+00090440,g_OnGround,global,likely,0 airborne 1 landed 8 ditched,game_flow_symbols.csv
+00090444,g_WaitCount,global,verified,WaitKey retrace counter (limit 500),platform_symbols.csv
+0009044c,g_LastAction,global,verified,,player_symbols.csv
+00090450,g_LandAttrLow,global,verified,stat 74,player_symbols.csv
+00090454,g_LockTarget,global,verified,-1 none; 0..1 air; 2 big target; >=3 ground+3,weapons_symbols.csv
+0009045c,g_PlaneClass,global,verified,stat 77,player_symbols.csv
+00090460,g_GroundParked,global,verified,,player_symbols.csv
+00090464,g_UpHeld,global,verified,,player_symbols.csv
+0009047c,g_RadarJammed,global,verified,class 0x86 trigger -> radar Jammed,level_symbols.csv
+00090490,g_KeyCode,global,verified,always 0 (Input_GetKeyCode_Stub),platform_symbols.csv
+00090494,g_GunRange,global,verified,0x10000,weapons_symbols.csv
+000904a0,g_DownHeld,global,verified,,player_symbols.csv
+000904a8,g_Kills,global,medium,enemy aircraft kills (saved),symbols_data.csv
+000904ac,g_BaseHit,global,likely,,weapons_symbols.csv
+000904b8,g_TaxiStopTimer,global,likely,,player_symbols.csv
+000904cc,g_IsHeli,global,verified,stat91,game_flow_symbols.csv
+000904d0,g_HudMsgCount,global,medium,,symbols_game.csv
+000904dc,g_TrigCamCol,global,verified,last camera column for the MP2 trigger,level_symbols.csv
+000904e0,g_TrigCamRow,global,verified,,level_symbols.csv
+000904ec,g_MaxLoadWeight,global,verified,,game_flow_symbols.csv
+000904fc,g_HookDown,global,likely,tailhook down,player_symbols.csv
+00090500,g_HardpointLoad,global,verified,stat103,game_flow_symbols.csv
+00090504,g_TargetsDone,global,verified,,level_symbols.csv
+00090508,g_GunSpreadA,global,verified,w68,weapons_symbols.csv
+0009052c,g_TargetMarkY,global,verified,,level_symbols.csv
+00090534,g_GunRayHit,global,verified,,weapons_symbols.csv
+00090540,g_LastDamage,global,verified,,player_symbols.csv
+00090544,g_GunPowerUp,global,likely,bonus crate,weapons_symbols.csv
+0009054c,g_AimX,global,verified,persistent aim point,weapons_symbols.csv
+00090550,g_HeliVX,global,verified,,player_symbols.csv
+00090558,g_GunPower,global,verified,w94%10,weapons_symbols.csv
+0009055c,g_AimY,global,verified,persistent aim point,weapons_symbols.csv
+00090560,g_GunSpreadA2,global,verified,w70,weapons_symbols.csv
+00090564,g_GunSpreadB2,global,verified,w71,weapons_symbols.csv
+00090570,g_AeroGatePostHit,global,verified,,level_symbols.csv
+00090574,g_TargetMarkX,global,verified,HUD arrow/guided target x px (0 none),level_symbols.csv
+00090580,g_GliderLift,global,verified,,player_symbols.csv
+00090584,g_GunPodFiring,global,verified,,weapons_symbols.csv
+00090594,g_IsGlider,global,verified,thrust stat 0,player_symbols.csv
+000905a0,g_FrameParity,global,verified,toggles every frame,game_flow_symbols.csv
+000905a4,g_GunSpreadB,global,verified,w69,weapons_symbols.csv
+000905ac,g_ConvoyCount,global,verified,,enemies_symbols.csv
+000905b0,g_GunFiring,global,likely,,weapons_symbols.csv
+000905b4,g_GunHeat,global,verified,0..40,weapons_symbols.csv
+000905b8,g_Fuel,global,verified,,game_flow_symbols.csv
+000905bc,g_TrigClass,global,verified,,level_symbols.csv
+000905c0,g_EscortMode,global,verified,,enemies_symbols.csv
+000905c4,g_ScrollFineX,global,verified,renamed from g_ShakeX: = g_CamX&15 (fine scroll; no shake),video_symbols.csv
+000905c8,g_ScrollFineY,global,verified,renamed from g_ShakeY: = g_CamY&15,video_symbols.csv
+000905cc,g_FireOrConfirm,global,verified,fire||Space||Enter (Input_PollMenu; Player_Update stores g_Fire),platform_symbols.csv
+000905dc,g_FixedGear,global,verified,stat 89,player_symbols.csv
+000905e0,g_DropTankHold,global,verified,,weapons_symbols.csv
+000905f0,g_RunwayFill,global,verified,tile used to repair runway holes,level_symbols.csv
+000905f4,g_FlameVX,global,verified,,weapons_symbols.csv
+000905f8,g_FlameVY,global,verified,,weapons_symbols.csv
+00090608,g_FlameActive,global,verified,,weapons_symbols.csv
+00090644,g_Seaplane,global,verified,stat 114,player_symbols.csv
+00090650,g_NightLevel,global,verified,Clamp((camY+150)/67+1;0;15),video_symbols.csv
+00090654,g_FuelLeaks,global,verified,,player_symbols.csv
+0009065c,g_NightLevelShown,global,verified,-2 forces refresh,video_symbols.csv
+0009066c,g_EngineRevTarget,global,high,,sound_symbols.csv
+00090670,g_DamageLampsDirty,global,verified,,player_symbols.csv
+00090674,g_Thrust,global,verified,float stat83/100 (0 = glider),game_flow_symbols.csv
+0009067c,g_PhotoBlocked,global,verified,,weapons_symbols.csv
+00090690,g_Shared_90690,global,medium,reused scratch: level/menus and weapon fire-fail flag,symbols_overrides.csv
+00090698,g_EngineRev,global,high,,sound_symbols.csv
+000906a0,g_FlaresPending,global,verified,8 per mission,weapons_symbols.csv
+000906b0,g_GunFlameMode,global,verified,MISC.Z w79,weapons_symbols.csv
+000906b8,g_EnemyBombs,global,verified,,enemies_symbols.csv
+000906bc,g_EnemySpxLoaded,global,high,last loaded enemy bank,symbols_data.csv
+000906cc,g_EnemyBombRef,global,verified,,enemies_symbols.csv
+000906d4,g_EnemySetIndex,global,verified,,enemies_symbols.csv
+000906d8,g_EnemyGunDamage,global,high,ENEMIES byte 1,symbols_data.csv
+000906e0,g_EnemySkill,global,verified,,enemies_symbols.csv
+000906e4,g_EnemySpxLetter,global,verified,,enemies_symbols.csv
+000906f0,g_EnemyBombWeapon,global,verified,,enemies_symbols.csv
+000906f4,g_EnemyBaseX,global,high,from p26,symbols_data.csv
+000906f8,g_EnemyMissiles,global,verified,,enemies_symbols.csv
+000906fc,g_EnemyMslCount,global,verified,,enemies_symbols.csv
+00090700,g_EnemySetLoaded,global,high,last loaded ENEMIES record,symbols_data.csv
+00090708,g_EnemyAirCount,global,verified,,enemies_symbols.csv
+0009070c,g_EnemyBaseRow,global,high,from p27,symbols_data.csv
+00090738,g_StrafeCount,global,likely,,weapons_symbols.csv
+00090768,g_SpecialHit,global,verified,class 0xC7 hit; forces fog next sortie,level_symbols.csv
+00090774,g_AimFrame,global,verified,,weapons_symbols.csv
+00090778,g_MenuDX,global,verified,right-left,platform_symbols.csv
+0009077c,g_MenuDY,global,verified,down-up,platform_symbols.csv
+00090780,g_Drag,global,verified,stat 81 /100,player_symbols.csv
+00090784,g_LaunchDirX,global,verified,,weapons_symbols.csv
+00090790,g_Shared_90790,global,medium,reused: target vy (player) and launch direction y (weapons),symbols_overrides.csv
+00090794,g_ChuteSwingDir,global,likely,,player_symbols.csv
+00090798,g_SpeedDelta,global,verified,,player_symbols.csv
+000907a0,g_CruiseSpeed,global,verified,stat 86 /100,player_symbols.csv
+000907c4,g_LaunchSfx,global,verified,,weapons_symbols.csv
+000907c8,g_EngineSfxLastState,global,high,,sound_symbols.csv
+000907cc,g_AimLocked,global,likely,also terrain min height in Cruise,weapons_symbols.csv
+000907d0,g_CursorX,global,verified,menu cursor col/x,game_flow_symbols.csv
+000907d4,g_CursorY,global,verified,menu cursor row/y,game_flow_symbols.csv
+000907d8,g_MaxSinkAccel,global,verified,stat 84,player_symbols.csv
+000907dc,g_WingAuthority,global,verified,stat 85,player_symbols.csv
+000907e0,g_HeliLift,global,verified,collective 0..10; 5 hovers,player_symbols.csv
+000907f4,g_EndGameIndex,global,verified,0..6,game_flow_symbols.csv
+000907f8,g_DamageHits,global,verified,input of Player_DamageSystems,player_symbols.csv
+000907fc,g_Crashed,global,verified,,game_flow_symbols.csv
+00090800,g_AbortFlag,global,medium,,symbols_game.csv
+0009080c,g_CurX,global,verified,current projectile cache,weapons_symbols.csv
+00090810,g_CurY,global,verified,current projectile cache,weapons_symbols.csv
+00090818,g_BaseIsCarrier,global,verified,attr0(end col;63)==0x82,level_symbols.csv
+00090824,g_DeathTimer,global,likely,frame loop ends at 0x20,game_flow_symbols.csv
+00090828,g_CatapultCount,global,verified,,player_symbols.csv
+00090834,g_CatapultTimer,global,verified,,player_symbols.csv
+00090844,g_CrashBlast,global,verified,stat 119,player_symbols.csv
+00090848,g_CurArm,global,verified,current projectile cache,weapons_symbols.csv
+00090850,g_GunHitBonus,global,verified,w72,weapons_symbols.csv
+0009085c,g_RocketBoost,global,likely,,player_symbols.csv
+00090868,g_ExplI,global,verified,,weapons_symbols.csv
+0009086c,g_CurFrame,global,verified,current projectile cache,weapons_symbols.csv
+00090870,g_CurKind,global,verified,current projectile cache,weapons_symbols.csv
+00090874,g_CurFlags,global,verified,current projectile cache,weapons_symbols.csv
+00090878,g_LaunchX,global,verified,,weapons_symbols.csv
+0009087c,g_LaunchY,global,verified,,weapons_symbols.csv
+00090880,g_CurMotor,global,verified,current projectile cache,weapons_symbols.csv
+00090884,g_BrakeDrag,global,verified,,player_symbols.csv
+00090890,g_BonusType,global,verified,,enemies_symbols.csv
+0009089c,g_MarkerX,global,verified,class 5 marker x px (sprite 0x1e9),level_symbols.csv
+000908a0,g_MarkerY,global,verified,,level_symbols.csv
+000908a4,g_RocketBoostTimer,global,likely,,player_symbols.csv
+000908a8,g_CurSpeed,global,verified,current projectile cache,weapons_symbols.csv
+000908b0,g_CurTileAttr,global,verified,current projectile cache,weapons_symbols.csv
+000908b4,g_CrashDir,global,verified,,player_symbols.csv
+000908b8,g_CrashAttr,global,verified,,player_symbols.csv
+000908bc,g_ProjCount,global,verified,0..21,weapons_symbols.csv
+000908c4,g_CurFlight,global,verified,current projectile cache,weapons_symbols.csv
+000908c8,g_BerthaDelay,global,verified,600 frames,level_symbols.csv
+000908cc,g_ProjStepY,global,verified,sub-step remainder,weapons_symbols.csv
+000908d0,g_EngineTickRate,global,verified,stat 78,player_symbols.csv
+000908d4,g_CurDetonate,global,verified,current projectile cache,weapons_symbols.csv
+000908d8,g_BerthaShellTimer,global,verified,shell lands at 20,level_symbols.csv
+000908dc,g_BerthaH,global,verified,,level_symbols.csv
+000908e4,g_BerthaW,global,verified,,level_symbols.csv
+000908e8,g_BerthaCol,global,verified,,level_symbols.csv
+000908ec,g_BerthaRow,global,verified,,level_symbols.csv
+000908f4,g_BerthaShellX,global,verified,,level_symbols.csv
+00090900,g_PlayerSpriteId,global,verified,,player_symbols.csv
+00090908,g_CrashTileAttr,global,verified,,player_symbols.csv
+0009090c,g_ReverseExhaustX,global,likely,stat 97,player_symbols.csv
+00090914,g_ProjStepX,global,verified,sub-step remainder,weapons_symbols.csv
+0009091c,g_CrateVY,global,verified,,level_symbols.csv
+00090924,g_ExplVX,global,verified,never written,weapons_symbols.csv
+00090928,g_ExplVY,global,verified,,weapons_symbols.csv
+00090934,g_CurVX,global,verified,current projectile cache,weapons_symbols.csv
+00090938,g_CurVY,global,verified,current projectile cache,weapons_symbols.csv
+0009093c,g_ExplX0,global,verified,,weapons_symbols.csv
+00090940,g_CrateSprite,global,verified,,level_symbols.csv
+00090944,g_GunPowerUp2,global,likely,bonus crate,weapons_symbols.csv
+00090948,g_CrateX,global,verified,,level_symbols.csv
+0009094c,g_CrateY,global,verified,,level_symbols.csv
+00090950,g_ExplY0,global,verified,,weapons_symbols.csv
+00090954,g_EjectSeat,global,likely,stat 87 (>10 -> -1 = none),player_symbols.csv
+00090958,g_ReverseThrust,global,likely,0 none; 1 armed; 2 on (stat 96),player_symbols.csv
+00090968,g_ChuteVY,global,likely,,player_symbols.csv
+0009097c,g_AutoThrottle,global,high,player.md: Tab toggles autothrottle (game_flow called it g_TrainingMode),symbols_overrides.csv
+0009098c,g_ProjSprite,global,verified,also used as loop counter,weapons_symbols.csv
+0009099c,g_EjectState,global,likely,>0 ejected; 99 picked up; >99 pilot died,game_flow_symbols.csv
+000909c0,g_Shared_909c0,global,medium,reused: alien abduction flag (game_flow) and crash timer (sound),symbols_overrides.csv
+000909c4,g_GunAmmo,global,verified,,weapons_symbols.csv
+000909c8,g_AnyInput,global,verified,OR of g_Ctrl plus fire/space/enter,platform_symbols.csv
+000909d0,g_Armour,global,high,stat108 + g_ArmourBonus,symbols_data.csv
+000909d8,g_EscortNeeded,global,verified,,enemies_symbols.csv
+000909e0,g_ArmourBonus,global,high,bonus armour (saved),symbols_data.csv
+000909e8,g_PickupX,global,verified,,enemies_symbols.csv
+000909ec,g_PickupY,global,verified,,enemies_symbols.csv
+00090a04,g_AlienPlaneIdx,global,verified,,game_flow_symbols.csv
+00090a20,g_AeroPlaneSlot,global,verified,also the Aerolimits bonus multiplier,game_flow_symbols.csv
+00090a24,g_AimDirX,global,verified,,weapons_symbols.csv
+00090a28,g_AimDirY,global,verified,,weapons_symbols.csv
+00090a34,g_HasAfterburner,global,verified,stat 95,player_symbols.csv
+00090a48,g_FlameLength,global,verified,stat 98,player_symbols.csv
+00090a58,g_PlaneSel,global,verified,1-based plane (0 none),game_flow_symbols.csv
+00090ab8,g_LoopI,global,verified,generic loop index shared by many modules,weapons_symbols.csv
+00090abc,g_WheelsOk,global,verified,,player_symbols.csv
+00090b18,g_MusicTracks,global,high,GENDAT3 CD track per title,symbols_data.csv
+00090c58,g_CtrlRaw,global,verified,int32[11] 0/-1: TurnL TurnR 0 0 Fire 0 Pause Up Left Right Down,platform_symbols.csv
+00090c98,g_Ctrl,global,verified,int32[11] copy of g_CtrlRaw,platform_symbols.csv
+00090ca8,g_GunTrigger,global,verified,,weapons_symbols.csv
+00090eb0,g_KillTallyValue,global,likely,was g_RadarScales: medal values 1 5 10 25 50 75 100 for the kill tally,player_symbols.csv
+00090ecc,g_PlaneUsed,global,high,airframes used per plane (saved; 9999 = alien),symbols_data.csv
+00090fe4,g_FlashTable,global,verified,indexed by g_FlashCounter; rows of 10 from 0x90fe8 (GENDATA.DAX),video_symbols.csv
+00090fe8,g_NightFlashColours,global,medium,GENDATA Amiga RGB4 rows of 10,symbols_data.csv
+00091140,g_PlaneFlown,global,verified,[plane-1]=1 once airborne,game_flow_symbols.csv
+0009125c,g_ProjDetonate,global,verified,int[21] k4,weapons_symbols.csv
+000912b0,g_ProjArm,global,verified,int[21] k1 arm delay,weapons_symbols.csv
+00091304,g_PhotoCol,global,verified,int[10],weapons_symbols.csv
+00091330,g_ProjFlight,global,verified,int[21] k3,weapons_symbols.csv
+00091384,g_ProjKind,global,verified,int[21] k0,weapons_symbols.csv
+000913d8,g_ProjFlags,global,verified,int[21] k5,weapons_symbols.csv
+0009142c,g_FlameX,global,verified,,weapons_symbols.csv
+00091458,g_FlameY,global,verified,,weapons_symbols.csv
+00091484,g_AeroGateX,global,high,Aerolimits gate x (p15..),symbols_data.csv
+00091498,g_AeroGateY,global,high,Aerolimits gate y,symbols_data.csv
+000914ac,g_ProjMotor,global,verified,int[21] k2,weapons_symbols.csv
+0009152c,g_PlaneLimit,global,high,DATA/L1L2 per plane (>=200 unlimited),symbols_data.csv
+00091648,g_MissionParams,global,verified,,enemies_symbols.csv
+0009164a,g_MP_ReconCol,global,high,p01 recon column (objective),symbols_data.csv
+0009164c,g_MP_ReconRow,global,high,p02 recon min row,symbols_data.csv
+0009164e,g_MP_TargetX0,global,high,p03 target column start / 2000+steal col / 5000+tile id,symbols_data.csv
+00091650,g_MP_TargetX1,global,high,p04 target column end / tile id count,symbols_data.csv
+00091652,g_MP_AirKills,global,high,p05 enemy aircraft to shoot down,symbols_data.csv
+00091654,g_MP_ConvoyKills,global,medium,p06 convoy vehicles to destroy (>1000 escort),symbols_data.csv
+00091656,g_MP_TargetsReq,global,high,p07 targets required,symbols_data.csv
+00091658,g_MP_EnemyAir,global,high,p08 enemies record*100 + aircraft count,symbols_data.csv
+0009165a,g_MP_ConvoyCount,global,medium,p09 convoy vehicle count (>=1000 shuttle flag),symbols_data.csv
+0009165c,g_MP_ConvoyCol,global,high,p10 convoy start column (>=1000 ground units),symbols_data.csv
+0009165e,g_MP_EnemySpawnCol,global,high,p11,symbols_data.csv
+00091660,g_MP_EnemyWakeCol,global,high,p12,symbols_data.csv
+00091662,g_MP_ConvoyKind,global,high,p13 hi=truck spx letter/behaviour lo=hp multiplier,symbols_data.csv
+00091664,g_MP_PickupCol,global,high,p14,symbols_data.csv
+00091666,g_MP_ConvoyTypesA,global,high,p15 4 nibble vehicle types,symbols_data.csv
+00091668,g_MP_ConvoyTypesB,global,high,p16,symbols_data.csv
+0009166a,g_MP_ConvoyRow,global,high,p17,symbols_data.csv
+0009166c,g_MP_ConvoySpacing,global,high,p18,symbols_data.csv
+0009166e,g_MP_Bertha,global,high,p19 letter*1000+column,symbols_data.csv
+00091670,g_MP_CeilingRow,global,medium,p20,symbols_data.csv
+00091672,g_MP_TargetMarker,global,medium,p21,symbols_data.csv
+00091674,g_MP_TargetFlag,global,low,p22,symbols_data.csv
+00091676,g_MP_ConvoyFlag,global,low,p23,symbols_data.csv
+00091678,g_MP_PickupSprite,global,medium,p24,symbols_data.csv
+0009167a,g_MP_Weather,global,high,p25 0 random fog/1 night/2 fog,symbols_data.csv
+0009167c,g_MP_EnemyBaseCol,global,high,p26,symbols_data.csv
+0009167e,g_MP_EnemyBaseRow,global,high,p27,symbols_data.csv
+00091680,g_MP_BerthaRow,global,high,p28,symbols_data.csv
+00091682,g_MP_Misc29,global,low,p29,symbols_data.csv
+00091684,g_PlaneStats,global,high,121 ints from MISC.Z record,symbols_data.csv
+0009194c,g_WeaponResupplyFrac,global,high,remainder of resupply,symbols_data.csv
+00091a68,g_WeaponResupply,global,high,tenths per mission,symbols_data.csv
+00091b84,g_WeaponStock,global,high,campaign stock (saved),symbols_data.csv
+00091ca0,g_ProjLock,global,verified,int[21] lock target+1; not swapped on removal,weapons_symbols.csv
+00091cf4,g_WeaponBlastB,global,medium,Explosion_Damage arg6,symbols_data.csv
+00091e10,g_WeaponRackMult,global,medium,max = mult * plane racks,symbols_data.csv
+00091fbc,g_WeaponPerRack,global,high,rounds per rack load,symbols_data.csv
+000920d8,g_WeaponThrust,global,medium,projectile life/thrust (negative = retarded bomb),symbols_data.csv
+000921f4,g_WeaponBlastA,global,medium,Explosion_Damage arg5,symbols_data.csv
+00092310,g_WeaponIcon,global,high,icon sprite id,symbols_data.csv
+0009242c,g_WeaponWeight,global,high,weight lb,symbols_data.csv
+0009255c,g_BonusSprites,global,medium,GENDAT2 (mostly overwritten by constants),symbols_data.csv
+00092590,g_ProjTargetX,global,verified,int[21],weapons_symbols.csv
+000925e4,g_ProjTargetY,global,verified,int[21],weapons_symbols.csv
+00092674,g_ProjSpriteBase,global,high,GENDATA 16 sprite bases per fire kind,symbols_data.csv
+000926b8,g_ProjLife,global,verified,int[21] thrust/fuel,weapons_symbols.csv
+00092720,g_ProjBlastA,global,verified,int[21] Explosion arg5; k0=10 sprite id,weapons_symbols.csv
+00092774,g_ProjFrame,global,verified,int[21],weapons_symbols.csv
+000927c8,g_ProjBlastB,global,verified,int[21],weapons_symbols.csv
+00092830,g_ProjX,global,verified,int[21] -999 = dead,weapons_symbols.csv
+00092884,g_ProjY,global,verified,int[21],weapons_symbols.csv
+000928d8,g_ProjVX,global,verified,int[21],weapons_symbols.csv
+0009292c,g_ProjVY,global,verified,int[21],weapons_symbols.csv
+00092992,g_BriefingText,global,high,,symbols_game.csv
+00092ad4,g_ParallaxPal,global,high,= level g_BackdropPal,symbols_overrides.csv
+00092b04,g_Shared_92b04,global,medium,reused in Game_Run: CD mission track pick and effective throttle,symbols_overrides.csv
+00092b08,g_SpeedTmp,global,verified,,player_symbols.csv
+00092b14,g_EngineWarnCol,global,verified,,player_symbols.csv
+00092b18,g_FogSticky,global,high,= game_flow g_FogPending (never cleared),symbols_overrides.csv
+00092b1c,g_StoryShown,global,verified,enables the save prompt,game_flow_symbols.csv
+00092b20,g_Bullets,global,verified,32 x {x8;y8;vx;vy},weapons_symbols.csv
+00093220,g_Bullet93220,global,verified,cleared only,weapons_symbols.csv
+00093224,g_BulletCount,global,verified,,weapons_symbols.csv
+00093228,g_ParticleCount,global,verified,,enemies_symbols.csv
+0009322c,g_CDTrackStart,global,high,u32 frames; [0]=lead-out,sound_symbols.csv
+00093344,g_CDDrive,global,high,,sound_symbols.csv
+00093348,g_DpmiRmRegs,global,high,DPMI real-mode call struct,sound_symbols.csv
+0009337a,g_CDLastTrack,global,high,,sound_symbols.csv
+0009337b,g_CDFirstTrack,global,high,,sound_symbols.csv
+0009337c,g_DosBufSeg,global,high,,sound_symbols.csv
+00093380,g_SBVector,global,high,,sound_symbols.csv
+00093384,g_GusSliceLimit,global,high,0x21 or 0x23,sound_symbols.csv
+00093388,g_SampleData,global,high,,sound_symbols.csv
+0009338c,g_OldSBVecOff,global,high,,sound_symbols.csv
+00093394,g_BulletVX,global,verified,,weapons_symbols.csv
+00093398,g_BulletVY,global,verified,,weapons_symbols.csv
+000933a0,g_ExplPower,global,verified,,weapons_symbols.csv
+000933a4,g_ExplPowerB,global,verified,,weapons_symbols.csv
+000933a8,g_ExplX,global,verified,,weapons_symbols.csv
+000933ac,g_ExplY,global,verified,,weapons_symbols.csv
+000933b0,g_ColArmourSum,global,verified,,level_symbols.csv
+000933b4,g_PalSaved,global,verified,768 B,video_symbols.csv
+000936b4,g_Config,global,verified,JS.CFG image (60 bytes on disk; 0x48 read),platform_symbols.csv
+000936ee,g_SBIrq,global,high,JS.CFG +0x3a,sound_symbols.csv
+000936f4,g_CDEndgameLatch,global,high,never cleared,sound_symbols.csv
+000936f8,g_CDMusicOn,global,high,JS.CFG +0,sound_symbols.csv
+000936fc,g_SfxOn,global,high,JS.CFG +2 (u16),sound_symbols.csv

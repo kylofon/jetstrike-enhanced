@@ -1,0 +1,99 @@
+address,name,module,confidence,note
+00017353,Bonus_FireExtinguisher,play,medium,Bonus_Award type 0 (hudtext 44); 0x906a8++
+00017399,Bonus_AmmoPod,play,medium,type 1; 0x909e4++ (max 4)
+000173e3,Bonus_FuelPod,play,low,type 2 (hudtext 46)
+00017430,Bonus_Repair,play,medium,type 3; restores armour 0x909d0 = stat108 + 0x909e0
+000174db,Bonus_AutoEject,play,medium,type 4; 0x90314 += 4
+0001750b,Bonus_ECM,play,medium,type 5; 0x90710 = 1
+00017530,Bonus_Armour,play,medium,type 6; 0x909e0++ (max 4)
+000175da,Bonus_FirePower,play,medium,type 8; 0x90544++ (max 3)
+0001af0f,Bertha_Update,play,medium,counts destroyed tiles of the Bertha stamp; shells player while < p07; clears p19
+00015387,StealMission_Update,play,low,DAT_00090280 mode (p03 2001..4999): marker + spawns near target
+00017be5,StealMission_Taken,play,low,clears DAT_00090280 when the player reaches column p03+4
+00015957,Player_LandingCheck,play,medium,clears p00 land objective; landing pitch from plane stat 113
+00091648,g_MissionParams,global,high,30 words from M record (p00 land objective); see port/formats/data.md
+0009164a,g_MP_ReconCol,global,high,p01 recon column (objective)
+0009164c,g_MP_ReconRow,global,high,p02 recon min row
+0009164e,g_MP_TargetX0,global,high,p03 target column start / 2000+steal col / 5000+tile id
+00091650,g_MP_TargetX1,global,high,p04 target column end / tile id count
+00091652,g_MP_AirKills,global,high,p05 enemy aircraft to shoot down
+00091654,g_MP_ConvoyKills,global,medium,p06 convoy vehicles to destroy (>1000 escort)
+00091656,g_MP_TargetsReq,global,high,p07 targets required
+00091658,g_MP_EnemyAir,global,high,p08 enemies record*100 + aircraft count
+0009165a,g_MP_ConvoyCount,global,medium,p09 convoy vehicle count (>=1000 shuttle flag)
+0009165c,g_MP_ConvoyCol,global,high,p10 convoy start column (>=1000 ground units)
+0009165e,g_MP_EnemySpawnCol,global,high,p11
+00091660,g_MP_EnemyWakeCol,global,high,p12
+00091662,g_MP_ConvoyKind,global,high,p13 hi=truck spx letter/behaviour lo=hp multiplier
+00091664,g_MP_PickupCol,global,high,p14
+00091666,g_MP_ConvoyTypesA,global,high,p15 4 nibble vehicle types
+00091668,g_MP_ConvoyTypesB,global,high,p16
+0009166a,g_MP_ConvoyRow,global,high,p17
+0009166c,g_MP_ConvoySpacing,global,high,p18
+0009166e,g_MP_Bertha,global,high,p19 letter*1000+column
+00091670,g_MP_CeilingRow,global,medium,p20
+00091672,g_MP_TargetMarker,global,medium,p21
+00091674,g_MP_TargetFlag,global,low,p22
+00091676,g_MP_ConvoyFlag,global,low,p23
+00091678,g_MP_PickupSprite,global,medium,p24
+0009167a,g_MP_Weather,global,high,p25 0 random fog/1 night/2 fog
+0009167c,g_MP_EnemyBaseCol,global,high,p26
+0009167e,g_MP_EnemyBaseRow,global,high,p27
+00091680,g_MP_BerthaRow,global,high,p28
+00091682,g_MP_Misc29,global,low,p29
+0008e378,g_MissionDefWeapons,global,high,4 weapon idx from record +0x1b8 (default rack1/rack2 + fallbacks)
+00084e48,g_TilesetPending,global,high,record tileset name with .tlx; compared to g_TilesetName
+0008fffc,g_MapVariant,global,high,trailing digit of the map name (NN in .mp2/.mxp)
+00085648,g_StoryName,global,high,.asc name then picture name
+00090408,g_MissionBonus,global,high,(mission+1)*1000; 32000 in Aerolimits
+0009035c,g_NightMission,global,high,p25==1
+00091684,g_PlaneStats,global,high,121 ints from MISC.Z record
+00090324,g_MiscData,global,high,DATA/MISC buffer (60 x 0xdc)
+0009032c,g_MiscZData,global,high,DATA/MISC.Z buffer (60 x 300)
+0009152c,g_PlaneLimit,global,high,DATA/L1L2 per plane (>=200 unlimited)
+00090ecc,g_PlaneUsed,global,high,airframes used per plane (saved; 9999 = alien)
+00090330,g_PlaneCount,global,high,JETS.N count (59)
+000902e8,g_WeaponCount,global,high,WEAPONS.DAT count (69)
+000921f4,g_WeaponBlastA,global,medium,Explosion_Damage arg5
+00091cf4,g_WeaponBlastB,global,medium,Explosion_Damage arg6
+000920d8,g_WeaponThrust,global,medium,projectile life/thrust (negative = retarded bomb)
+00092310,g_WeaponIcon,global,high,icon sprite id
+00091fbc,g_WeaponPerRack,global,high,rounds per rack load
+0009242c,g_WeaponWeight,global,high,weight lb
+00091e10,g_WeaponRackMult,global,medium,max = mult * plane racks
+000877c8,g_WeaponDesc,global,high,0xa0 per weapon
+00091b84,g_WeaponStock,global,high,campaign stock (saved)
+00091a68,g_WeaponResupply,global,high,tenths per mission
+0009194c,g_WeaponResupplyFrac,global,high,remainder of resupply
+000906d4,g_EnemySetIndex,global,high,p08/100+1
+00090700,g_EnemySetLoaded,global,high,last loaded ENEMIES record
+000906e0,g_EnemySkill,global,high,ENEMIES byte 0
+000906d8,g_EnemyGunDamage,global,high,ENEMIES byte 1
+000906f8,g_EnemyMissiles,global,high,ENEMIES byte 2
+000906b8,g_EnemyBombs,global,high,ENEMIES byte 3
+000906f0,g_EnemyBombWeapon,global,high,ENEMIES byte 4
+000906cc,g_EnemyBombRef,global,medium,ENEMIES byte 5 (*16)
+000906e4,g_EnemySpxLetter,global,high,ENEMIES byte 6 (enemy<a+n>.spx)
+000906bc,g_EnemySpxLoaded,global,high,last loaded enemy bank
+000906f4,g_EnemyBaseX,global,high,from p26
+0009070c,g_EnemyBaseRow,global,high,from p27
+0008f088,g_ParamNotObjective,global,high,GENDATA 26 x (campaign aero) shorts
+00092674,g_ProjSpriteBase,global,high,GENDATA 16 sprite bases per fire kind
+00090fe8,g_NightFlashColours,global,medium,GENDATA Amiga RGB4 rows of 10
+000863f0,g_SarcasmLines,global,high,28 x 0x50
+00086148,g_MusicTitles,global,high,GENDAT3 7 x 0x50 (artist at +0x28)
+00090b18,g_MusicTracks,global,high,GENDAT3 CD track per title
+0008d9f8,g_AeroRoundsOptions,global,high,GENDAT3 3/5/10/15
+00090eb0,g_RadarScales,global,medium,GENDAT2 7 words
+0009255c,g_BonusSprites,global,medium,GENDAT2 (mostly overwritten by constants)
+0008e1d0,g_VehicleHP,global,high,GENDAT2 base hp per vehicle type
+0008de38,g_VehicleSprites,global,high,GENDAT2 (sprite a/b pairs stride 8)
+0008e330,g_Score,global,high,per player (saved)
+000904a8,g_Kills,global,medium,enemy aircraft kills (saved)
+00090304,g_ExtraAircraftScore,global,medium,250000 doubling
+000902d8,g_NextBonusScore,global,medium,bonus crate threshold
+000902e4,g_BonusScoreStep,global,medium,
+000909e0,g_ArmourBonus,global,high,bonus armour (saved)
+000909d0,g_Armour,global,high,stat108 + g_ArmourBonus
+00091484,g_AeroGateX,global,high,Aerolimits gate x (p15..)
+00091498,g_AeroGateY,global,high,Aerolimits gate y

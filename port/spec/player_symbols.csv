@@ -1,0 +1,164 @@
+address,name,module,confidence,note
+0002d34e,Player_Update,player,verified,keys only: tow start; autothrottle; briefing; pause; abort; look/follow; eject; gear; hover switch (flight model is inlined in Game_Run 0x1ea8c)
+000403c1,Player_GliderUpdate,player,verified,was Camera_Update/Player_HoverUpdate: glider speed (no thrust) + ridge lift 0x90580; called when 0x90594
+00029b29,Player_DrawHeli,player,verified,was Player_Collide: queues body+rotor sprites from the .HD table (0x84a34); no collision; rotor offset always from record 0
+00027008,Tanker_Update,player,likely,was Player_Ejection: air-to-air refuelling tanker; fuel transfer at the probe (stats 109/110)
+0002780b,SupportAircraft_Update,player,likely,was Player_DeathAndLanding: tow plane; Fat Albert; B52; ship; campaign bomber + lock-on; player flare shells; ground pickup/winch
+00015957,Carrier_Update,player,verified,was Player_LandingCheck: catapult countdown and taxi-to-catapult; called by Mission_CheckComplete
+0003c600,Player_EjectUpdate,player,likely,ejected pilot / parachute state machine (g_EjectState)
+0003b6e6,Eject_SetPilotX,player,verified,0x90328 = Sign(0x90328)*PX; empty loop leaves g_LoopI=6
+0003f2fe,Player_DamageSystems,player,verified,armour loss and random system failure (16 handlers below)
+0003f5c8,Damage_EngineFire,player,verified,g_EngineFire++ (fire extinguisher 0x906a8 may cancel)
+0003f645,Damage_EngineFail,player,verified,throttle 0
+0003f688,Damage_ControlHit,player,verified,g_TurnRate = (g_TurnRate != 1)
+0003f6c2,Damage_Weapon1,player,verified,rack 0 rounds = 0
+0003f6e7,Damage_Weapon2,player,verified,rack 1 rounds = 0
+0003f70c,Damage_Display1,player,verified,empty
+0003f727,Hud_LampBlinkA,player,likely,DISPLAY 2 FAIL: draws a shift-bank sprite at the panel position of sprite 0x8c
+0003f777,Hud_LampBlinkB,player,likely,DISPLAY 3 FAIL: same with sprite 0xa8
+0003f7c9,Damage_AllDisplays,player,verified,A+B; flags 5 6 7
+0003f80c,Damage_FuelLeak,player,verified,g_FuelLeaks++
+0003f82d,Damage_Undercarriage,player,verified,fixed-gear planes lose the gear
+0003f85b,Damage_ThrottleJam,player,verified,Rand(10)==1 -> throttle = Rand(8)
+0003f894,Damage_GunFail,player,verified,Rand(10)==1 -> gun ammo 0
+0003f8c8,Damage_WingHoled,player,verified,toggles stat 85 (0x907dc) 1<->0 (also ROTOR DAMAGED)
+0003f920,Damage_Explosion,player,verified,g_EngineFire = 3
+000323b9,Player_RotateA,player,verified,Up: g_Dir -= turn rate; heli: collective up
+00032476,Player_RotateB,player,verified,Down: g_Dir += turn rate; heli: collective down
+000324ed,Player_PitchUp,player,verified,plane: ThrottleUp; heli: g_HeliVX += 2 clamped
+00032585,Player_ThrottleUp,player,verified,throttle +2 (max 9); heli: tilt +2 (0..13)
+00032635,Player_PitchDown,player,verified,clears brake drag; plane: ThrottleDown; heli: g_HeliVX -= 2
+000326d3,Player_ThrottleDown,player,verified,throttle -2; at 0 on the ground: brakes or reverse thrust
+0001693b,Player_TakeoffAssist,player,verified,fire held with gear down: auto throttle to rotate speed; nose levelling
+000152a0,Player_AutoThrottle,player,verified,holds cruise speed +0.5..+1.0
+00015bb6,Player_Ditching,player,verified,g_OnGround==8: stop counter; OUCH; bumps
+00015cb3,Player_FullPower,player,verified,FULL POWER STUPID; throttle 9 (backseat driver while stalling)
+00016620,Player_PullUp,player,verified,PULL UP STUPID ground warning (0x901bc) with backseat driver
+00016b82,Player_EngineFire,player,verified,engine shake; spiral at fire level 3; death at >3
+00016d70,Player_GearCollapseRoll,player,verified,hard landing while stalling: Rand(5)==1 gear fails
+000156a2,Player_AfterburnerFlame,player,verified,3 flame sprites (double math; twin engines stat 66)
+0001554b,Player_DrawReverseThrust,player,verified,reverse-thrust exhaust and tailhook sprites
+00026b27,Hud_DrawBriefing,player,likely,B key held >8 frames: briefing text overlay
+00025c8b,Hud_DrawPanel,player,likely,display.pax; weapon icons; lives; damage lamps; terrain profile; counters; radar markers
+0002ec74,Hud_UpdateRadar,player,verified,radar/Jammed; speed bar; fuel; dots; colour pulses; altimeter; score; kill medals; lamps
+000267da,Hud_DrawTargetArrow,player,verified,sprite 0xa7 clamped to the screen if target within 0x4b0
+00026e03,Hud_PushMessage,player,verified,queue of 10 x 100 chars; 40 frames
+00026e5a,Hud_DrawMessages,player,verified,centred rows at y 0x2e+8*row; expiry shifts
+00026cc6,Hud_Nop,player,verified,empty (Hud_PlaneMessage/WeaponMessage show nothing)
+00026ce1,Hud_PlaneMessage,player,verified,Hud_Nop(HUDTEXT[61+player]); 0x909b8=0
+00026d24,Hud_WeaponMessage,player,verified,builds rack messages then Hud_Nop (nothing shown)
+00026f9c,Stub_LaunchCountdown,player,verified,empty; receives STANDBY TO LAUNCH n
+00090094,g_Speed,global,verified,float airspeed 0..6
+00090200,g_Dir,global,verified,0..63 heading; heli tilt 0..13
+000901f0,g_DirHalf,global,verified,g_Dir/2
+0008ffd4,g_Throttle,global,verified,0..9
+00090790,g_TargetVY,global,verified,
+0008ff38,g_VXError,global,verified,(int)(e0d0*speed - vx); stall slip test
+0008ff3c,g_LiftVY,global,verified,
+00090068,g_StallSink,global,verified,stall counter added to the wanted vy
+00090098,g_StallLimit,global,verified,16x max sink 0x40..0xc0
+000900a8,g_StallTopY,global,verified,highest PY since the stall (9999 none)
+0008ff14,g_GearDown,global,verified,1 = undercarriage down
+000904fc,g_HookDown,global,likely,tailhook down
+00090654,g_FuelLeaks,global,verified,
+000900d8,g_EngineFire,global,likely,0 none; 3 out of control; >3 dead
+00090550,g_HeliVX,global,verified,
+000907e0,g_HeliLift,global,verified,collective 0..10; 5 hovers
+00090884,g_BrakeDrag,global,verified,
+00090958,g_ReverseThrust,global,likely,0 none; 1 armed; 2 on (stat 96)
+0009085c,g_RocketBoost,global,likely,
+000908a4,g_RocketBoostTimer,global,likely,
+00090314,g_RocketCount,global,likely,
+00090834,g_CatapultTimer,global,verified,
+00090828,g_CatapultCount,global,verified,
+000904b8,g_TaxiStopTimer,global,likely,
+000902b4,g_Overloaded,global,verified,
+00090abc,g_WheelsOk,global,verified,
+0009015c,g_OverRunway,global,verified,-1 inside the base rectangle
+0009097c,g_AutoThrottle,global,verified,was g_TrainingMode: toggled by Tab with AUTOTHROTTLE ON/OFF; enables 0x152a0
+00090460,g_GroundParked,global,verified,
+00090464,g_UpHeld,global,verified,
+000904a0,g_DownHeld,global,verified,
+0009044c,g_LastAction,global,verified,
+00090430,g_ActionThisFrame,global,verified,
+0008fa20,g_DamageFlags,global,verified,int[14]
+00090670,g_DamageLampsDirty,global,verified,
+000907f8,g_DamageHits,global,verified,input of Player_DamageSystems
+00090540,g_LastDamage,global,verified,
+00092b04,g_EffThrottle,global,verified,
+00092b08,g_SpeedTmp,global,verified,
+00092b14,g_EngineWarnCol,global,verified,
+00080178,g_EngineWarnDir,global,verified,
+00090594,g_IsGlider,global,verified,thrust stat 0
+00090580,g_GliderLift,global,verified,
+00090798,g_SpeedDelta,global,verified,
+00090284,g_PrevSpeed,global,verified,
+0008fe9c,g_RotateSpeed,global,verified,
+0008ff94,g_TowX,global,verified,
+0008ff98,g_TowY,global,verified,
+0008ff8c,g_TowState,global,verified,>=0 towing; -17 released
+0008ff88,g_TowFrame,global,verified,
+0008ff74,g_TowRope,global,verified,0..0x60
+0008ff90,g_TowTime,global,verified,
+0008ff78,g_TowVY,global,verified,
+0008ffb8,g_TankerType,global,likely,
+00090270,g_EjectScrX,global,likely,
+00090274,g_EjectScrY,global,likely,
+0009024c,g_EjectCamX,global,likely,
+00090250,g_EjectCamY,global,likely,
+00090968,g_ChuteVY,global,likely,
+0008ff28,g_ChuteSwing,global,likely,
+00090794,g_ChuteSwingDir,global,likely,
+00090298,g_ChuteFail,global,likely,
+00090328,g_PilotX,global,likely,
+00090908,g_CrashTileAttr,global,verified,
+000908b8,g_CrashAttr,global,verified,
+000908b4,g_CrashDir,global,verified,
+00084a34,g_HeliHD,global,verified,.HD table pointer (100 x 16 bytes)
+00080344,g_HeliFrameBase,global,verified,int[8]
+00080364,g_HeliFrameKind,global,verified,int[8]
+0008deb8,g_HeliMaxLeft,global,verified,int[8] from GENDAT3
+0008e310,g_HeliMaxRight,global,verified,int[8] from GENDAT3
+0008e0d0,g_DirVX,global,verified,int[32] (int)(-cos*8)
+0008e210,g_DirLift,global,verified,int[32] (int)(-sin*5.2)
+0008e150,g_DirGunX,global,verified,int[32] (int)-(cos*16+0.5); [16] forced 16
+0008e290,g_DirGunY,global,verified,int[32] (int)(-sin*16)
+0008fe10,g_Dir16X,global,verified,int[16] (int)(-cos*8)
+0008fe50,g_Dir16Y,global,verified,int[16] (int)(-sin*3); heli -3
+0008fcb8,g_PlayerDirSprite,global,verified,32 pairs (normal; gear down)
+00090900,g_PlayerSpriteId,global,verified,
+0008d3f0,g_HudMsgs,global,verified,10 x 100 chars
+0008031c,g_HudMsgTime,global,verified,int[10]
+00090eb0,g_KillTallyValue,global,likely,was g_RadarScales: medal values 1 5 10 25 50 75 100 for the kill tally
+00090060,g_GearSilent,global,likely,stat 62
+00090258,g_NavLightBlink,global,likely,stat 63
+00090358,g_TwinEngine,global,likely,stat 66
+0009008c,g_NeedsTow,global,verified,stat 67
+00090188,g_BrakeStrength,global,verified,stat 73
+00090450,g_LandAttrLow,global,verified,stat 74
+0008fee0,g_HasWinch,global,likely,stat 76
+0009045c,g_PlaneClass,global,verified,stat 77
+000908d0,g_EngineTickRate,global,verified,stat 78
+00090780,g_Drag,global,verified,stat 81 /100
+000903b0,g_TopSpeed,global,verified,stat 82
+000907d8,g_MaxSinkAccel,global,verified,stat 84
+000907dc,g_WingAuthority,global,verified,stat 85
+000907a0,g_CruiseSpeed,global,verified,stat 86 /100
+00090954,g_EjectSeat,global,likely,stat 87 (>10 -> -1 = none)
+00090168,g_TurnRate,global,verified,stat 88
+000905dc,g_FixedGear,global,verified,stat 89
+000903d4,g_AirframeType,global,verified,stat 93 (2 = VTOL)
+00090a34,g_HasAfterburner,global,verified,stat 95
+0009090c,g_ReverseExhaustX,global,likely,stat 97
+00090a48,g_FlameLength,global,verified,stat 98
+0008ff0c,g_GearHeight,global,verified,stat 100
+000901dc,g_ProbeDX,global,verified,stat 109: refuelling probe (not ejection seat)
+000901e0,g_ProbeDY,global,verified,stat 110
+0008ff20,g_ParkAttitude,global,verified,stat 113
+00090644,g_Seaplane,global,verified,stat 114
+0009006c,g_BurnerFrames,global,verified,stat 115
+0008ffe4,g_HookDX,global,likely,stat 116 (tailhook present)
+0008ffe8,g_HookDY,global,likely,stat 117
+00090130,g_StallNoseDrop,global,verified,stat 118
+00090844,g_CrashBlast,global,verified,stat 119
+00090070,g_Conspicuity,global,likely,stat 120 enemy attack chance factor

@@ -19,7 +19,14 @@ Tiles are 16×16. The map is W×64 tiles (1024 px tall) and wraps horizontally. 
 - Front end (menus, briefings, pictures, intro): drawn at 320×240 and pillarboxed or integer-scaled. Only
   the in-mission view gets larger.
 
-## Resolution options (decide in phase E0)
+## Decisions (user, 2026-10-06)
+1. **View 640×360** (playfield 640×294) is the target and the default; 320×240 stays as the regression mode.
+2. **"On screen" grows with the view**: `IsOnScreen`, culling and spawn edges use the new view (no separate
+   320-wide activation window). Player-relative AI/lock ranges stay as they are (§4).
+3. **HUD**: the original 320×66 panel, centred, with side fill.
+4. **Repo**: jetstrike-sdl3 history merged in (remote `upstream`); its plan is kept as `PORT_PLAN.md`.
+
+## Resolution options
 | View | Playfield | Visible vs original | Notes |
 |---|---|---|---|
 | 320×240 | 320×175 | 1× | original, regression mode |
@@ -89,8 +96,7 @@ Two kinds of values. Look at each site and tag it in the code (`/* ENH: view */`
   scale that fits).
 
 ## Phases
-- **E0 Repo setup.** Import the jetstrike-sdl3 history into this repo (`git remote add upstream`, merge
-  master) so later fixes to the faithful port can be merged in. Rename the binaries to JetStrikeEnhanced.
+- **E0 Repo setup.** Done: jetstrike-sdl3 history merged (2026-10-06). Still to do: rename the binaries to JetStrikeEnhanced.
   Decide the resolution presets. Make a set of reference snapshots at 320×240 (headless
   `SDL_VIDEO_DRIVER=dummy`, scripted keys) for regression tests.
 - **E1 Runtime view size.** Video model, stride, pages, split, presentation, switching between front end

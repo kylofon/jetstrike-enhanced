@@ -1,0 +1,175 @@
+address,name,module,confidence,note
+00015ce6,Weapons_FrameDispensers,weapons,verified,per-frame: 0x177db if g_90100; JP233 / Porcupine dispensers
+000182cb,Projectile_LgbSteer,weapons,likely,LGB x-steering used by Projectile_Alarm (in-range test uses g_90574)
+000184cf,Projectile_Alarm,weapons,likely,flight k3=3 (ALARM): climb while fuel then dive on target
+0002688f,Bullets_Clear,weapons,verified,count=0
+000268d9,Bullet_Add,weapons,verified,(x8;y8;vx;vy) max 32
+0002694b,Bullets_Update,weapons,verified,(camx;camy) move/cull/plot tracer pixels
+00026b03,Smoke_Stub,weapons,verified,returns its 4th arg; smoke trail disabled (caller still consumes Rand(2))
+00032846,Player_Weapons,weapons,verified,the gun: flamer or tracer + ray + hit rolls; heat/ammo
+000332fb,Projectiles_UpdateOld,weapons,verified,renamed from Projectiles_Update: unreferenced older updater (also entered at +0xd 0x33308); do not port
+00033308,Projectiles_UpdateOld_b,weapons,verified,+0xd entry of 0x332fb (same function)
+000341e9,Weapon_Fire,weapons,verified,rack launch dispatcher on k0 (jump table 0x34219)
+000346d3,Flares_Add,weapons,verified,pending++ then Flare_Release
+000346f9,Weapon_FireGunPod,weapons,verified,renamed from Weapon_FireFromStock: k0=9 gun pod; swaps gun params and calls Player_Weapons
+000348db,Weapon_TakePhoto,weapons,verified,renamed from Weapon_DropMarker: k0=4 camera pod photo (column into 0x91304)
+0003494e,Weapon_DispenseJP233,weapons,verified,renamed from Weapon_FireSpecialA: one JP233 submunition per frame
+00034b94,Weapon_DispensePorcupine,weapons,verified,renamed from Weapon_FireSpecialB: one Porcupine missile per frame
+00034dd0,Weapon_ArmPorcupine,weapons,verified,renamed from Weapon_ArmA: k0=11
+00034e13,Weapon_ArmJP233,weapons,verified,renamed from Weapon_ArmB: k0=8
+00034e56,Projectile_Init,weapons,verified,blast/pos/life of slot g_ProjCount
+00034f0d,Weapon_DropTank,weapons,verified,renamed from Weapon_FireRepeat: k0=5 jettison after 10 held calls
+000351e9,Weapon_DropCommando,weapons,verified,renamed from Weapon_FireBomb: k0=10
+0003529c,Weapon_LaunchBallistic,weapons,verified,renamed from Weapon_FireMissile: k0 0/3/6/7 bombs etc; nuke + camera messages
+00035532,Weapon_FireRocket,weapons,verified,renamed from Weapon_FireCamera: k0=1 rockets (vx +-32)
+000356fe,Weapon_FireGuided,weapons,verified,k0=2 guided missiles; AAM lock/range check
+00038a61,Flare_Release,weapons,verified,renamed from Flares_Update: releases one pending flare (max 2 active)
+00039b69,Explosion_Damage,weapons,verified,(x;y;vx;vy;power;powerB) vx/vy unused; craters + damage to all object lists + scores
+0003a99f,Explosion_Terrain,weapons,verified,debris mode select + debris velocity
+0003adf9,Explosion_Particles,weapons,likely,water debris (mode 3)
+0003af32,Explosion_DebrisSmall,weapons,verified,mode 1 (power<30)
+0003afc0,Explosion_DebrisGround,weapons,verified,mode 0
+0003b18d,Explosion_DebrisSolid,weapons,likely,mode 2 (solid tile)
+0003b261,Explosion_Nuke,weapons,verified,empty stub (power -40)
+000413a0,Projectile_HitGround,weapons,verified,solid tile hit in the sub-step loop
+000415e4,Projectiles_Update,weapons,verified,renamed from Projectiles_UpdateGuided: the live updater of all player projectiles
+00042509,Projectile_AimMissionTarget,weapons,verified,sets targetX/Y from mission target centre
+000425c2,Projectile_LgbCluster,weapons,verified,LGB steering (k3 6) and cluster opening (k3 4/11)
+00042b70,Projectile_AlarmOld,weapons,likely,unreferenced ALARM variant
+00042d0e,Projectile_AimMarker,weapons,likely,k3=2 aim at mission target when target marker set
+00042dc6,Projectile_Climb,weapons,likely,k3=9 (no shipped weapon)
+00042ec9,Projectile_Steer,weapons,verified,steer to targetX/Y or g_90574/g_9052c
+00043207,Projectile_Commando,weapons,verified,k0=10 commando sprite/parachute
+000433c1,Projectile_Parachute,weapons,likely,k0=7 parachute drag
+0004341a,Projectile_HomeAir,weapons,verified,k3=0 homing + proximity vs air/big/ground enemies
+000438f2,Projectile_SeaSkim,weapons,verified,k3=7 anti-ship
+00043d05,Projectile_Cruise,weapons,verified,k3=13/14 terrain following cruise
+00092720,g_ProjBlastA,global,verified,int[21] Explosion arg5; k0=10 sprite id
+00092774,g_ProjFrame,global,verified,int[21]
+000927c8,g_ProjBlastB,global,verified,int[21]
+00092830,g_ProjX,global,verified,int[21] -999 = dead
+00092884,g_ProjY,global,verified,int[21]
+000928d8,g_ProjVX,global,verified,int[21]
+0009292c,g_ProjVY,global,verified,int[21]
+000926b8,g_ProjLife,global,verified,int[21] thrust/fuel
+00091384,g_ProjKind,global,verified,int[21] k0
+000912b0,g_ProjArm,global,verified,int[21] k1 arm delay
+000914ac,g_ProjMotor,global,verified,int[21] k2
+00091330,g_ProjFlight,global,verified,int[21] k3
+0009125c,g_ProjDetonate,global,verified,int[21] k4
+000913d8,g_ProjFlags,global,verified,int[21] k5
+00092590,g_ProjTargetX,global,verified,int[21]
+000925e4,g_ProjTargetY,global,verified,int[21]
+00091ca0,g_ProjLock,global,verified,int[21] lock target+1; not swapped on removal
+000908bc,g_ProjCount,global,verified,0..21
+00090ab8,g_LoopI,global,verified,generic loop index shared by many modules
+0009080c,g_CurX,global,verified,current projectile cache
+00090810,g_CurY,global,verified,current projectile cache
+00090934,g_CurVX,global,verified,current projectile cache
+00090938,g_CurVY,global,verified,current projectile cache
+0009086c,g_CurFrame,global,verified,current projectile cache
+00090848,g_CurArm,global,verified,current projectile cache
+00090870,g_CurKind,global,verified,current projectile cache
+000908c4,g_CurFlight,global,verified,current projectile cache
+00090880,g_CurMotor,global,verified,current projectile cache
+00090874,g_CurFlags,global,verified,current projectile cache
+000908d4,g_CurDetonate,global,verified,current projectile cache
+000908a8,g_CurSpeed,global,verified,current projectile cache
+000908b0,g_CurTileAttr,global,verified,current projectile cache
+00090914,g_ProjStepX,global,verified,sub-step remainder
+000908cc,g_ProjStepY,global,verified,sub-step remainder
+0009054c,g_AimX,global,verified,persistent aim point
+0009055c,g_AimY,global,verified,persistent aim point
+00090a24,g_AimDirX,global,verified,
+00090a28,g_AimDirY,global,verified,
+00090774,g_AimFrame,global,verified,
+000907cc,g_AimLocked,global,likely,also terrain min height in Cruise
+0009098c,g_ProjSprite,global,verified,also used as loop counter
+00090134,g_PingPongStep,global,verified,
+00090138,g_PingPong,global,verified,0..4 triangle per frame
+00090878,g_LaunchX,global,verified,
+0009087c,g_LaunchY,global,verified,
+00090784,g_LaunchDirX,global,verified,
+00090790,g_LaunchDirY,global,verified,
+000907c4,g_LaunchSfx,global,verified,
+00090338,g_FireRack,global,verified,0/1
+0008ff00,g_FirePairFirst,global,verified,
+0008fbc8,g_RackWeapon,global,verified,int[2]
+0008fcb0,g_RackCount,global,verified,int[2]
+0009002c,g_FireKindP1,global,verified,k0+1
+00090690,g_FireFail,global,verified,also written by 0x3e66b
+000902d4,g_FireLatch,global,verified,
+0008feb8,g_LoadWeight,global,verified,
+0008faf0,g_LaunchDirTabX,global,verified,int[16]
+0008fb30,g_LaunchDirTabY,global,verified,int[16][2]
+0008fc30,g_Dir16X,global,verified,int[16] read as [2f]
+0008fc70,g_Dir16Y,global,verified,int[16] read as [2f]
+000905e0,g_DropTankHold,global,verified,
+000901ec,g_PorcupineArmed,global,verified,rack+1
+000901f4,g_JP233Armed,global,verified,rack+1
+000902cc,g_PhotoCount,global,verified,
+00091304,g_PhotoCol,global,verified,int[10]
+0009067c,g_PhotoBlocked,global,verified,
+00090198,g_BigBombSfxDone,global,verified,
+000900f0,g_ExplSfxHold,global,likely,explosion sfx suppression
+0008453c,g_FireKey1,global,verified,int16 latch
+00084540,g_FireKey2,global,verified,int16 latch
+00090ca8,g_GunTrigger,global,verified,
+000906b0,g_GunFlameMode,global,verified,MISC.Z w79
+00090508,g_GunSpreadA,global,verified,w68
+000905a4,g_GunSpreadB,global,verified,w69
+00090560,g_GunSpreadA2,global,verified,w70
+00090564,g_GunSpreadB2,global,verified,w71
+00090850,g_GunHitBonus,global,verified,w72
+00090558,g_GunPower,global,verified,w94%10
+000901f8,g_GunType,global,verified,w94/10
+000909c4,g_GunAmmo,global,verified,
+000905b4,g_GunHeat,global,verified,0..40
+00090544,g_GunPowerUp,global,likely,bonus crate
+00090944,g_GunPowerUp2,global,likely,bonus crate
+000905b0,g_GunFiring,global,likely,
+00090584,g_GunPodFiring,global,verified,
+00090454,g_LockTarget,global,verified,-1 none; 0..1 air; 2 big target; >=3 ground+3
+00090420,g_LockDist,global,verified,
+00090494,g_GunRange,global,verified,0x10000
+00090534,g_GunRayHit,global,verified,
+00090738,g_StrafeCount,global,likely,
+00090608,g_FlameActive,global,verified,
+0009142c,g_FlameX,global,verified,
+00091458,g_FlameY,global,verified,
+000905f4,g_FlameVX,global,verified,
+000905f8,g_FlameVY,global,verified,
+00093394,g_BulletVX,global,verified,
+00093398,g_BulletVY,global,verified,
+00092b20,g_Bullets,global,verified,32 x {x8;y8;vx;vy}
+00093224,g_BulletCount,global,verified,
+00093220,g_Bullet93220,global,verified,cleared only
+000906a0,g_FlaresPending,global,verified,8 per mission
+00090310,g_FlareCount,global,verified,max 2
+0008fad8,g_FlareLife,global,verified,int[2]
+0008fae0,g_FlareX,global,verified,int[2]
+0008fae8,g_FlareY,global,verified,int[2]
+0008fbb0,g_FlareVX,global,verified,int[2]
+0008fbb8,g_FlareVY,global,verified,int[2]
+000933a8,g_ExplX,global,verified,
+000933ac,g_ExplY,global,verified,
+000933a0,g_ExplPower,global,verified,
+000933a4,g_ExplPowerB,global,verified,
+00090210,g_ExplSfxPower,global,verified,
+0009029c,g_ExplCraters,global,verified,
+0009093c,g_ExplX0,global,verified,
+00090950,g_ExplY0,global,verified,
+00090868,g_ExplI,global,verified,
+0008fec4,g_ExplCX,global,verified,
+0008fecc,g_ExplCY,global,verified,
+0008fea4,g_ExplDebrisMode,global,verified,also temp in DebrisGround
+00090294,g_ExplSolid,global,verified,
+00090278,g_ExplDX8,global,verified,
+0009027c,g_ExplSpread,global,verified,
+00090924,g_ExplVX,global,verified,never written
+00090928,g_ExplVY,global,verified,
+0009037c,g_MarkerX,global,verified,
+00090380,g_MarkerY,global,verified,
+00090398,g_DropZoneX,global,verified,
+000903a0,g_DropZoneY,global,verified,
+000904ac,g_BaseHit,global,likely,

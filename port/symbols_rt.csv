@@ -1,0 +1,276 @@
+address,name,module,confidence,note
+000485d0,_cstart_,rt,high,program entry (DOS4GW startup)
+0004864a,__cstart_body,rt,medium,startup continuation: INT21 30h DOS version; 4Ah resize; DGROUP/env setup; calls __InitRtns and __CMain
+00048842,__fatal_runtime_error,rt,high,writes message to CON (INT21 3Dh/40h) and terminates (INT21 4Ch)
+00048874,__GETDS,rt,high,loads DS from saved selector at cs:[0x48644]
+0004887c,inp,rt,high,in al;dx (port=arg1)
+00048887,outp,rt,high,out dx;al - game uses for VGA DAC 0x3c8 and PIT 0x40/0x43
+00048894,__save_SS,rt,low,stores SS to 0x8079c
+0004889b,__CHK,rt,high,stack check
+000488ae,__STK,rt,high,stack overflow test; calls __fatal_runtime_error
+000488cb,__STKOVERFLOW,rt,high,stack overflow -> fatal error
+000488da,_dos_getvect,rt,high,INT21 35h (2502h under Phar Lap); game: vector 9 (keyboard) and timer vector
+00048914,_dos_setvect,rt,high,INT21 25h (2504h Phar Lap); game installs keyboard ISR 0x10760 on INT 9 and ISR 0x31a31 on timer vector (DAT_93380)
+0004894b,int386,rt,high,int386(intno;in;out) -> segread + int386x; game uses INT 31h (DPMI)
+00048974,printf,rt,high,vfprintf(stdout=0x8085e); game prints memory/exit messages
+00048996,__null_rtn,rt,low,empty ret
+00048997,exit,rt,high,runs fini routines (ptrs 0x807b0..0x807b8) then __exit (INT21 4Ch)
+000489c0,__get_rand_seed_ptr,rt,medium,returns &seed (0x807bc)
+000489c6,rand,rt,high,LCG seed*0x41c64e6d+0x3039; >>16 & 0x7fff
+000489e8,srand,rt,high,sets seed
+000489fb,malloc,rt,high,wrapper to _nmalloc
+00048a0b,_nmalloc,rt,high,near heap allocator (grows via __ExpandDGROUP)
+00048a7d,__open_flags,rt,high,parses fopen mode string r/w/a/+/b/t
+00048b2c,__doopen,rt,high,opens fd for FILE (via sopen 0x4ae05)
+00048c11,_fsopen,rt,high,allocates FILE (__allocfp) then __doopen
+00048c3c,fopen,rt,high,fopen(name;mode); game: data\jetsprit.pal and js.cfg
+00048c51,__chk_freopen_fp,rt,medium,validates FILE for freopen
+00048cb6,freopen,rt,medium,freopen(name;mode;fp)
+00048ce2,fread,rt,high,fread(buf;size;n;fp)
+00048e3d,fclose,rt,high,fclose(fp) (checks stream list)
+00048e69,__doclose,rt,high,close stream; free buffer; remove tmpfile
+00048e8d,__hexdigit,rt,medium,0-15 -> '0'..'f' (tmpfile name helper)
+00048ea0,__MkTmpFile,rt,medium,builds tmp file name tXXXX_xx.tmp
+00048f1f,__shutdown_stream,rt,high,flush; reposition; close handle; free buffer
+00048fbd,outpw,rt,high,out dx;ax - game: VGA seq/GC/CRTC regs 0x3c4/0x3ce/0x3d4
+00048fca,strcpy,rt,high,
+00048ff3,strlen,rt,high,
+0004900f,strcat,rt,high,
+0004904a,fseek,rt,high,fseek(fp;off;whence)
+0004921b,ftell,rt,high,
+0004924f,free,rt,high,wrapper to _nfree
+0004925f,_nfree,rt,high,
+00049284,__I4D,rt,high,soft-float int32 -> double (EAX -> EDX:EAX)
+00049291,__U4D,rt,high,soft-float uint32 -> double
+000492c4,__FDD,rt,high,soft-float double divide (div-by-zero -> 0x4b4c1)
+000494c8,__FDI4,rt,high,double -> int32
+000494cc,__FDU4,rt,high,double -> uint32
+00049544,__FDS,rt,high,double subtract (negates and falls into __FDA)
+0004954a,__FDA,rt,high,double add
+00049714,__FDM,rt,high,double multiply
+000498c0,__FSFD,rt,high,float -> double
+00049918,__FDC,rt,high,double compare
+00049950,__FSS,rt,high,float subtract
+0004995a,__FSA,rt,high,float add (dispatch via [0x807f8]: x87 or emulated)
+00049a2b,__FSM,rt,high,float multiply (dispatch via [0x807fc])
+00049ab2,__FSD_thunk,rt,medium,thunk to __FSD
+00049b5e,__FSD,rt,high,float divide (dispatch via [0x80800])
+00049b69,__init_float_dispatch,rt,medium,selects x87 or emulated float add/mul/div based on 8087 flag 0x80a59
+00049bb4,__FSC,rt,high,float compare
+00049bf3,__utoa_body,rt,medium,unsigned to ascii with radix
+00049c3b,itoa,rt,high,itoa(val;buf;radix) - game uses radix 10
+00049c6c,__FDFS,rt,high,double -> float
+00049cc4,__sin_cos_emu,rt,medium,emulated sin/cos/tan core (selector 0/2/1)
+00049f10,sin,rt,medium,sin(double) - x87 (0x4b993) or emulated
+00049f2a,__sin_reg,rt,medium,register-arg sin
+00049f56,cos,rt,medium,cos(double)
+00049f6b,__cos_reg,rt,medium,register-arg cos
+00049f9f,tan,rt,medium,tan(double)
+00049fb2,__tan_reg,rt,medium,register-arg tan
+00049fd4,__FDN,rt,medium,double negate (flip sign bit)
+00049fdf,abs,rt,high,
+00049fed,strncpy,rt,high,
+0004a020,strcmp,rt,high,
+0004a0cd,__scanf_getc_file,rt,medium,fscanf char-input callback
+0004a114,__scanf_ungetc_file,rt,medium,fscanf unget callback (ungetc)
+0004a12a,vfscanf,rt,high,sets up callbacks; calls __scnf
+0004a158,fscanf,rt,high,game reads text data
+0004a178,fgets,rt,high,fgets(buf;n;fp)
+0004a1e4,__U4FS,rt,high,uint32 -> float
+0004a20f,__I4FS,rt,high,int32 -> float
+0004a220,__FSI4,rt,high,float -> int32 (table of float->int entry points follows)
+0004a25c,__FSI_signed,rt,medium,float -> int core (signed)
+0004a268,__FSU_core,rt,medium,float -> int core
+0004a2b0,memset,rt,high,memset(dst;val;n) -> __memset_body
+0004a2d2,int386x,rt,high,int386x(intno;in;out;sregs) - game uses INT 31h DPMI
+0004a2f3,_fmemset,rt,high,far memset (offset;selector;val;n)
+0004a31a,fwrite,rt,high,fwrite(ptr;size;n;fp) - game saves config/scores
+0004a481,time,rt,high,time(NULL): DOS date/time -> mktime
+0004a4ba,__null_rtn2,rt,low,empty ret
+0004a4bb,__CMain,rt,high,sets up stack; calls main (0x000146f4) then exit
+0004a50a,__InitRtns,rt,high,runs XI init table by priority
+0004a54d,__FiniRtns,rt,high,runs YI fini table by priority
+0004a590,segread,rt,high,
+0004a5be,__fprtf_putc,rt,medium,printf output callback (fputc)
+0004a5d7,vfprintf,rt,high,vfprintf(fp;fmt;args) -> __prtf
+0004a658,__MemAllocator,rt,high,heap block allocator (free list search)
+0004a708,__MemFree,rt,high,heap block free/coalesce
+0004a813,__LinkUpNewMHeap,rt,medium,inserts new heap segment into heap list
+0004a88d,__unlink_free,rt,medium,doubly linked list unlink
+0004a8a9,__UnlinkMHeap,rt,medium,removes heap segment
+0004a943,__FreeDPMIBlocks,rt,medium,DPMI 0502h free memory block / INT21 49h
+0004a9ba,__ReAllocDPMIBlock,rt,medium,DPMI 0503h resize memory block
+0004aaec,__LastFree,rt,medium,size of free block at end of DGROUP
+0004ab39,__CreateNewNHeap,rt,medium,DPMI 0501h alloc / INT21 48h; DPMI 0006h get segment base
+0004ac21,__ExpandDGROUP,rt,medium,grows near heap (sbrk / new DPMI block)
+0004adbe,__ret0,rt,low,returns 0
+0004adc5,tolower,rt,high,
+0004adda,__get_errno_ptr,rt,high,returns &errno
+0004ade0,__get_doserrno_ptr,rt,high,returns &_doserrno
+0004ade6,open,rt,high,open(path;mode;...) -> sopen with share 0
+0004ae05,sopen,rt,high,INT21 3Ch/3Dh/3Eh/40h create/open file handle
+0004afc7,setmode,rt,medium,INT21 4400h/4401h IOCTL get/set device info
+0004b031,__allocfp,rt,high,allocates FILE struct
+0004b0cc,__freefp,rt,high,returns FILE to free list
+0004b0ff,__purgefp,rt,high,frees FILE free list at exit
+0004b121,__chktty,rt,high,marks stream as tty (isatty)
+0004b14e,__ioalloc,rt,high,allocates stream buffer (0x1000 default)
+0004b1c5,memcpy,rt,high,dword+byte copy (used internally)
+0004b1ef,__qread,rt,high,INT21 3Fh read
+0004b220,fgetc,rt,high,text-mode CR / ^Z handling
+0004b299,__filbuf,rt,high,refill and return char
+0004b2c4,__fill_buffer,rt,high,reads into stream buffer
+0004b36f,__get_tmp_id,rt,low,returns DAT_80814 (used for tmp file naming)
+0004b375,__flush,rt,high,flush stream buffer (write or seek back)
+0004b412,lseek,rt,high,INT21 42h
+0004b45d,close,rt,high,INT21 3Eh
+0004b497,remove,rt,high,-> unlink (INT21 41h)
+0004b4a7,tell,rt,high,lseek(fd;0;SEEK_CUR)
+0004b4bc,__FPE_underflow_zero,rt,medium,returns 0.0
+0004b4c1,__FPE_divzero,rt,medium,FP error 0x83 -> +/-inf
+0004b4cd,__FPE_overflow,rt,medium,FP error 0x84; ERANGE -> +/-inf
+0004b515,__Init_Argv_alt,rt,low,builds argv (alternate entry 3 bytes earlier)
+0004b518,__Init_Argv,rt,medium,builds argc/argv from command line
+0004b5c8,__parse_args,rt,medium,splits command line (quotes; backslashes)
+0004b6a3,frexp,rt,low,FP helper used by trig and printf
+0004b6e9,modf,rt,low,
+0004b6fe,__modf_body,rt,low,
+0004b7ec,__mul64_helper,rt,low,64-bit arithmetic helper for trig range reduction
+0004b8ed,__EvalPoly,rt,low,polynomial evaluation (FDA/FDM loop)
+0004b923,__OddPoly,rt,low,odd polynomial evaluation
+0004b95a,__set_EDOM,rt,medium,errno=EDOM
+0004b961,__set_ERANGE,rt,medium,errno=ERANGE
+0004b972,__FPE_handler_call,rt,medium,calls FP exception handler ptr [0x80840]
+0004b98a,__x87_cos,rt,medium,x87 path (selector 2)
+0004b993,__x87_sin,rt,medium,x87 path (selector 0) with range reduction
+0004ba30,__x87_tan,rt,medium,x87 tan path
+0004baaf,ungetc,rt,high,
+0004bb2a,__scnf,rt,high,scanf engine
+0004bd31,__scan_fmt_width,rt,low,scanf helper
+0004bdfe,__scan_skipws,rt,low,scanf helper
+0004be35,__scan_char,rt,low,scanf %c
+0004beae,__scan_ret0,rt,low,
+0004beb6,__scan_string,rt,low,scanf %s
+0004bfa6,__scan_report,rt,low,scanf %n
+0004bff1,__scan_charset_init,rt,low,scanf %[ set builder
+0004c035,__scan_charset,rt,low,scanf %[
+0004c114,__scan_float,rt,low,scanf %e/%f/%g (uses __FDFS and [0x80b38] cnvs2d hook)
+0004c3d4,__scan_int,rt,low,scanf %d/%x/%o
+0004c5d1,__scan_hexval,rt,low,
+0004c605,__scan_getc,rt,low,
+0004c630,__memset_body,rt,medium,register-arg memset core
+0004c667,__memset_dwords,rt,medium,
+0004c6d4,__int386x_body,rt,medium,loads regs; executes INT via stub table
+0004c70b,__int_table,rt,medium,table of 'int N' stubs for all 256 vectors
+0004caac,write,rt,high,INT21 40h with text-mode LF->CRLF; append via 42h
+0004cc85,fputc,rt,high,
+0004cd2d,__getdatetime,rt,medium,INT21 2Ah/2Ch date+time
+0004cdcf,mktime,rt,medium,
+0004cef2,stackavail,rt,high,
+0004cefb,__init_stklen,rt,low,sets 0x80abc=0x8000
+0004cf06,__prtf,rt,high,printf engine
+0004d126,__get_fmt_spec,rt,medium,printf spec parser
+0004d22f,__get_fmt_number,rt,medium,printf width/precision parse
+0004d282,__prtf_set_str,rt,low,
+0004d2ab,__prtf_set_wstr,rt,low,
+0004d2d2,__prtf_string,rt,low,
+0004d325,__prtf_int,rt,low,integer formatting
+0004d3f1,__EFG_printf_call,rt,medium,calls [0x80b34] float formatter hook
+0004d408,__prtf_fmt,rt,medium,formats one conversion
+0004d841,strupr,rt,medium,uses toupper
+0004d861,_set_amblksiz,rt,low,setter returning old value (0x80ab8)
+0004d877,sbrk,rt,medium,DPMI 0501h / INT21 4800h
+0004d911,__brk,rt,medium,INT21 EDh/4Ah DOS4G memory resize
+0004d9bb,isatty,rt,high,INT21 4400h
+0004d9db,__set_errno_dos_alt,rt,low,
+0004d9f3,__set_errno_dos2,rt,low,
+0004da1b,__set_errno_dos,rt,high,maps DOS error -> errno
+0004da8b,__set_errno_EBADF,rt,low,errno helper
+0004dadd,__SetIOMode,rt,medium,
+0004daf5,__InitFiles,rt,high,links stdin/out/err/aux/prn into stream list
+0004db3a,__full_io_exit,rt,high,closes all streams; frees FILE list
+0004db54,__closeall,rt,medium,
+0004dbad,flushall,rt,medium,__flushall(mask)
+0004dbe5,__getche_stdin,rt,low,INT21 01h read char with echo
+0004dc00,__qwrite,rt,high,INT21 40h raw write (seek end for append)
+0004dc7d,unlink,rt,high,INT21 41h
+0004dca1,__fsave,rt,low,saves FPU state
+0004dcad,__fld_tbyte,rt,low,
+0004dceb,__chk8087,rt,medium,detects 8087 (sets 0x80a58/0x80a59)
+0004dd2a,__set_matherr,rt,low,sets matherr hook
+0004dd37,__math_error,rt,medium,calls matherr; prints func: DOMAIN error to stderr
+0004ddad,__stack_overflow_exit,rt,low,__fatal_runtime_error(1)
+0004ddbc,_EFG_Format,rt,medium,printf %e/%f/%g formatter
+0004de98,__strip_zeros,rt,medium,%g trailing zero removal
+0004dee5,__cnvs2d,rt,medium,string -> double (scanf hook)
+0004df00,__leapyear,rt,low,time helper
+0004df34,__brktime,rt,low,time helper
+0004e195,__isindst_cmp,rt,low,
+0004e1c5,__mkday,rt,low,time helper
+0004e2f4,_localtime_body,rt,low,
+0004e318,localtime,rt,low,
+0004e32e,tzset,rt,medium,
+0004e349,__tz_parse_num,rt,low,
+0004e372,__tz_parse_time,rt,low,
+0004e455,__tz_parse_rule,rt,low,
+0004e547,__parse_tz,rt,low,parses TZ env var
+0004e609,__ultoa_body,rt,medium,
+0004e651,ultoa,rt,medium,
+0004e681,toupper,rt,high,
+0004e6c8,__matherr_thunk,rt,low,
+0004e6cd,fputs,rt,high,
+0004e746,__set_tz_ptr,rt,low,
+0004e753,__fmt_exponent,rt,low,e+XX formatting
+0004e7f7,__fmt_fixed,rt,low,
+0004e873,__fmt_round,rt,low,
+0004e8de,__cvt,rt,medium,float to string (ecvt/fcvt core)
+0004ead2,__strtod_body,rt,medium,
+0004ec99,getenv,rt,high,case-insensitive environment search
+0004ecee,__ret0_matherr,rt,low,default matherr returns 0
+0004ecf5,__fmt_infnan,rt,medium,INF/NAN formatting
+0004ed6c,__fp_helper1,rt,low,
+0004ed86,__fp_helper2,rt,low,
+0004eda1,__fp_helper3,rt,low,
+0004edbb,__fp_pow10,rt,low,
+0004edeb,__fp_helper4,rt,low,
+0004ee29,__fp_helper5,rt,low,
+0004ee6b,__fp_scale,rt,low,
+0004ef7c,__fp_to_digits,rt,low,
+0004f118,__fp_split,rt,low,integer/fraction split of double
+0004f1a8,__fp_norm_alt,rt,low,
+0004f1f3,__fp_normalize,rt,low,
+0004f246,strnicmp,rt,high,
+0004f29e,__fp_helper6,rt,low,
+0004f2dd,__fp_helper7,rt,low,
+0004f2f7,__fp_log10ish,rt,low,
+0004f494,__fp_helper8,rt,low,
+0004f4cc,__fp_table_lookup,rt,low,
+0004f506,__fp_u64,rt,low,
+0004f571,__fp_digits10000,rt,low,
+0004f5e3,__fp_data_or_code,rt,low,decompiles as garbage (likely data table)
+0004f698,__fp_tbl_ptr,rt,low,
+0004f69a,__setenvp_alt,rt,low,
+0004f6a0,__setenvp,rt,medium,copies environment block into heap
+0004f780,log,rt,low,x87 log via log2*ln2
+00050000,asm_unpack,asm,medium,obj2 asm: decompressor(dst;src) called by picture/data loaders (6 game call sites)
+00050020,asm_unpack_init,asm,low,obj2 asm helper
+0005007c,asm_unpack_getbits,asm,low,obj2 asm helper (bit reader)
+00050090,asm_unpack_lit,asm,low,obj2 asm helper
+0005017c,asm_unpack_copy,asm,low,obj2 asm helper
+000501e0,asm_unpack_main,asm,low,obj2 asm main loop
+00070000,gus_detect,asm,medium,obj4 asm: Gravis UltraSound probe (GF1 reset reg 0x4C; DRAM 0xAA test); returns RAM size
+0007004c,gus_poke_block,asm,medium,upload buffer to GUS DRAM (regs 0x43/0x44; base+0x107)
+000700a6,gus_voice_select,asm,low,base+0x102 voice select / reg 0x0E
+000700d1,gus_read_port,asm,low,
+000700df,gus_reset_voices,asm,low,
+000700f2,gus_set_freq,asm,low,
+0007012b,gus_set_volume,asm,low,
+000701fe,gus_delay,asm,low,
+0007020f,gus_probe_dram,asm,low,
+0007022e,gus_probe,asm,low,
+00070256,gus_ram_size,asm,low,
+00070282,gus_dram_test,asm,low,
+00070297,gus_reset,asm,low,GF1 reg 0x4C reset
+000702ad,gus_set_dram_addr,asm,low,
+000702d6,gus_init,asm,low,reset; active voices reg 0x0E
+0007034d,gus_voice_start,asm,low,program voice (addr/loop/vol) and start

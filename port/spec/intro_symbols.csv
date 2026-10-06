@@ -1,0 +1,46 @@
+address,name,module,confidence,note
+000107bb,main,intro,verified,INTRO.EXE; stub -> Intro_Main body 0x107c8
+000107c8,Intro_Main,intro,verified,INTRO.EXE; load; mode X; scene machine 1..7; overlay; credits; exit on Esc/D release
+00013475,Intro_ExitWaitKey,intro,verified,INTRO.EXE; post-loop fragment: credits visible -> Intro_Cleanup else dead menu loop
+00013f03,Intro_Cleanup,intro,verified,INTRO.EXE; fade; text mode; sound/CD stop; restore INT 9; free
+00013ff1,Intro_DrawCredits,intro,verified,INTRO.EXE; stub (scroll;page)
+00013ffe,Intro_DrawCredits_body,intro,verified,INTRO.EXE; big font 16x9 glyphs; backslash newline +12; advance 11 (I 7; W 12)
+000142c1,Intro_ReadKey,intro,verified,INTRO.EXE; stub
+000142ce,Intro_ReadKey_body,intro,verified,INTRO.EXE; -1 Esc/D released; 1..5 arrows/Enter
+00010010,Kbd_ISR,intro,verified,INTRO.EXE; g_KeyReleased[sc&0x7f] = break ? 1 : 0
+000100ce,Spr_BlitClip,intro,verified,INTRO.EXE; stub; body 0x100db clips x to 0..0x160
+000149a6,Pal_Fade,intro,verified,INTRO.EXE; dir 0 in 25 steps; 1 out 26 steps; 1 vsync each
+000149b3,Pal_Fade_body,intro,verified,INTRO.EXE
+0001553a,CD_InitAndPlayTrack2,intro,verified,INTRO.EXE; MSCDEX checks (printf) then track 2
+00020254,Pal_Set,intro,verified,INTRO.EXE; (pal;first;last;waitVsync)
+000205c4,Video_FlipScroll,intro,verified,INTRO.EXE; (x;showPage1) start+pan; waits retrace end then start
+00020614,Tile_DrawBand,intro,verified,INTRO.EXE; (map;ptrs;band;plane;page) band = 32 rows; band 7 = 16 rows
+00020ba3,Tile_ScrollMapLeft,intro,verified,INTRO.EXE; 16 rows x 24 rotate left
+000200b8,Video_PlotUnder,intro,verified,INTRO.EXE; plot if pixel is 0 or 0x20..0x24
+000202c0,Spr_Blit,intro,verified,INTRO.EXE; chunky->planar 0 transparent
+000134d3,DeadMenu_Case0,intro,likely,INTRO.EXE; dead menu switch fragment (Ghidra caseD_0)
+0001363d,DeadMenu_Case8,intro,likely,INTRO.EXE; dead menu switch fragment (Ghidra caseD_8)
+00067018,g_Scene,global,verified,INTRO.EXE; 1..7
+00060368,g_CreditIndex,global,verified,INTRO.EXE; 0..10
+00060701,g_LogoShown,global,verified,INTRO.EXE
+00060705,g_FrameOverlayActive,global,verified,INTRO.EXE
+0006072d,g_CreditStrings,global,verified,INTRO.EXE; 11 ptrs
+0006075d,g_CreditWidths,global,verified,INTRO.EXE; 11 x {w1;w2}
+000607b5,g_GlyphSetPtr,global,verified,INTRO.EXE; -> 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?'
+0006036c,g_PalSource,global,verified,INTRO.EXE; 0x240 bytes: 0..0x5f <<2; rest >>2
+00065c18,g_Palette,global,verified,INTRO.EXE
+00065f18,g_PaletteWork,global,verified,INTRO.EXE
+00066218,g_TilePtrs,global,verified,INTRO.EXE; 384
+00066818,g_TileMap,global,verified,INTRO.EXE; 16x24 int32
+00066e18,g_KeyReleased,global,verified,INTRO.EXE; 128 int32
+00060e98,g_CityPoints,global,verified,INTRO.EXE; 405 x {x;y;col}
+00060b50,g_SpriteSize,global,verified,INTRO.EXE; 97 x {w;h}
+00067044,g_SpriteOffs,global,verified,INTRO.EXE; offs[0]=0; sprite n uses offs[n-1]
+00067040,g_Char1Buf,global,verified,INTRO.EXE; CHAR1.RAW buffer (= offs[-1] slot)
+000671ec,g_RawBuf,global,verified,INTRO.EXE
+000671e8,g_TilBuf,global,verified,INTRO.EXE
+000671fc,g_BigFont,global,verified,INTRO.EXE
+000671f8,g_SmallFontBuf,global,verified,INTRO.EXE; never drawn
+000671f0,g_AosetBuf,global,likely,INTRO.EXE; malloc 0x12c00 for the dead menu
+00067020,g_FrameBuf,global,verified,INTRO.EXE; 8 ptrs FRAME1..8 (0x67020..0x6703c)
+000671f4,g_MouseEnabled,global,verified,INTRO.EXE; never set

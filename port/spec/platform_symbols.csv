@@ -1,0 +1,106 @@
+address,name,module,confidence,note
+000146f4,main,platform,verified,2MB probe; buffers; Kbd_Install; spx; js.cfg; joystick; mode X; benchmark; Game_Run; shutdown + credits
+00010108,Video_WaitVSync,platform,verified,wait for start of next retrace (0x3DA bit3)
+00031a19,Video_CountVSync,platform,verified,wait end of retrace then count loops until next retrace
+000143d3,Video_BenchmarkSpeed,platform,verified,13 batches of 4i tile draws; frame-boundary crossings 0/1/>=2 -> g_VSyncWaits 2/1/0
+00010760,Kbd_ISR,platform,verified,INT 9: g_KeyDown[sc&0x7f]=make (E0 ignored); recompute 21 remapped key words + Alt/Ctrl edge latches
+00010a16,Kbd_Install,platform,verified,clears g_KeyDown[256]; hooks INT 9
+00010a88,Kbd_Restore,platform,verified,restores INT 9
+00010abb,Timer_Install,platform,verified,DPMI 0x204/0x205 INT 8 -> 0x310ba; PIT divisor 0x5d37 = 50.00 Hz
+00010ba0,Timer_Restore,platform,verified,never called
+00010bad,Timer_Restore2,platform,verified,duplicate entry; never called
+00010c1d,FatalError,platform,verified,(a;b;code): CD_Stop; Sound_Shutdown if sfx; text mode; printf %s%s\n; exit(code)
+00010c6b,Str_TrimRight,platform,verified,(s;i) trims spaces/NULs backwards; reads s[-1]
+00010d65,Rand,platform,verified,n==0 -> 0 without rand(); else rand()%(n+1) signed; n==-1 divides by zero
+00010da7,SwapInt,platform,verified,
+00010ddc,SwapByte,platform,verified,
+00010e11,Clamp,platform,verified,(v;lo;hi) signed
+0001178a,Wrap,platform,verified,not a true wrap: v>lo ? v%(hi-lo+1) : (v+lo)%(hi-lo+1)
+00013a25,Sign,platform,verified,
+000137de,Div16,platform,verified,v/16 truncating toward zero
+00014331,Bit_Test,platform,verified,(bit;v) (v&(1<<bit))==(1<<bit)
+00014382,Bit_Clear,platform,verified,(bit;*p) *p&=~(1<<bit)
+0001169d,Input_GetKeyCode_Stub,platform,verified,returns 0 (empty Amiga key-code reader); result stored in g_KeyCode
+00012288,File_LoadStub,platform,verified,empty; called with (jetsoundext.aaf;0;-1)
+00011eab,Input_GetBits,platform,verified,TurnR<<3|TurnL<<2|Pause<<1|g_Fire; no callers
+00011f20,Input_AnyKey,platform,verified,TurnR|TurnL|Pause or Left|Right|Up|Dn
+000122a3,Key_Up,platform,verified,returns g_KeyUp 0x84560
+000122cb,Key_Left,platform,verified,returns g_KeyLeft 0x84552
+000122f3,Key_Right,platform,verified,returns g_KeyRight 0x84564
+0001231b,Key_Down,platform,verified,returns g_KeyDn 0x8454e
+00012114,File_LoadWhole,platform,verified,(dir;name;&buf;size) size>0 fixed; -1 always malloc; 0 file size; malloc if *buf NULL; fatal 1/6
+0001aeaa,Mem_AllocMapBuffers,platform,verified,0x849f0=malloc(150000); g_MapGrid=malloc(0xfa04); *g_MapGrid=0
+0003ceae,Input_ReadControls,platform,verified,keys+joystick -> g_Fire; g_CtrlRaw[11] 0/-1 copied to g_Ctrl via global 0x90ab8; g_AnyInput
+0001acf5,Input_PollMenu,platform,verified,ReadControls; g_FireOrConfirm; g_MenuDX/DY; 4 vsync waits (15 Hz)
+0003c5b0,Input_GetFKey,platform,verified,busy-waits for F1..F10; returns 1..10
+00045144,WaitKey_Release,platform,verified,wait confirm (timeout 500 retraces) then wait release; name kept
+00045233,WaitKey_Press,platform,verified,wait confirm (no timeout) then release unless F-key held
+000327c0,Joystick_Poll,platform,verified,port 0x201 RC timing loop -> g_JoyX/g_JoyY (16-bit counts; no timeout)
+000327fb,Joystick_GetX,platform,verified,
+00032805,Joystick_GetY,platform,verified,
+0003280f,Joystick_GetButtons,platform,verified,(~in 0x201)>>4
+00032824,Joystick_WaitButton,platform,verified,(mask) wait release then press; no callers
+0001456d,Joystick_ReadDirs,platform,verified,bits 1 left 2 up 4 right 8 down vs calibration thresholds; *buttons
+000167b6,CheatKeys,platform,verified,dead code (no callers); compares g_KeyCode (always 0) with zero table 0x8456c..
+000167c3,CheatKeys_b,platform,verified,dead duplicate entry
+000489c6,rand,platform,verified,Watcom LCG seed*0x41C64E6D+0x3039; (seed>>16)&0x7FFF
+000489e8,srand,platform,verified,only caller MainMenu: srand(time(NULL)) on every entry
+000489c0,__get_rand_seed_ptr,platform,verified,returns 0x807bc
+000807bc,g_RandSeed,global,verified,uint32 initial 1
+00080054,g_VSyncWaits,global,verified,int32 0/1/2 extra retrace waits per FlipPage (2 on fast machines)
+00083958,g_KeyDown,global,verified,uint8[256] by set-1 scancode (0..0x7f written)
+000936b4,g_Config,global,verified,JS.CFG image (60 bytes on disk; 0x48 read)
+00084510,g_PackBuf,global,verified,malloc(85000) packed file buffer
+00084508,g_PicBuf,global,verified,malloc(82000) picture buffer
+000849f0,g_MapBuf,global,likely,malloc(150000) in Mem_AllocMapBuffers
+0008fe94,g_CfgFile,global,verified,FILE* temp (js.cfg; gendat3.dax)
+00084526,g_OldKbdVecOff,global,verified,saved INT 9 offset (selector at 0x8452a)
+00084490,g_OldTimerSel,global,verified,saved INT 8 selector (DPMI 0x204)
+00084480,g_OldTimerOff,global,verified,saved INT 8 offset
+00084538,g_JoyEnabled,global,verified,word from cfg+0x24
+00084536,g_DetailParallax,global,verified,word from cfg+0x2e
+00084530,g_JoyLeftThr,global,verified,uint16 cfg+0x26
+00084532,g_JoyUpThr,global,verified,uint16 cfg+0x28
+00084534,g_JoyRightThr,global,verified,uint16 cfg+0x2a
+0008452c,g_JoyDownThr,global,verified,uint16 cfg+0x2c
+0008054c,g_JoyX,global,verified,
+00080550,g_JoyY,global,verified,
+00090264,g_JoyDirs,global,verified,direction bits from Joystick_ReadDirs
+00084548,g_KeyEject,global,verified,slot cfg+0x04 (E)
+00084556,g_KeyHover,global,verified,slot cfg+0x06 (Enter) agile/hover
+00084546,g_KeyUnusedA,global,verified,slot cfg+0x08 (A) never read
+00084558,g_KeyGear,global,verified,slot cfg+0x0a (U) undercarriage
+0008455e,g_KeyUnusedL,global,verified,slot cfg+0x0c (L) never read
+00084554,g_KeyUnusedD,global,verified,slot cfg+0x0e (D) never read
+0008454a,g_KeyPause,global,verified,slot cfg+0x10 (P)
+0008454c,g_KeyAutoThrottle,global,verified,slot cfg+0x12 (Tab)
+00084544,g_KeyBriefing,global,verified,slot cfg+0x14 (B) held >8 frames
+00084542,g_KeyAbort,global,verified,slot cfg+0x16 (Esc) self-destruct/abort
+00084560,g_KeyUp,global,verified,slot cfg+0x18
+0008454e,g_KeyDn,global,verified,slot cfg+0x1a (named Dn to avoid clash with g_KeyDown)
+00084552,g_KeyLeft,global,verified,slot cfg+0x1c
+00084564,g_KeyRight,global,verified,slot cfg+0x1e
+00084550,g_KeyTurnL,global,likely,slot cfg+0x20 (LShift) heli turn left
+00084562,g_KeyTurnR,global,likely,slot cfg+0x22 (RShift) heli turn right
+0008455a,g_KeyGuns,global,verified,slot cfg+0x30 (Space)
+0008453c,g_FireLeftReq,global,verified,edge latch set by ISR (cfg+0x32 Alt); cleared by consumer
+00084540,g_FireRightReq,global,verified,edge latch set by ISR (cfg+0x34 Ctrl); cleared by consumer
+00080060,g_AltHeld,global,verified,ISR held-state for fire-left latch
+00080064,g_CtrlHeld,global,verified,ISR held-state for fire-right latch
+0008453e,g_KeyLook,global,verified,slot cfg+0x36 (KP*)
+0008453a,g_KeyTarget,global,verified,slot cfg+0x38 (Backspace) change target; renamed from g_KeySlots (it is a single slot)
+0008455c,g_Fire,global,verified,word: guns key or joystick button 1
+00090c58,g_CtrlRaw,global,verified,int32[11] 0/-1: TurnL TurnR 0 0 Fire 0 Pause Up Left Right Down
+00090c98,g_Ctrl,global,verified,int32[11] copy of g_CtrlRaw
+000909c8,g_AnyInput,global,verified,OR of g_Ctrl plus fire/space/enter
+000905cc,g_FireOrConfirm,global,verified,fire||Space||Enter (Input_PollMenu; Player_Update stores g_Fire)
+00090778,g_MenuDX,global,verified,right-left
+0009077c,g_MenuDY,global,verified,down-up
+00090444,g_WaitCount,global,verified,WaitKey retrace counter (limit 500)
+00090418,g_WaitCountInit,global,verified,start value for g_WaitCount; reset to 0
+00090490,g_KeyCode,global,verified,always 0 (Input_GetKeyCode_Stub)
+0009044c,g_LastAction,global,likely,action debounce id (3/4/5/7); *= g_ActionThisFrame each frame
+00090430,g_ActionThisFrame,global,likely,
+00080174,g_QuitGame,global,verified,set by main-menu Quit; Game_Run returns
+0008078e,g_CDChecked,global,verified,CD_Check done once
+0008078c,g_SoundInited,global,verified,Sound_Init done once

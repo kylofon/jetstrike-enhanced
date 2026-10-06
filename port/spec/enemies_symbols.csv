@@ -1,0 +1,124 @@
+address,name,module,confidence,note
+000149ae,Building_Update,enemies,verified,
+00014b4a,Commandos_Update,enemies,verified,renamed: was Flak_Update
+00015492,PrizePlane_Award,enemies,verified,
+00016f13,Bonus_Spawn,enemies,verified,
+00017072,Bonus_Update,enemies,verified,
+00017214,Bonus_Award,enemies,verified,
+00017353,Bonus_FireExtinguisher,enemies,verified,bonus effect handler (section 14.3)
+00017399,Bonus_AmmoPod,enemies,verified,bonus effect handler (section 14.3)
+000173e3,Bonus_FuelPod,enemies,verified,bonus effect handler (section 14.3)
+00017430,Bonus_Repair,enemies,verified,bonus effect handler (section 14.3)
+000174db,Bonus_AutoEject,enemies,verified,bonus effect handler (section 14.3)
+0001750b,Bonus_ECM,enemies,verified,bonus effect handler (section 14.3)
+00017530,Bonus_Armour,enemies,verified,bonus effect handler (section 14.3)
+00017597,Bonus_Saver,enemies,verified,bonus effect handler (section 14.3)
+000175da,Bonus_FirePower,enemies,verified,bonus effect handler (section 14.3)
+0001761d,Bonus_FirePower2,enemies,verified,bonus effect handler (section 14.3)
+00017642,Bonus_ExtraLife,enemies,verified,bonus effect handler (section 14.3)
+00017663,Bonus_ExtraEject,enemies,verified,bonus effect handler (section 14.3)
+00017684,Convoy_LaunchMissile,enemies,verified,
+000177db,AgentSmoke_Update,enemies,verified,
+00017944,Enemy_DropBomb,enemies,verified,
+00017c56,Flamer_Update,enemies,verified,renamed: was Turrets_Update (weapons.md name kept as alias); player flamer shot chain
+0001821c,Stub_Kind9,enemies,verified,
+00018237,OldProj_CycleFrame,enemies,likely,dead code; do not port
+00018274,OldProj_FrameFromVY,enemies,likely,dead code; do not port
+0001844f,OldProj_Brake,enemies,likely,dead code; do not port
+00018663,OldProj_AimMarker,enemies,likely,dead code; do not port
+00018720,OldProj_Combi,enemies,likely,dead code; do not port
+00018771,OldProj_Cruise,enemies,likely,dead code; do not port
+00018bc8,OldProj_SeaSkim,enemies,likely,dead code; do not port
+00018fca,OldProj_Climb,enemies,likely,dead code; do not port
+000190aa,OldProj_Proximity,enemies,likely,dead code; do not port
+00019153,OldProj_AimAndSplit,enemies,likely,dead code; do not port
+00019178,OldProj_AimMissionTarget,enemies,likely,dead code; do not port
+00019236,OldProj_Steer,enemies,likely,dead code; do not port
+00019574,OldProj_SpeedFromV,enemies,likely,dead code; do not port
+00019669,OldProj_Speed32,enemies,likely,dead code; do not port
+0001968e,OldProj_Cluster,enemies,likely,dead code; do not port
+00019ab5,OldProj_HerculesDrop,enemies,likely,dead code; do not port wrapper
+00019ac2,OldProj_HerculesDrop_Body,enemies,likely,dead code; do not port
+00019c6f,OldProj_Fall,enemies,likely,dead code; do not port
+00019cc8,EnemyShells_Update,enemies,verified,renamed: was Targets_Update
+00019fda,EnemyMissiles_Update,enemies,verified,renamed: was Helis_Update
+0001a7cb,OldProj_HomeAir,enemies,likely,dead code; do not port
+00026520,Particles_Nop,enemies,verified,
+0002653b,Particles_Clear,enemies,verified,
+00026560,Particle_Spawn,enemies,verified,
+0002661e,Particles_Update,enemies,verified,
+000268be,Tracer_Stub,enemies,verified,
+0002bc0b,Airbase_Update,enemies,verified,
+0002c55b,AirbaseCrew_Update,enemies,verified,renamed: was Balloons_Update
+0002c8a2,FireEngine_Spray,enemies,verified,
+00035a33,EnemyPilots_Update,enemies,verified,renamed: was Mines_Update
+00035e20,EnemyGround_Update,enemies,verified,
+00036ae3,EnemyAir_Update,enemies,verified,
+000389b0,EnemyFire_Sfx,enemies,verified,
+00038ba8,EnemyBomber_Spawn,enemies,verified,
+0003b27c,Debris_Update,enemies,verified,
+0003b5c0,Debris_Spawn,enemies,verified,
+0003b6e6,Debrief_SignX,enemies,verified,
+0003b743,Convoy_DeathStub,enemies,verified,
+0003cd9e,Heading_TurnToward,enemies,verified,
+0003d105,Convoy_Update,enemies,verified,
+0003dc4e,BaseRepair_Update,enemies,verified,
+0003dd5e,BaseHit_Losses,enemies,verified,
+0003dea2,Gun_Draw,enemies,verified,
+0003dfaa,Flak_Draw,enemies,verified,
+0003e0b2,SAM_Draw,enemies,verified,
+0003e705,OldFlak_Shell,enemies,likely,dead code; do not port wrapper
+0003e712,OldFlak_Shell_Body,enemies,likely,dead code; do not port
+0003e8b3,Gun_Fire,enemies,verified,
+0003ea8f,Convoy_FireShell,enemies,verified,
+0003ec5b,Flak_Fire,enemies,verified,
+0003ef72,SAM_Fire,enemies,verified,
+0003f991,Enemy_LoadSpx,enemies,verified,
+0003fa76,Enemy_ReplaceSprite,enemies,verified,
+0003faab,Enemy_SetupSpriteIds,enemies,verified,
+0003ff4d,Truck_LoadSpx,enemies,verified,
+00040f5a,OldEnemyMissiles_AtConvoy,enemies,likely,dead code; do not port wrapper
+00040f67,OldEnemyMissiles_AtConvoy_Body,enemies,likely,dead code; do not port
+0004424d,TargetVehicle_Spawn,enemies,verified,renamed: was Enemy_InitPositions
+00044478,TargetVehicles_Update,enemies,verified,renamed: was Ships_Update
+000447f3,TV_LaunchSAM,enemies,verified,
+000448d7,TV_FireShell,enemies,verified,
+00045859,Pickup_Update,enemies,verified,
+0008ff10,g_ViewTarget,global,verified,
+0008ffa0,g_ShellCount,global,verified,
+0008ffe0,g_ConvoyTrain,global,verified,
+0009007c,g_PracticeEjects,global,verified,
+00090094,g_Speed,global,verified,
+000900b4,g_TVCount,global,verified,
+000900d8,g_DamageLevel,global,verified,
+000901ac,g_BaseYOff,global,verified,
+00090338,g_FireRack,global,verified,
+00090348,g_EnemyGroundCount,global,verified,
+00090378,g_FuelBase,global,verified,
+00090424,g_PlayerScrX,global,verified,
+00090428,g_PlayerScrY,global,verified,
+00090454,g_LockTarget,global,verified,
+000904cc,g_IsHeli,global,verified,
+00090544,g_GunPowerUp,global,verified,
+000905a0,g_FrameParity,global,verified,
+000905ac,g_ConvoyCount,global,verified,
+000905b8,g_Fuel,global,verified,
+000905c0,g_EscortMode,global,verified,
+000905f0,g_RunwayFill,global,verified,
+000906b8,g_EnemyBombs,global,verified,
+000906cc,g_EnemyBombRef,global,verified,
+000906d4,g_EnemySetIndex,global,verified,
+000906e0,g_EnemySkill,global,verified,
+000906e4,g_EnemySpxLetter,global,verified,
+000906f0,g_EnemyBombWeapon,global,verified,
+000906f8,g_EnemyMissiles,global,verified,
+000906fc,g_EnemyMslCount,global,verified,
+00090708,g_EnemyAirCount,global,verified,
+00090890,g_BonusType,global,verified,
+00090944,g_GunPowerUp2,global,verified,
+000909d8,g_EscortNeeded,global,verified,
+000909e8,g_PickupX,global,verified,
+000909ec,g_PickupY,global,verified,
+00090ab8,g_LoopI,global,verified,
+00091648,g_MissionParams,global,verified,
+00093228,g_ParticleCount,global,verified,

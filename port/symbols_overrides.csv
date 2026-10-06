@@ -1,0 +1,29 @@
+address,name,module,confidence,note
+00016e38,BaseRadar_Update,level,high,"conflict: level.md (verified, animated dish sprite 0x1e2-0x1e5) over game_flow Windsock_Update"
+00025add,PlaneRecord_Load,game_flow,high,conflict: game_flow over first-pass PilotRecord_Load
+000403c1,Player_GliderUpdate,player,high,conflict: player.md authoritative (level called it Player_HoverUpdate)
+00080050,g_ParallaxBuf,global,high,= level g_Backdrop
+00080070,g_FogActive,global,high,fog switch (level.md); video.md's g_NightPalActive is wrong
+0008078c,g_SoundInitDone,global,high,= platform g_SoundInited
+0008078e,g_CDCheckDone,global,high,= platform g_CDChecked
+0008453c,g_FireKey1,global,high,= platform g_FireLeftReq (edge latch)
+00084540,g_FireKey2,global,high,= platform g_FireRightReq (edge latch)
+0008fcb0,g_RackCount,global,high,= game_flow g_RackRounds
+00090338,g_FireRack,global,high,= game_flow g_RackSel
+00092ad4,g_ParallaxPal,global,high,= level g_BackdropPal
+00092b18,g_FogSticky,global,high,= game_flow g_FogPending (never cleared)
+0008fea4,g_Shared_8fea4,global,medium,reused: menu zone hit (game_flow) and explosion debris mode (weapons)
+0009002c,g_Shared_9002c,global,medium,reused: plane candidate (select screens) and fire kind P1 (weapons)
+000900f0,g_Shared_900f0,global,medium,reused: sfx busy timer (sound) / explosion sfx hold (weapons): check if one meaning
+00090690,g_Shared_90690,global,medium,reused scratch: level/menus and weapon fire-fail flag
+00090790,g_Shared_90790,global,medium,reused: target vy (player) and launch direction y (weapons)
+000909c0,g_Shared_909c0,global,medium,reused: alien abduction flag (game_flow) and crash timer (sound)
+00092b04,g_Shared_92b04,global,medium,reused in Game_Run: CD mission track pick and effective throttle
+00050000,LZW_Unpack,asm,high,obj2 LZW unpacker entry (rt asm_unpack)
+00050020,LZW_Init,asm,high,
+00050090,LZW_ReadCode,asm,high,
+000501e0,LZW_Decode,asm,high,
+0009097c,g_AutoThrottle,global,high,player.md: Tab toggles autothrottle (game_flow called it g_TrainingMode)
+000389b0,Sfx_RandomAmbient,sound,high,random sfx 0x10/0x1a (Rand(20)/Rand(10)) not tied to an enemy (enemies called it EnemyFire_Sfx)
+0003b6e6,Eject_SetPilotX,player,medium,uses player position and Sign(0x90328) (enemies called it Debrief_SignX)
+000900d8,g_EngineFire,global,medium,player.md: 1..2 smoke / 3 out of control / >3 dead (enemies: g_DamageLevel)

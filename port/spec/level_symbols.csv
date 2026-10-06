@@ -1,0 +1,84 @@
+address,name,module,confidence,note
+00010cb6,Map_GetTileAttr,level,verified,(x;y;t) g_MapVal[(t&3)*256+tile]
+00010d22,Map_SetTile,level,verified,
+000116dd,Map_GetTile,level,verified,
+000133b3,Tileset_LoadTlx,level,verified,TLX LZW -> g_TileData; .pal 0xC0 bytes -> palette 128..191; name ext restored to .tlx
+0001351e,Parallax_Load,level,verified,.dx0/.dx1 + .p0<Rand(1)>/.p10; leaves g_TilesetName ext rewritten (tileset reloaded every mission)
+00015194,Runway_Update,level,verified,night runway light sprite 0x192/0x193 running along the runway
+00015387,AgentDrop_Update,level,verified,renamed from StealMission_Update: p03 form b is an agent drop; zone marker + smoke points
+00017be5,AgentDrop_Release,level,verified,renamed from StealMission_Taken: at column p03+4 releases the agent (crate object; AGENT DROPPED)
+0001af0f,Bertha_Update,level,verified,counts air/rubble cells of the stamp; < p07: muzzle blast + shell on the runway 20 frames later; else p19=0
+00025c13,Tileset_Load,level,verified,Tileset_LoadTlx + dead loop
+0002422d,Map_LoadMxp,level,verified,LZW grid; width; original+live ground rows; g_SkyTile=tile(0;0)
+00024377,Map_ResetCounters,level,verified,zeroes 0x90690 0x90638 0x90634
+000243d6,Map_StampBertha,level,verified,data/bertha<A+p19/1000> at (p19%1000;p28); lowers live heights
+0003b777,Map_CraterAt,level,verified,(px;py;dmg) tile destruction; score; debris/smoke/secondary explosion; column collapse and spread
+0003cdec,Map_ScanAround,level,verified,min live ground row over x-10..x+9 (wrap bug at x==W)
+0003e1a3,Map_TriggerColumn,level,verified,was FUN_0003e1a3: MP2 column trigger (classes 0x83-0x86/5; ground launcher spawn)
+0003e66b,Map_TriggerColumnAhead,level,verified,was FUN_0003e66b: MP2 trigger for column of camX+scrX+fineX+16 (projectile/weapon-cam path)
+0003f02e,Mission_CheckComplete,level,verified,per frame while on the ground: objectives when stopped on the runway
+0003f195,Map_DamageColumn,level,verified,(x;y;tile;mode) clears column upward; armour sum in 0x933b0; uninitialised return (see spec 4.1)
+0003f2d8,Map_ColArmourSum,level,verified,was FUN_0003f2d8: returns 0x933b0
+000403c1,Player_HoverUpdate,level,likely,renamed from Camera_Update: VTOL/hover vertical physics; not a camera routine (player spec owns details)
+00040e8b,Map_FindTile,level,verified,(v;x0;y0;x1;y1;mode) first column whose tile (mode 0) or attr table mode-1 == v
+00014abe,Map_SecondaryExplosions,level,verified,was FUN_00014abe: Explosion_Damage for queued table-3 bit 0x04 tiles
+00044a5d,Mission_CheckObjectives,level,verified,target forms a/c; Aero pad score; p20; all-objectives test -> g_MissionResult
+00045584,Waypoint_Update,level,verified,Aerolimits gates
+0004596f,Crate_Update,level,verified,Aerolimits crate and agent-drop parachute fall
+00016e38,BaseRadar_Update,level,verified,was FUN_00016e38: animated sprite at the class-0x8C tile near the base
+000849d0,g_MapGrid,global,verified,4-byte header + W*64 tiles (0xFA04 buffer; W<=1000)
+000849d8,g_MapVal,global,verified,VAL 4x256 + live heights +0x400 + original heights +0xBD0
+000849ec,g_MapMp2,global,verified,was DAT_000849ec: MP2 column trigger table
+00080074,g_MapLoaded,global,verified,was DAT_00080074: name of the map in memory
+00080058,g_TileData,global,verified,was DAT_00080058: 64 KB tile pixels
+00080050,g_Backdrop,global,verified,was DAT_00080050: parallax backdrop 0x280C8
+00092ad4,g_BackdropPal,global,verified,copy of the 48 backdrop palette bytes
+000900c4,g_SkyTile,global,verified,tile id used to erase (tile(1;0) after Mission_Setup)
+000901a8,g_BaseEndX,global,verified,runway right end px
+00090180,g_BaseStartX,global,verified,runway left boundary px
+000901ac,g_BaseYOff,global,verified,(63-runway row)*16
+000905f0,g_RunwayFill,global,verified,tile used to repair runway holes
+00090818,g_BaseIsCarrier,global,verified,attr0(end col;63)==0x82
+000903b4,g_MapWidthPx,global,verified,W*16 camera wrap limit
+0008ff18,g_TrigCol,global,likely,MP2 trigger column / player column (shared)
+00090690,g_Scratch690,global,verified,MP2 byte while triggering; general scratch
+0008fee4,g_TrigOff,global,verified,
+0008feec,g_TrigRow,global,verified,
+000905bc,g_TrigClass,global,verified,
+0009047c,g_RadarJammed,global,verified,class 0x86 trigger -> radar Jammed
+0009089c,g_MarkerX,global,verified,class 5 marker x px (sprite 0x1e9)
+000908a0,g_MarkerY,global,verified,
+00090574,g_TargetMarkX,global,verified,HUD arrow/guided target x px (0 none)
+0009052c,g_TargetMarkY,global,verified,
+000933b0,g_ColArmourSum,global,verified,
+00090504,g_TargetsDone,global,verified,
+000902f4,g_TargetTilesInit,global,verified,form c initial count
+000903b8,g_AeroPadScore,global,verified,(4-|i-5|)*2500
+000908e8,g_BerthaCol,global,verified,
+000908ec,g_BerthaRow,global,verified,
+000908e4,g_BerthaW,global,verified,
+000908dc,g_BerthaH,global,verified,
+000908c8,g_BerthaDelay,global,verified,600 frames
+000908d8,g_BerthaShellTimer,global,verified,shell lands at 20
+000908f4,g_BerthaShellX,global,verified,
+00090280,g_AgentDropPending,global,verified,p03 form b active
+00090948,g_CrateX,global,verified,
+0009094c,g_CrateY,global,verified,
+00090940,g_CrateSprite,global,verified,
+0009091c,g_CrateVY,global,verified,
+00090334,g_AeroGateIdx,global,verified,
+00090570,g_AeroGatePostHit,global,verified,
+00080070,g_FogActive,global,verified,renamed from g_NightPalActive (video): set only for fog and never at night
+00092b18,g_FogSticky,global,verified,set by FOG WARNING; never cleared
+00090768,g_SpecialHit,global,verified,class 0xC7 hit; forces fog next sortie
+0008ff10,g_ViewTarget,global,verified,follow view: -1 none; projectile slot; 50 B52; 100 Fat Albert; 150 ground force; 200 enemy; < -1 hold
+0008ff68,g_ViewX,global,verified,alternative view camera x (swapped with g_CamX for drawing)
+0008ff70,g_ViewY,global,verified,
+000904dc,g_TrigCamCol,global,verified,last camera column for the MP2 trigger
+000904e0,g_TrigCamRow,global,verified,
+00090384,g_PrevCamX,global,verified,
+00090374,g_PrevCamY,global,verified,
+0009017c,g_RunwayLightX,global,verified,
+000902c0,g_LauncherCol,global,verified,ground launcher spawned by MP2 trigger (Building_Update)
+0008ec48,g_SmokeX,global,verified,6 smoke points (with 0x8ec60 y; 0x8ec30 timer; count 0x90100)
+0008dfd0,g_SecExpX,global,verified,secondary explosions (0x8e050 y; 0x8df50 dmg; count 0x902fc)
