@@ -206,8 +206,11 @@ E2 notes (from E2.1):
   bullets live while in the view (weapons.c:294, `0x140`/`0xb0` + extra; the gun now reaches the view's right
   edge), `Explosion_Terrain` runs for craters in the view (weapons.c:1515). Winch and look-around (user,
   2026-10-06): the winch lets go past `camX + 0x17c + extra cols` (support.c:347); look-around steps one view
-  width / playfield height (player.c:709, `0x140`/`0xb0` + extra). Left for E3.1: enemy shell pixels
-  (enemies.c:868, Q13), lightning x clamp (frame.c:105).
+  width / playfield height (player.c:709, `0x140`/`0xb0` + extra). Enemy shells and lightning (user,
+  2026-10-06): outside 320×240 the shell dot is drawn on the back page where the shell is, anywhere in the
+  view (Q13 fixed; 320×240 keeps the HUD-page dot as the regression mode; Q14 hit test unchanged); the lightning
+  bolt starts at `Rand(200 + extra cols) + 0x2c` and is clamped to the view width (Q6, no bolt on page B, kept).
+  E3.1 still has to walk the remaining `0x140`/`0xb0`/`0xaf` sites and confirm the player-relative ones.
 - Messages (user, 2026-10-06): `Hud_DrawMessages` and `Hud_DrawBriefing` centre on `vl.view_w / 2` (same rows
   from the top). The other centred `0xa0` texts are 320×240 front-end screens or HUD-panel text.
 - The backdrop line at the bottom of the view is the original's at the same bottom edge (`py` from

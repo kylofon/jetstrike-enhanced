@@ -864,9 +864,15 @@ void EnemyShells_Update(void)
         g_CurX = SX[j] - g_CamX;
         g_CurY = SY[j] - g_CamY;
         /* Q13: absolute VRAM (the HUD panel page); the colour argument is not pushed in the original (a byte of
-         * the caller's saved EBP). PORT: a fixed colour. */
-        if (g_CurX > -1 && g_CurX < 0x140 && (u32)g_CurY < 0x80000000u && g_CurY < 0xb0)
-            Video_PutPixel((u32)g_CurX, g_CurY, 0xff);
+         * the caller's saved EBP). PORT: a fixed colour. ENH: in a view other than 320x240 (which stays the
+         * regression mode) Q13 is fixed: the shell is drawn on the back page where it is, anywhere in the view
+         * (screen = world - camera, as Sprite_Queue). */
+        if (vl.view_w == 320 && vl.view_h == 240) {
+            if (g_CurX > -1 && g_CurX < 0x140 && (u32)g_CurY < 0x80000000u && g_CurY < 0xb0)
+                Video_PutPixel((u32)g_CurX, g_CurY, 0xff);
+        } else if (g_CurX >= 0 && g_CurX < vl.view_w && g_CurY >= 0 && g_CurY < vl.split) {
+            Video_PutPixel((u32)(g_CurX + g_ScrollFineX), g_BackPage / VRAM_ROWB + 16 + g_CurY + g_ScrollFineY, 0xff);
+        }
         /* Q14: x compared with itself, y with camera X + screen y */
         if (BoxOverlap(g_ViewCamX + g_CurX, g_ViewCamY + g_CurY, g_ViewCamX + g_CurX, g_ViewCamX + g_PlayerScrY,
                        SSIZE[j] * 0x18 + 8, SSIZE[j] * 0x18 + 8)) {

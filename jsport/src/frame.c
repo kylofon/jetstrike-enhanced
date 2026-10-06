@@ -93,7 +93,7 @@ static void lightning(void)                      /* GF step 48, video.md §7.1 *
         for (DS32(0x90470) = 0; DS32(0x90470) < 0x30; DS32(0x90470)++) {}
     g_LightningCooldown = 0x32;
     Sfx_Play(0x12, 0x157c, 0x3f, g_CamX + g_PlayerScrX);
-    g_BoltX = Rand(200) + 0x2c;
+    g_BoltX = Rand(200 + VIEW_EXTRA_COLS) + 0x2c;          /* ENH: view: anywhere across the view */
     g_BoltY = g_BackPage / VRAM_ROWB;
     for (;;) {
         if (Rand(0x28) + 0x3c <= g_BoltY) break;      /* page B (row 322): no bolt (video.md Q6) */
@@ -102,7 +102,7 @@ static void lightning(void)                      /* GF step 48, video.md §7.1 *
         int a = Rand(0x14);
         int x = g_BoltX + a;
         int b = Rand(0x14);
-        DS32(0x8FFAC) = Clamp(x - b, 0, 0x140);
+        DS32(0x8FFAC) = Clamp(x - b, 0, 0x140 + VIEW_EXTRA_COLS);   /* ENH: view */
         Video_DrawLine((u32)g_BoltX, (u32)g_BoltY, (u32)DS32(0x8FFAC), (u32)DS32(0x8FFB4), 0xff);
         g_BoltX = DS32(0x8FFAC);
         g_BoltY = DS32(0x8FFB4);
