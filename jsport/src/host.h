@@ -73,6 +73,7 @@ _Noreturn void host_fatal_code(int code, const char *fmt, ...);
  *   JS_SNAPSHOT_DIR=dir   save presented frames as snapNNNN.png, one every JS_SNAPSHOT_MS (default 2000)
  *   JS_KEYS="<sec>:<xx>[+<xx>...][p|r],..."  scripted set-1 keys (hex; grey keys e0xx), p = press only,
  *                         r = release only
+ *   JS_SNAP_AT="t1,t2,.." with JS_VCLOCK=1: frame at each game time to dir/at_NNN.png + hash line in dir/snap.txt
  *   JS_QUIT_AFTER=sec     exit(0) after that many seconds (headless runs)
  *   JS_AUDIO_DUMP=file    write the mixer stream (u8 mono) to a WAV file */
 double host_seconds(void);

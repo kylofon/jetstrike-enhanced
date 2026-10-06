@@ -140,6 +140,7 @@ fopen(DSTR(0x80EE6), DSTR(0x80C77));            /* strings of the exe: "js.cfg",
 | `SDL_VIDEO_DRIVER=dummy`, `SDL_AUDIO_DRIVER=dummy` | headless run (no window, no sound device; timing unchanged) |
 | `JS_SNAPSHOT_DIR=dir` | every presented frame >= `JS_SNAPSHOT_MS` (default 2000) ms after the previous one is saved as `dir/snapNNNN.png` |
 | `JS_KEYS="<sec>:<xx>[+<xx>...][p\|r],..."` | scripted set-1 keys in hex at that many seconds after start (grey keys `e048`); a tap is held 0.2 s; `p` = press only, `r` = release only: `"2:39,5:01"` = Space at 2 s, Esc at 5 s; `"4:e048p,9:e048r"` holds Up for 5 s |
+| `JS_SNAP_AT="t1,t2,..."` | with `JS_SNAPSHOT_DIR` and `JS_VCLOCK=1`: the first presented frame at or after each game time (seconds, ascending) is saved as `dir/at_NNN.png` and `NNN time FNV-1a(RGB)` is appended to `dir/snap.txt`; used by `tools/snapcheck/snapcheck.py` (frame-exact regression check, `ref.txt` = hashes at 320x240) |
 | `JS_QUIT_AFTER=sec` | exit after that many seconds |
 | `JS_AUDIO_DUMP=file.wav` | record the mixer output (u8 mono at the SB rate) |
 | `JS_SEED=n` | replaces `time(NULL)` in MainMenu's `srand` (reproducible runs) |

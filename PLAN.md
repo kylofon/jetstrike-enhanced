@@ -16,12 +16,12 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Start E0.2 (below). | | |
+| — | Nothing yet. Start E1.1 (below). | | |
 
 ## Status
 
-- **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed).
-- **Next:** E0.2 (reference snapshots), Sonnet.
+- **Done:** E0.1 (repo setup: sdl3 history merged, binaries renamed), E0.2 (`tools/snapcheck`: 76 frames in 9 scenarios, deterministic).
+- **Next:** E1.1 (runtime view size), Opus.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -137,7 +137,7 @@ Model: H = Haiku, S = Sonnet, O = Opus. Size: S < 1 h of agent work, M = one ses
 | Id | Task | Model | Size / Status |
 |---|---|---|---|
 | E0.1 | jetstrike-sdl3 history merged; binaries renamed (game `jsenh`, launcher `JetStrikeEnhanced`, own settings folder; CMake targets keep their names for clean upstream merges) | O | done 2026-10-06 |
-| E0.2 | Reference snapshots at 320×240: headless (`SDL_VIDEO_DRIVER=dummy`), scripted keys, frame dumps for front end + one mission of each type, plus a compare script (`tools/snapcheck`) that prints only pass/fail counts | S | M |
+| E0.2 | Reference snapshots at 320×240: headless (`SDL_VIDEO_DRIVER=dummy`), scripted keys, frame dumps for front end + one mission of each type, plus a compare script (`tools/snapcheck`) that prints only pass/fail counts | S | done 2026-10-06 (`python tools/snapcheck/snapcheck.py`, about 45 s; `--update` only from a known-good build) |
 
 ### Phase E1 — Runtime view size (§1–2; gate: E0.2 snapshots match byte for byte at 320×240)
 | Id | Task | Model | Size |

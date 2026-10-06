@@ -70,11 +70,48 @@ static void snapshot(void)
     SDL_DestroySurface(s);
 }
 
+/* Developer aid: JS_SNAP_AT="t1,t2,..." (ascending seconds on the JS_KEYS clock, use with JS_VCLOCK=1) saves the
+ * first presented frame at or after each time as dir/at_NNN.png (dir = JS_SNAPSHOT_DIR) and appends
+ * "NNN <time> <FNV-1a of the RGB pixels>" to dir/snap.txt: the reference data of tools/snapcheck. */
+static void snapshot_at(void)
+{
+    static const char *spec;
+    static bool checked;
+    static int n;
+    if (!checked) {
+        const char *d = SDL_getenv("JS_SNAPSHOT_DIR");
+        spec = (d && *d) ? SDL_getenv("JS_SNAP_AT") : NULL;
+        checked = true;
+    }
+    if (!spec || !*spec) return;
+    char *end;
+    double at = SDL_strtod(spec, &end);
+    if (end == spec) { spec = NULL; return; }
+    if (host_script_seconds() < at) return;
+    uint32_t h = 2166136261u;
+    for (int i = 0; i < HOST_FRAME_W * HOST_FRAME_H; i++) {
+        uint32_t px = frame[i];
+        for (int k = 0; k < 3; k++) { h ^= (px >> (8 * k)) & 0xFF; h *= 16777619u; }
+    }
+    const char *dir = SDL_getenv("JS_SNAPSHOT_DIR");
+    char path[512];
+    SDL_Surface *s = SDL_CreateSurfaceFrom(HOST_FRAME_W, HOST_FRAME_H, SDL_PIXELFORMAT_XRGB8888, frame,
+                                           HOST_FRAME_W * 4);
+    SDL_snprintf(path, sizeof path, "%s/at_%03d.png", dir, n);
+    if (s) { SDL_SavePNG(s, path); SDL_DestroySurface(s); }
+    SDL_snprintf(path, sizeof path, "%s/snap.txt", dir);
+    FILE *f = fopen(path, "a");
+    if (f) { fprintf(f, "%03d %.2f %08x\n", n, at, h); fclose(f); }
+    n++;
+    spec = (*end == ',') ? end + 1 : NULL;
+}
+
 void host_present(void)
 {
     if (!frame_source) return;
     frame_source(frame);
     snapshot();
+    snapshot_at();
     if (!texture) return;
     SDL_UpdateTexture(texture, NULL, frame, HOST_FRAME_W * 4);
     SDL_SetRenderDrawColor(host_renderer, 0, 0, 0, 255);
