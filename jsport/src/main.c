@@ -29,8 +29,8 @@
 #include "video.h"
 
 /* ENH: the view without --view. PLAN.md decision 1 makes 640x360 the default once the wide renderer is in. */
-#define VIEW_DEFAULT_W 320
-#define VIEW_DEFAULT_H 240
+#define VIEW_DEFAULT_W 640
+#define VIEW_DEFAULT_H 360
 
 static int usage(const char *prog)
 {

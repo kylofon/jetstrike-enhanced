@@ -9,7 +9,7 @@ tools/snapcheck/ref.txt. Prints only the pass / fail counts (and the failing fra
   python tools/snapcheck/snapcheck.py --update   rewrite ref.txt from this build (only from a build known to be right)
   python tools/snapcheck/snapcheck.py --twice    run twice and compare the runs with each other (determinism check)
   options: --exe PATH (default jsport/build/jsenh.exe[/jsport.exe]), --game-dir DIR (default Game),
-           --only NAME[,NAME] (scenario names), --view WxH (passed to the game; default none = the game's default view)
+           --only NAME[,NAME] (scenario names), --view WxH (passed to the game; default 320x240, the regression view)
 
 Frames land in work/snapcheck/<scenario>/at_NNN.png (look at them when a hash differs).
 Scenario times are game seconds; a mission scenario takes about 40 s of real time, scenarios run in parallel.
@@ -102,7 +102,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update", action="store_true"); ap.add_argument("--twice", action="store_true")
     ap.add_argument("--exe"); ap.add_argument("--game-dir", default=os.path.join(ROOT, "Game"))
-    ap.add_argument("--only"); ap.add_argument("--view")
+    ap.add_argument("--only"); ap.add_argument("--view", default="320x240")
     a = ap.parse_args()
     names = a.only.split(",") if a.only else list(SCENARIOS)
     exe = find_exe(a.exe)

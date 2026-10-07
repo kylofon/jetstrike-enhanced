@@ -13,6 +13,7 @@
 class wxButton;
 class wxCheckBox;
 class wxChoice;
+class wxSpinCtrl;
 class wxStaticBitmap;
 class wxStaticText;
 class wxTextCtrl;
@@ -49,6 +50,8 @@ private:
     void Play();
     void About();
     void Save();
+    void ViewChanged();             // custom fields on/off, window sizes in the scale list
+    void CurrentView(int& w, int& h) const;
 
     wxTextCtrl* folder_ = nullptr;
     wxTextCtrl* program_ = nullptr;
@@ -69,6 +72,10 @@ private:
     wxStaticText* keysNote_ = nullptr;
 
     wxChoice* sbRate_ = nullptr;
+    wxChoice* view_ = nullptr;
+    wxSpinCtrl* viewW_ = nullptr;
+    wxSpinCtrl* viewH_ = nullptr;
+    wxStaticText* viewNote_ = nullptr;
     wxChoice* scale_ = nullptr;
     wxCheckBox* fullscreen_ = nullptr;
     wxCheckBox* noIntro_ = nullptr;

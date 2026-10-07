@@ -16,7 +16,7 @@ remove it when it is done.
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| — | Nothing yet. Next is U-wide (look at the dumps), then U-play. | | |
+| — | Nothing yet. Next is U-wide (look at the dumps), then U-play. Also try the launcher's new View size choice (E4.2). | | |
 
 ## Status
 
@@ -25,7 +25,7 @@ remove it when it is done.
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
   parallax at any view; 76/76 at 320×240), E2.2 (camera limit, player box centred, blitter clipping), HUD centred (E4.1), E3.1 (screen-value
   sites: changed or tagged as kept; 76/76 at 320×240).
-- **Next:** U-wide (user), U-play (user), E4.2 launcher (ground collision), Opus; then U-play.
+- **Next:** U-wide (user), U-play (user), then E5 fixes (ground collision), Opus; then U-play.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -259,7 +259,14 @@ E3 notes (from E3.2):
 | Id | Task | Model | Size |
 |---|---|---|---|
 | E4.1 | HUD panel centred with side fill | S | done 2026-10-06 (colour 0 at the sides, in `compose()`) |
-| E4.2 | Launcher "View size" (presets + custom) → `--view WxH`; desktop-fit integer scale | S | M |
+| E4.2 | Launcher "View size" (presets + custom) → `--view WxH`; desktop-fit integer scale | S | done 2026-10-07 (see E4 notes) |
+
+E4 notes (from E4.2):
+- Launcher: **View size** (five presets, custom with width/height fields; width is rounded to a multiple of 16)
+  → `--view WxH` in `game.cpp`; **Window size** lists view × 1..6 and is relabelled when the view changes. Settings
+  `View`, `ViewW`, `ViewH`. The desktop fit was already in the game (E1.2). Built with `-DJS_LAUNCHER=ON` (wx 3.2).
+- The game's default view is now 640×360 (`VIEW_DEFAULT_*` in `main.c`); `snapcheck.py` passes `--view 320x240`
+  by default (76/76).
 
 ### Phase E5 — Fixes
 | Id | Task | Model | Size |

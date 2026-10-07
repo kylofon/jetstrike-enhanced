@@ -70,6 +70,7 @@ bool LaunchGame(const GameOptions& o, wxString& error) {
     }
     std::vector<wxString> args{o.program,
                                "--game-dir", o.gameDir,
+                               "--view", wxString::Format("%dx%d", o.viewW, o.viewH),
                                "--scale", wxString::Format("%d", o.scale),
                                "--sb-rate", wxString::Format("%d", o.sbRate)};
     if (o.fullscreen) args.push_back("--fullscreen");

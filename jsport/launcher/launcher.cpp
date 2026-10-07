@@ -13,6 +13,7 @@
 #include <wx/progdlg.h>
 #include <wx/settings.h>
 #include <wx/sizer.h>
+#include <wx/spinctrl.h>
 #include <wx/statbmp.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
@@ -40,6 +41,18 @@ const char* const SECTION = "Game";
 
 const int MIN_SCALE = 1, MAX_SCALE = 6, DEFAULT_SCALE = 3;
 const int SB_RATES[] = {19920, 3906};
+
+// View sizes (--view WxH: the whole mission screen including the HUD). The last choice is a custom size.
+struct ViewPreset { int w, h; const wchar_t* label; };
+const ViewPreset VIEWS[] = {
+    {320, 240, L"320 × 240: the original"},
+    {480, 270, L"480 × 270 (16:9)"},
+    {640, 360, L"640 × 360 (16:9, recommended)"},
+    {640, 480, L"640 × 480 (4:3)"},
+    {960, 540, L"960 × 540 (16:9)"},
+};
+const int N_VIEWS = sizeof VIEWS / sizeof VIEWS[0], CUSTOM_VIEW = N_VIEWS, DEFAULT_VIEW = 2;
+const int VIEW_MIN_W = 320, VIEW_MAX_W = 960, VIEW_MIN_H = 240, VIEW_MAX_H = 540;
 
 #ifdef __WXMSW__
 HRESULT CALLBACK AboutCallback(HWND hwnd, UINT msg, WPARAM, LPARAM lp, LONG_PTR) {
@@ -196,10 +209,29 @@ LauncherDialog::LauncherDialog()
     sbRate_->SetToolTip("The original means to play its effects at 19 920 Hz, but a bug programs the card for 3 906 Hz: "
                         "lower, slower, muffled effects, as players heard them in 1994 (--sb-rate).");
     grid->Add(sbRate_, 0, wxALIGN_CENTER_VERTICAL);
+    grid->Add(new wxStaticText(ob, wxID_ANY, "&View size:"), 0, wxALIGN_CENTER_VERTICAL);
+    view_ = new wxChoice(ob, wxID_ANY);
+    for (const ViewPreset& v : VIEWS) view_->Append(v.label);
+    view_->Append(L"Custom…");
+    view_->SetToolTip("How much of the map you see around the plane (--view). The game draws its original pixels "
+                      "at 1:1; a larger view shows more. In the front end the original 320 × 240 screens are used.");
+    grid->Add(view_, 0, wxALIGN_CENTER_VERTICAL);
+    grid->Add(new wxStaticText(ob, wxID_ANY, "Custom size:"), 0, wxALIGN_CENTER_VERTICAL);
+    auto* custom = new wxBoxSizer(wxHORIZONTAL);
+    viewW_ = new wxSpinCtrl(ob, wxID_ANY, "640", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, VIEW_MIN_W,
+                            VIEW_MAX_W, 640);
+    viewH_ = new wxSpinCtrl(ob, wxID_ANY, "360", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, VIEW_MIN_H,
+                            VIEW_MAX_H, 360);
+    viewW_->SetToolTip("Width: a multiple of 16, 320 to 960.");
+    viewH_->SetToolTip("Height: 240 to 540, the HUD included.");
+    custom->Add(viewW_, 0, wxALIGN_CENTER_VERTICAL);
+    custom->Add(new wxStaticText(ob, wxID_ANY, L" × "), 0, wxALIGN_CENTER_VERTICAL);
+    custom->Add(viewH_, 0, wxALIGN_CENTER_VERTICAL);
+    grid->Add(custom, 0, wxALIGN_CENTER_VERTICAL);
     grid->Add(new wxStaticText(ob, wxID_ANY, "&Window size:"), 0, wxALIGN_CENTER_VERTICAL);
     scale_ = new wxChoice(ob, wxID_ANY);
-    for (int s = MIN_SCALE; s <= MAX_SCALE; ++s) scale_->Append(wxString::Format(L"%d × %d", 320 * s, 240 * s));
-    scale_->SetToolTip("The window's size when the game starts. Alt+Enter switches to full screen.");
+    scale_->SetToolTip("The window's size when the game starts: the view times a whole number. A window that "
+                       "doesn't fit the desktop is made smaller. Alt+Enter switches to full screen.");
     grid->Add(scale_, 0, wxALIGN_CENTER_VERTICAL);
     optionsBox->Add(grid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
     fullscreen_ = new wxCheckBox(ob, wxID_ANY, "Start in f&ull screen (Alt+Enter switches)");
@@ -304,8 +336,17 @@ LauncherDialog::LauncherDialog()
     folder_->ChangeValue(dir.empty() ? DefaultGameDir() : dir);
     program_->ChangeValue(program.empty() ? DefaultProgram() : program);
     sbRate_->SetSelection(settings::GetInt(SECTION, "SbRate", SB_RATES[0]) == SB_RATES[1] ? 1 : 0);
+    view_->SetSelection(wxMax(0, wxMin(CUSTOM_VIEW, settings::GetInt(SECTION, "View", DEFAULT_VIEW))));
+    viewW_->SetValue(settings::GetInt(SECTION, "ViewW", 640));
+    viewH_->SetValue(settings::GetInt(SECTION, "ViewH", 360));
+    ViewChanged();
     scale_->SetSelection(
         wxMax(MIN_SCALE, wxMin(MAX_SCALE, settings::GetInt(SECTION, "Scale", DEFAULT_SCALE))) - MIN_SCALE);
+    view_->Bind(wxEVT_CHOICE, [this](wxCommandEvent&) { ViewChanged(); });
+    viewW_->Bind(wxEVT_SPINCTRL, [this](wxSpinEvent&) { ViewChanged(); });
+    viewH_->Bind(wxEVT_SPINCTRL, [this](wxSpinEvent&) { ViewChanged(); });
+    viewW_->Bind(wxEVT_TEXT, [this](wxCommandEvent&) { ViewChanged(); });
+    viewH_->Bind(wxEVT_TEXT, [this](wxCommandEvent&) { ViewChanged(); });
     fullscreen_->SetValue(settings::GetInt(SECTION, "Fullscreen", 0) != 0);
     noIntro_->SetValue(settings::GetInt(SECTION, "NoIntro", 0) != 0);
     loading_ = false;
@@ -539,6 +580,7 @@ void LauncherDialog::Play() {
     GameOptions options;
     options.program = wxFileName(program_->GetValue()).GetFullPath();
     options.gameDir = wxFileName(folder_->GetValue()).GetFullPath();
+    CurrentView(options.viewW, options.viewH);
     options.scale = scale_->GetSelection() + MIN_SCALE;
     options.fullscreen = fullscreen_->GetValue();
     options.sbRate = SB_RATES[sbRate_->GetSelection() == 1 ? 1 : 0];
@@ -555,10 +597,39 @@ void LauncherDialog::Save() {
     settings::SetString(SECTION, "Program",
                         wxFileName(program).SameAs(wxFileName(DefaultProgram())) ? wxString() : program);
     settings::SetInt(SECTION, "SbRate", SB_RATES[sbRate_->GetSelection() == 1 ? 1 : 0]);
+    settings::SetInt(SECTION, "View", view_->GetSelection());
+    settings::SetInt(SECTION, "ViewW", viewW_->GetValue());
+    settings::SetInt(SECTION, "ViewH", viewH_->GetValue());
     settings::SetInt(SECTION, "Scale", scale_->GetSelection() + MIN_SCALE);
     settings::SetInt(SECTION, "Fullscreen", fullscreen_->GetValue() ? 1 : 0);
     settings::SetInt(SECTION, "NoIntro", noIntro_->GetValue() ? 1 : 0);
     settings::SaveWindowPosition(SECTION, this);
+}
+
+// The view the choice stands for; a custom width is rounded to a multiple of 16 and both are kept in range.
+void LauncherDialog::CurrentView(int& w, int& h) const {
+    const int sel = view_->GetSelection();
+    if (sel >= 0 && sel < N_VIEWS) {
+        w = VIEWS[sel].w;
+        h = VIEWS[sel].h;
+        return;
+    }
+    w = wxMax(VIEW_MIN_W, wxMin(VIEW_MAX_W, (viewW_->GetValue() + 8) / 16 * 16));
+    h = wxMax(VIEW_MIN_H, wxMin(VIEW_MAX_H, viewH_->GetValue()));
+}
+
+void LauncherDialog::ViewChanged() {
+    const bool custom = view_->GetSelection() == CUSTOM_VIEW;
+    viewW_->Enable(custom);
+    viewH_->Enable(custom);
+    int w, h;
+    CurrentView(w, h);
+    int keep = scale_->GetSelection();
+    if (keep == wxNOT_FOUND) keep = DEFAULT_SCALE - MIN_SCALE;
+    scale_->Clear();
+    for (int s = MIN_SCALE; s <= MAX_SCALE; ++s)
+        scale_->Append(wxString::Format(L"%d × %d  (%d×)", w * s, h * s, s));
+    scale_->SetSelection(keep);
 }
 
 void LauncherDialog::About() {
