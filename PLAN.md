@@ -25,7 +25,7 @@ remove it when it is done.
   window, front-end screens in a mission view), E1.3 (76/76 at 320×240 after E1.2), E2.1 (tile window and
   parallax at any view; 76/76 at 320×240), E2.2 (camera limit, player box centred, blitter clipping), HUD centred (E4.1), E3.1 (screen-value
   sites: changed or tagged as kept; 76/76 at 320×240).
-- **Next:** U-wide (user), U-play (user), then E5 fixes (ground collision), Opus; then U-play.
+- **Next:** U-wide (user), U-play (user), then E5 fixes. v0.1.0 released 2026-10-09 (E6.1).
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -279,7 +279,7 @@ E4 notes (from E4.2):
 ### Phase E6 — Release
 | Id | Task | Model | Size |
 |---|---|---|---|
-| E6.1 | Zip, launcher, `RELEASE_NOTES.md`, `SHA256SUMS.txt`, same as the sdl3 release | H | S |
+| E6.1 | Zip, launcher, `RELEASE_NOTES.md`, `SHA256SUMS.txt`, same as the sdl3 release | H | done 2026-10-09 (v0.1.0: `jsenh-v0.1.0-win64.zip`, Release build with `-DJS_LAUNCHER=ON`, licences from the sdl3 zip, same MSYS2 package versions) |
 | U-release | Install from the zip on a clean folder, play one mission, approve publishing | user | 15 min |
 
 ### Later, optional
