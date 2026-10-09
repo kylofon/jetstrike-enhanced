@@ -7,7 +7,7 @@
  *                 height 240..540; 320x240 is the original (default for now). Front end and intro stay 320x240.
  *   --scale       initial window size: the view times N (default 3)
  *   --fullscreen  start in full screen (Alt+Enter switches)
- *   --sb-rate     Sound Blaster mixer rate: 19920 (designed, default) or 3906 (what the original programs);
+ *   --sb-rate     Sound Blaster mixer rate: 3906 (what the original programs, default) or 19920 (the designed rate);
  *                 the intro's mixer: 40000 (designed) or 3906
  *   --no-intro    PORT: skip the intro (INTRO.EXE, which JS.BAT runs before the game)
  *   --lzw-dump    developer check: unpack every PAX/SPX/TLX/MXP/DX0/DX1 file of the game folder with the

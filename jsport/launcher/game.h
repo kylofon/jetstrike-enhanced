@@ -30,7 +30,7 @@ struct GameOptions {
     int viewW = 640, viewH = 360;  // --view: the mission screen, the HUD included
     int scale = 3;          // --scale: the window is the view times this
     bool fullscreen = false;  // --fullscreen
-    int sbRate = 19920;     // --sb-rate 19920|3906
+    int sbRate = 3906;      // --sb-rate 19920|3906
     bool noIntro = false;   // --no-intro
 };
 

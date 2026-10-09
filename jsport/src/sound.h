@@ -16,8 +16,8 @@ typedef struct {                 /* 0x803d4, 4 x 21 bytes */
 
 #define SFX_SLICES   35
 #define AAF_SIZE     0x48a7a
-#define SB_RATE_DESIGNED 19920   /* Sound_Init's request (default, PLAN.md decision 6) */
-#define SB_RATE_AS_CODED 3906    /* time constant 0 = 3906.25 Hz, what the original programs (Q1) */
+#define SB_RATE_DESIGNED 19920   /* Sound_Init's request (a setting; not the default) */
+#define SB_RATE_AS_CODED 3906    /* time constant 0 = 3906.25 Hz, what the original programs (Q1); default */
 
 extern MixChan g_MixChan[4];
 extern u32 g_SoundDevice;        /* 0x80430: 0 none, 1 SB */

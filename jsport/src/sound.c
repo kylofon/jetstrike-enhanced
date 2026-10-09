@@ -17,7 +17,7 @@ const u32 g_SfxLens[SFX_SLICES] = {
 };
 u32 g_SfxChanRR = 1;
 u8 *g_SampleData;
-int g_SBRate = SB_RATE_DESIGNED;
+int g_SBRate = SB_RATE_AS_CODED;       /* ENH: what the original plays (the 19920 Hz path sounds wrong) */
 
 static MixChan *chan(int ch) { return &g_MixChan[(ch == 0 || ch == 1 || ch == 2) ? ch : 3]; }
 

@@ -267,6 +267,9 @@ E4 notes (from E4.2):
   `View`, `ViewW`, `ViewH`. The desktop fit was already in the game (E1.2). Built with `-DJS_LAUNCHER=ON` (wx 3.2).
 - The game's default view is now 640×360 (`VIEW_DEFAULT_*` in `main.c`); `snapcheck.py` passes `--view 320x240`
   by default (76/76).
+- Sound Blaster rate (user, 2026-10-09): the default is now 3906 Hz, what the original really plays; the 19920 Hz
+  "as designed" setting makes the intro sound broken (decision 6 of the faithful port is reversed). Launcher setting
+  key renamed `SoundRate` so a saved 19920 from the old default does not stick.
 
 ### Phase E5 — Fixes
 | Id | Task | Model | Size |
