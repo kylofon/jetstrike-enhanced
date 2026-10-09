@@ -71,7 +71,6 @@ private:
     wxStaticBitmap* keysIcon_ = nullptr;
     wxStaticText* keysNote_ = nullptr;
 
-    wxChoice* sbRate_ = nullptr;
     wxChoice* view_ = nullptr;
     wxSpinCtrl* viewW_ = nullptr;
     wxSpinCtrl* viewH_ = nullptr;

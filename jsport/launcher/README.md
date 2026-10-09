@@ -22,8 +22,7 @@ launchers it is modelled on.
   (Esc, Tab and Enter count as keys there; Cancel keeps the old one). Grey arrows, Home, End and so on are the
   keypad's keys, and right Ctrl / Alt the left ones, as the game's keyboard handler sees them. A warning shows when
   one key does two things. **Original keys** puts back the shipped ones.
-* **Port options**: **Sound Blaster rate** (`--sb-rate`: 19 920 Hz as designed, or 3 906 Hz, what the original
-  actually programs), **View size** (`--view WxH`: a preset from 320 × 240, the original, to 960 × 540, or a custom size, width a
+* **Port options**: **View size** (`--view WxH`: a preset from 320 × 240, the original, to 960 × 540, or a custom size, width a
   multiple of 16; the default is 640 × 360), **Window size** (`--scale`: the view times 1 to 6; the game lowers it
   until it fits the desktop), **Start in full screen** (`--fullscreen`; Alt+Enter switches)
   and **Skip the intro** (`--no-intro`).

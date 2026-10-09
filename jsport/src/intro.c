@@ -319,7 +319,7 @@ static void Intro_PlaySample(int n)
 /* INTRO 0x10464 Intro_SoundInit (body 0x10471): GUS if present, else SB at 40000 Hz: INTRO.SAM loaded,
  * made unsigned, the loop bed (sample 6) started.
  * PORT: no GUS; SB_Detect, the DOS DMA buffer and the IRQ hook are the SDL device (the mixer at 40000 Hz,
- * or 3906 with --sb-rate 3906: the time constant 0 the original actually programs, sound.md Q1). A device
+ * or 3906, the default: the time constant 0 the original actually programs, sound.md Q1). A device
  * that cannot be opened = no card (silent). */
 static void Intro_SoundInit(void)
 {

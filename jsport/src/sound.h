@@ -24,7 +24,7 @@ extern u32 g_SoundDevice;        /* 0x80430: 0 none, 1 SB */
 extern const u32 g_SfxLens[SFX_SLICES];   /* 0x80434 */
 extern u32 g_SfxChanRR;          /* 0x80546 */
 extern u8 *g_SampleData;         /* 0x93388 */
-extern int g_SBRate;             /* PORT: mixer output rate (option --sb-rate) */
+extern int g_SBRate;             /* PORT: mixer output rate (always SB_RATE_AS_CODED: no option) */
 
 void Mixer_SetChannel(int ch, const u8 *data, u32 len, u32 loop, u8 shift, u32 rateParam);  /* 0x309ab */
 void Mixer_SetRate(int ch, u32 rateParam);                                                   /* 0x30ffa */

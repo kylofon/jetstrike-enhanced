@@ -33,7 +33,7 @@ The build copies `SDL3.dll` and what it loads (`libiconv-2.dll`, ...) next to `j
 ## Run
 
 ```
-jsport/build/jsenh.exe [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro] [--lzw-dump OUTDIR]
+jsport/build/jsenh.exe [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--no-intro] [--lzw-dump OUTDIR]
 ```
 
 | option | meaning |
@@ -41,7 +41,6 @@ jsport/build/jsenh.exe [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] 
 | `--game-dir` | the original game folder (default `Game`); CD tracks in `DIR/MUSIC/TRACKnn.WAV` (`tools/cdrip.py`) |
 | `--view` | ENH: the mission screen including the HUD, `WxH`: width a multiple of 16 in 320..960, height 240..540 (default 320x240 = the original; the playfield is W x (H - 65)). Front end and intro stay 320x240 |
 | `--scale` | window size: the view x N (default 3); Alt+Enter toggles full screen |
-| `--sb-rate` | Sound Blaster mixer rate: 19920 Hz as designed (default), 3906 = the rate the original actually programs (sound.md Q1); the intro's mixer: 40000 Hz / 3906 |
 | `--no-intro` | PORT: skip the intro (INTRO.EXE, which JS.BAT runs before the game; the port runs it first by default) |
 | `--lzw-dump` | developer check, see Verification |
 

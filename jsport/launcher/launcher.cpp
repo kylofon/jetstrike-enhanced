@@ -40,7 +40,6 @@ const char* const SUPPORT = "https://buymeacoffee.com/krzysztofkania";
 const char* const SECTION = "Game";
 
 const int MIN_SCALE = 1, MAX_SCALE = 6, DEFAULT_SCALE = 3;
-const int SB_RATES[] = {3906, 19920};   // the first is the default
 
 // View sizes (--view WxH: the whole mission screen including the HUD). The last choice is a custom size.
 struct ViewPreset { int w, h; const wchar_t* label; };
@@ -202,13 +201,6 @@ LauncherDialog::LauncherDialog()
     auto* optionsBox = new wxStaticBoxSizer(wxVERTICAL, this, "Port options");
     wxWindow* ob = optionsBox->GetStaticBox();
     auto* grid = new wxFlexGridSizer(2, gap, gap);
-    grid->Add(new wxStaticText(ob, wxID_ANY, "Sound &Blaster rate:"), 0, wxALIGN_CENTER_VERTICAL);
-    sbRate_ = new wxChoice(ob, wxID_ANY);
-    sbRate_->Append(L"3 906 Hz: what the original plays (default)");
-    sbRate_->Append(L"19 920 Hz: as designed (the intro sounds wrong)");
-    sbRate_->SetToolTip("The original means to play its effects at 19 920 Hz, but a bug programs the card for 3 906 Hz: "
-                        "lower, slower, muffled effects, as players heard them in 1994 (--sb-rate).");
-    grid->Add(sbRate_, 0, wxALIGN_CENTER_VERTICAL);
     grid->Add(new wxStaticText(ob, wxID_ANY, "&View size:"), 0, wxALIGN_CENTER_VERTICAL);
     view_ = new wxChoice(ob, wxID_ANY);
     for (const ViewPreset& v : VIEWS) view_->Append(v.label);
@@ -335,7 +327,6 @@ LauncherDialog::LauncherDialog()
     wxString program = settings::GetString(SECTION, "Program", "");
     folder_->ChangeValue(dir.empty() ? DefaultGameDir() : dir);
     program_->ChangeValue(program.empty() ? DefaultProgram() : program);
-    sbRate_->SetSelection(settings::GetInt(SECTION, "SoundRate", SB_RATES[0]) == SB_RATES[1] ? 1 : 0);
     view_->SetSelection(wxMax(0, wxMin(CUSTOM_VIEW, settings::GetInt(SECTION, "View", DEFAULT_VIEW))));
     viewW_->SetValue(settings::GetInt(SECTION, "ViewW", 640));
     viewH_->SetValue(settings::GetInt(SECTION, "ViewH", 360));
@@ -583,7 +574,6 @@ void LauncherDialog::Play() {
     CurrentView(options.viewW, options.viewH);
     options.scale = scale_->GetSelection() + MIN_SCALE;
     options.fullscreen = fullscreen_->GetValue();
-    options.sbRate = SB_RATES[sbRate_->GetSelection() == 1 ? 1 : 0];
     options.noIntro = noIntro_->GetValue();
     wxString error;
     if (!LaunchGame(options, error)) wxMessageBox(error, APP_TITLE, wxOK | wxICON_ERROR, this);
@@ -596,7 +586,6 @@ void LauncherDialog::Save() {
                         wxFileName(dir).SameAs(wxFileName(DefaultGameDir())) ? wxString() : dir);
     settings::SetString(SECTION, "Program",
                         wxFileName(program).SameAs(wxFileName(DefaultProgram())) ? wxString() : program);
-    settings::SetInt(SECTION, "SoundRate", SB_RATES[sbRate_->GetSelection() == 1 ? 1 : 0]);
     settings::SetInt(SECTION, "View", view_->GetSelection());
     settings::SetInt(SECTION, "ViewW", viewW_->GetValue());
     settings::SetInt(SECTION, "ViewH", viewH_->GetValue());

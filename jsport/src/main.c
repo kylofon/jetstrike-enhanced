@@ -1,14 +1,12 @@
 /* JetStrike SDL3 port: entry point.
  *
- * usage: jsenh [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--sb-rate 19920|3906] [--no-intro]
+ * usage: jsenh [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--no-intro]
  *              [--lzw-dump OUTDIR]
  *   --game-dir    folder with the original game files (default: "Game" in the working directory)
  *   --view        ENH: the mission screen including the HUD (PLAN.md): width a multiple of 16 in 320..960,
- *                 height 240..540; 320x240 is the original (default for now). Front end and intro stay 320x240.
+ *                 height 240..540; 320x240 is the original (default 640x360). Front end and intro stay 320x240.
  *   --scale       initial window size: the view times N (default 3)
  *   --fullscreen  start in full screen (Alt+Enter switches)
- *   --sb-rate     Sound Blaster mixer rate: 3906 (what the original programs, default) or 19920 (the designed rate);
- *                 the intro's mixer: 40000 (designed) or 3906
  *   --no-intro    PORT: skip the intro (INTRO.EXE, which JS.BAT runs before the game)
  *   --lzw-dump    developer check: unpack every PAX/SPX/TLX/MXP/DX0/DX1 file of the game folder with the
  *                 port's LZW into OUTDIR (as <DIR>_<NAME>.bin) and exit (tools/lzw_check.py compares them)
@@ -34,7 +32,7 @@
 
 static int usage(const char *prog)
 {
-    fprintf(stderr, "usage: %s [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] [--sb-rate 19920|3906] "
+    fprintf(stderr, "usage: %s [--game-dir DIR] [--view WxH] [--scale N] [--fullscreen] "
                     "[--no-intro] [--lzw-dump OUTDIR]\n", prog);
     return 2;
 }
@@ -111,10 +109,6 @@ int main(int argc, char **argv)
         }
         else if (!strcmp(a, "--scale") && v) { scale = atoi(v); i++; }
         else if (!strcmp(a, "--fullscreen")) fullscreen = true;
-        else if (!strcmp(a, "--sb-rate") && v) {
-            g_SBRate = atoi(v) == SB_RATE_AS_CODED ? SB_RATE_AS_CODED : SB_RATE_DESIGNED;
-            i++;
-        }
         else if (!strcmp(a, "--no-intro")) intro = false;
         else if (!strcmp(a, "--lzw-dump") && v) { dump = v; i++; }
         else return usage(argv[0]);
